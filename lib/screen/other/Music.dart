@@ -41,15 +41,15 @@ class _MusicState extends State<Music> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel'),
+              child: const Text('Delete'),
               onPressed: () {
+                removeSong(index);
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Delete'),
+              child: const Text('Cancel'),
               onPressed: () {
-                removeSong(index);
                 Navigator.of(context).pop();
               },
             ),
