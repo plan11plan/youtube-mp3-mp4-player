@@ -164,6 +164,8 @@ class _SeekBarState extends State<SeekBar> {
                 _dragValue ?? widget.position.inMilliseconds.toDouble(),
                 widget.duration.inMilliseconds.toDouble(),
               ),
+              activeColor: Colors.white,
+              inactiveColor: Colors.white54,
               onChanged: (value) {
                 setState(() {
                   _dragValue = value;

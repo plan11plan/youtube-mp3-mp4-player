@@ -1,47 +1,50 @@
+// 필요한 라이브러리들을 import 합니다.
 import 'package:flutter/material.dart';
 import 'package:player/models/playlist_model.dart';
-import 'package:player/screen/other/Music.dart';
-
 import '../../models/song_model.dart';
 import '../../widgets/playlist_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/song_card.dart';
-import 'Video.dart';
-import 'Youtube.dart';
 
+// HomeScreen이라는 StatelessWidget을 정의합니다. 이 클래스는 앱의 홈 화면을 나타냅니다.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  // build 메소드에서 화면을 그리는 작업을 합니다.
   @override
   Widget build(BuildContext context) {
-    List<Song> songs = Song.songs;
-    List<Playlist> playlists = Playlist.playlists;
+    List<Song> songs = Song.songs;  // 노래 리스트를 가져옵니다.
+    List<Playlist> playlists = Playlist.playlists;  // 플레이리스트를 가져옵니다.
 
+    // 컨테이너 위젯을 사용해 배경의 그라디언트를 설정하고,
+    // Scaffold 위젯을 사용해 앱바와 바디를 구성합니다.
     return Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.deepPurple.shade800.withOpacity(0.99),
-            Colors.deepPurple.shade300.withOpacity(0.99),
-          ],
-        )),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.deepPurple.shade800.withOpacity(0.99),
+                Colors.deepPurple.shade300.withOpacity(0.99),
+              ],
+            )),
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          appBar: _CustomAppBar(),
+          // appBar: _CustomAppBar(),
           body: SingleChildScrollView(
             child: Column(
                 children: [
-              _DiscoverMusic(),
-              _TrendingMusic(songs: songs),
-              _PlaylistMusic(playlists: playlists)
-            ]),
+                  _DiscoverMusic(),  // "Discover Music" 부분을 그립니다.
+                  _TrendingMusic(songs: songs),  // "Trending Music" 부분을 그립니다.
+                  _PlaylistMusic(playlists: playlists)  // "Playlist Music" 부분을 그립니다.
+                ]),
           ),
         ));
   }
 }
 
+// _PlaylistMusic이라는 StatelessWidget을 정의합니다.
+// 이 클래스는 플레이리스트의 음악을 보여주는 부분을 나타냅니다.
 class _PlaylistMusic extends StatelessWidget {
   const _PlaylistMusic({
     super.key,
@@ -50,26 +53,29 @@ class _PlaylistMusic extends StatelessWidget {
 
   final List<Playlist> playlists;
 
+  // build 메소드에서 화면을 그리는 작업을 합니다.
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(children: [
-        SectionHeader(title: 'Playlists', action: 'View More'),
+        SectionHeader(title: 'Playlists', action: 'View More'),  // 섹션 헤더를 그립니다.
         ListView.builder(
-          shrinkWrap: true,
-          padding: const EdgeInsets.only(top:20),
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: playlists.length,
-            itemBuilder: ((context,index){
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(top:20),
+            physics: const NeverScrollableScrollPhysics(),  // 스크롤을 비활성화합니다.
+            itemCount: playlists.length,  // 플레이리스트의 개수만큼 아이템을 만듭니다.
+            itemBuilder: ((context,index){  // 각 아이템에 대해 플레이리스트 카드를 생성합니다.
               return PlaylistCard(playlists: playlists[index]);
-        }
-        ))
+            }
+            ))
       ],),
     );
   }
 }
 
+// _TrendingMusic이라는 StatelessWidget을 정의합니다.
+// 이 클래스는 트렌딩 음악을 보여주는 부분을 나타냅니다.
 class _TrendingMusic extends StatelessWidget {
   const _TrendingMusic({
     super.key,
@@ -78,11 +84,12 @@ class _TrendingMusic extends StatelessWidget {
 
   final List<Song> songs;
 
+  // build 메소드에서 화면을 그리는 작업을 합니다.
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding:
-          const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
+      const EdgeInsets.only(left: 20.0, top: 20.0, bottom: 20.0),
       child: Column(
         children: [
           const Padding(
@@ -93,13 +100,13 @@ class _TrendingMusic extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20,),
-           SizedBox(
+          SizedBox(
             height: MediaQuery.of(context).size.height * 0.27,
             child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: songs.length,
+                scrollDirection: Axis.horizontal,
+                itemCount: songs.length,
                 itemBuilder: (context,index){
-                return SongCard(song: songs[index]);
+                  return SongCard(song: songs[index]);
                 }
 
             ),
@@ -111,12 +118,14 @@ class _TrendingMusic extends StatelessWidget {
   }
 }
 
-///////////////////////////////////////////////////////////
+// _DiscoverMusic이라는 StatelessWidget을 정의합니다.
+// 이 클래스는 음악을 검색하는 부분을 나타냅니다.
 class _DiscoverMusic extends StatelessWidget {
   const _DiscoverMusic({
     super.key,
   });
 
+  // build 메소드에서 화면을 그리는 작업을 합니다.
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -156,11 +165,12 @@ class _DiscoverMusic extends StatelessWidget {
   }
 }
 
-
-
+// _CustomAppBar이라는 StatelessWidget을 정의합니다.
+// 이 클래스는 앱바를 나타냅니다.
 class _CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _CustomAppBar({super.key});
 
+  // build 메소드에서 화면을 그리는 작업을 합니다.
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -179,6 +189,6 @@ class _CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  // TODO: implement preferredSize
+  // 앱바의 높이를 정의합니다.
   Size get preferredSize => const Size.fromHeight(56.0);
 }

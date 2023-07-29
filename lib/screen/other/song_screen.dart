@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
@@ -101,10 +103,36 @@ class _SongScreenState extends State<SongScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            Song.songs[currentSongIndex].coverUrl,
-            fit: BoxFit.cover,
+          Container(
+            constraints: BoxConstraints.expand(),
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage(Song.songs[currentSongIndex].coverUrl),
+                  fit: BoxFit.cover
+              ),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Container(
+                  color: Colors.black54
+              ),
+            ),
           ),
+
+          // 이미지를 BackdropFilter 위젯 위에 위치시킵니다.
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(30.0),
+                child: Image.asset(Song.songs[currentSongIndex].coverUrl,width: 270.0,
+                ),
+              ),
+              SizedBox(height: 240),
+            ],
+          ),
+
           const _BackgroundFilter(),
           _MusicPlayer(
               song: Song.songs[currentSongIndex],
@@ -210,7 +238,7 @@ class _BackgroundFilter extends StatelessWidget {
     return ShaderMask(
       shaderCallback: (rect) {
         return LinearGradient(
-            begin: Alignment.topCenter,
+            begin: Alignment.center,
             end: Alignment.bottomCenter,
             colors: [
               Colors.white,
@@ -228,10 +256,10 @@ class _BackgroundFilter extends StatelessWidget {
         decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              end: Alignment.bottomRight,
               colors: [
-                Colors.deepPurple.shade200,
-                Colors.deepPurple.shade800,
+                Colors.black,
+                Colors.grey,
               ],
             )),
       ),
