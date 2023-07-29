@@ -18,6 +18,47 @@ class _MusicState extends State<Music> {
     songs = Song.songs;
   }
 
+  void removeSong(int index) {
+    setState(() {
+      songs.removeAt(index);
+    });
+  }
+
+  Future<void> showDeleteConfirmationDialog(int index) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete?'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('Do you want to delete this song?',style: TextStyle(color: Colors.black),),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                removeSong(index);
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -41,14 +82,22 @@ class _MusicState extends State<Music> {
               },
               child: Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Removed the Image.asset line
-                    SizedBox(height: 10),
-                    Text(songs[index].title, style: Theme.of(context).textTheme.headline6),
-                    SizedBox(height: 5),
-                    Text(songs[index].description, style: Theme.of(context).textTheme.subtitle1),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 10),
+                        Text(songs[index].title, style: Theme.of(context).textTheme.headline6),
+                        SizedBox(height: 5),
+                        Text(songs[index].description, style: Theme.of(context).textTheme.subtitle1),
+                      ],
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => showDeleteConfirmationDialog(index),
+                    ),
                   ],
                 ),
               ),
