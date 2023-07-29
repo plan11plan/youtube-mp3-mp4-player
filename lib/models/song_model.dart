@@ -30,6 +30,12 @@ class Song{
       url: 'assets/music/Wait For You.mp3',
       coverUrl: 'assets/images/Wait For You.jpeg',
     ),
+    Song(
+      title: '갖고놀래',
+      description: 'feat.뚱이',
+      url: 'assets/music/갖고놀래.mp3',
+      coverUrl: 'assets/images/갖고놀래.jpeg',
+    ),
 
   ];
 

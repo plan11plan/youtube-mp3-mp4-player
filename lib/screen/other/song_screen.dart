@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 import '../../models/song_model.dart';
 import '../../widgets/player_buttons.dart';
@@ -8,31 +11,68 @@ import '../../widgets/seekbar.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
 
 class SongScreen extends StatefulWidget {
-  const SongScreen({super.key});
+  const SongScreen({Key? key}) : super(key: key);
 
   @override
   State<SongScreen> createState() => _SongScreenState();
 }
 
 class _SongScreenState extends State<SongScreen> {
-  AudioPlayer audioPlayer = AudioPlayer();
-  Song song = Get.arguments ?? Song.songs[0];
+  late AudioPlayer audioPlayer;
+  int currentSongIndex = Song.songs.indexOf(Get.arguments ?? Song.songs[0]);
+
+  Future<String> copyAssetToTempDirectory(String assetPath) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+
+    ByteData data = await rootBundle.load(assetPath);
+
+    String filePath = '$tempPath/${assetPath.split("/").last}';
+    File tempFile = File(filePath);
+    await tempFile.writeAsBytes(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+
+    return filePath;
+  }
+
+  Future<List<AudioSource>> copySongsAndGetAudioSources(List<Song> songs) async {
+    List<AudioSource> audioSources = [];
+
+    for (Song song in songs) {
+      String filePath = await copyAssetToTempDirectory(song.url);
+      AudioSource audioSource = AudioSource.uri(
+        Uri.parse('file://$filePath'),
+      );
+      audioSources.add(audioSource);
+    }
+
+    return audioSources;
+  }
+
+  void onPrevious() {
+    if (currentSongIndex > 0) {
+      setState(() {
+        currentSongIndex--;
+      });
+    }
+  }
+
+  void onNext() {
+    if (currentSongIndex < Song.songs.length - 1) {
+      setState(() {
+        currentSongIndex++;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-
-    audioPlayer.setAudioSource(ConcatenatingAudioSource(children: [
-      AudioSource.uri(
-        Uri.parse('file\\\\${song.url}'),
-      ),
-      AudioSource.uri(
-        Uri.parse('file://${Song.songs[1].url}'),
-      ),
-      AudioSource.uri(
-        Uri.parse('file:///${Song.songs[2].url}'),
-      ),
-
-    ]));
+    audioPlayer = AudioPlayer();
+    copySongsAndGetAudioSources(Song.songs).then((audioSources) {
+      audioPlayer.setAudioSource(ConcatenatingAudioSource(children: audioSources));
+    });
   }
 
   @override
@@ -44,9 +84,9 @@ class _SongScreenState extends State<SongScreen> {
   Stream<SeekBarData> get _seekBarDataSteam =>
       rxdart.Rx.combineLatest2<Duration, Duration?, SeekBarData>(
           audioPlayer.positionStream, audioPlayer.durationStream, (
-        Duration position,
-        Duration? duration,
-      ) {
+          Duration position,
+          Duration? duration,
+          ) {
         return SeekBarData(position, duration ?? Duration.zero);
       });
 
@@ -62,13 +102,16 @@ class _SongScreenState extends State<SongScreen> {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            song.coverUrl,
+            Song.songs[currentSongIndex].coverUrl,
             fit: BoxFit.cover,
           ),
           const _BackgroundFilter(),
           _MusicPlayer(
-            song: song,
-              seekBarDataSteam: _seekBarDataSteam, audioPlayer: audioPlayer),
+              song: Song.songs[currentSongIndex],
+              seekBarDataSteam: _seekBarDataSteam,
+              audioPlayer: audioPlayer,
+              onPrevious: onPrevious,
+              onNext: onNext),
         ],
       ),
     );
@@ -77,14 +120,20 @@ class _SongScreenState extends State<SongScreen> {
 
 class _MusicPlayer extends StatelessWidget {
   const _MusicPlayer({
-    super.key,
+    Key? key,
+    required this.song,
     required Stream<SeekBarData> seekBarDataSteam,
-    required this.audioPlayer, required this.song,
-  }) : _seekBarDataSteam = seekBarDataSteam;
+    required this.audioPlayer,
+    required this.onPrevious,
+    required this.onNext,
+  })  : _seekBarDataSteam = seekBarDataSteam,
+        super(key: key);
 
+  final Song song;
   final Stream<SeekBarData> _seekBarDataSteam;
   final AudioPlayer audioPlayer;
-  final Song song;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +150,7 @@ class _MusicPlayer extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(height: 10),
           Text(
             song.description,
             maxLines: 2,
@@ -109,40 +158,40 @@ class _MusicPlayer extends StatelessWidget {
               color: Colors.white,
             ),
           ),
-          SizedBox(height: 30,),
+          SizedBox(height: 30),
           StreamBuilder<SeekBarData>(
             stream: _seekBarDataSteam,
             builder: (context, snapshot) {
               final positionData = snapshot.data;
               return SeekBar(
                 position: positionData?.position ?? Duration.zero,
-                duration: positionData?.position ?? Duration.zero,
+                duration: positionData?.duration ?? Duration.zero,
                 onChanged: audioPlayer.seek,
               );
             },
           ),
-          PlayerButtons(audioPlayer: audioPlayer),
+          PlayerButtons(
+              audioPlayer: audioPlayer,
+              onPrevious: onPrevious,
+              onNext: onNext),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
-                iconSize: 35,
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.settings,
-                  color: Colors.white,
-                )
-              ),
+                  iconSize: 35,
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.settings,
+                    color: Colors.white,
+                  )),
               IconButton(
                   iconSize: 35,
                   onPressed: () {},
                   icon: const Icon(
                     Icons.cloud_download,
                     color: Colors.white,
-                  )
-              ),
-
+                  )),
             ],
           )
         ],
@@ -151,12 +200,10 @@ class _MusicPlayer extends StatelessWidget {
   }
 }
 
-
-
 class _BackgroundFilter extends StatelessWidget {
   const _BackgroundFilter({
-    super.key,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -180,13 +227,13 @@ class _BackgroundFilter extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.deepPurple.shade200,
-            Colors.deepPurple.shade800,
-          ],
-        )),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.deepPurple.shade200,
+                Colors.deepPurple.shade800,
+              ],
+            )),
       ),
     );
   }

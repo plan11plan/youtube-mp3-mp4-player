@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:player/models/playlist_model.dart';
+import 'package:player/screen/other/Music.dart';
 
 import '../../models/song_model.dart';
 import '../../widgets/playlist_card.dart';
 import '../../widgets/section_header.dart';
 import '../../widgets/song_card.dart';
+import 'Video.dart';
+import 'Youtube.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,14 +23,13 @@ class HomeScreen extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.deepPurple.shade800.withOpacity(0.8),
-            Colors.deepPurple.shade200.withOpacity(0.8),
+            Colors.deepPurple.shade800.withOpacity(0.99),
+            Colors.deepPurple.shade300.withOpacity(0.99),
           ],
         )),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: _CustomAppBar(),
-          bottomNavigationBar: const _CustomNavBar(),
           body: SingleChildScrollView(
             child: Column(
                 children: [
@@ -154,41 +156,7 @@ class _DiscoverMusic extends StatelessWidget {
   }
 }
 
-class _CustomNavBar extends StatelessWidget {
-  const _CustomNavBar({
-    super.key,
-  });
 
-  @override
-  Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      backgroundColor: Colors.deepPurple.shade800,
-      unselectedItemColor: Colors.white,
-      selectedItemColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      showUnselectedLabels: false,
-      showSelectedLabels: false,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_outline),
-          label: 'Favorites',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.play_circle_outline),
-          label: 'Play',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.people_outline),
-          label: 'Profile',
-        )
-      ],
-    );
-  }
-}
 
 class _CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _CustomAppBar({super.key});

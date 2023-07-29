@@ -67,9 +67,8 @@ flutter:
   assets:
     - asset/image/
     - assets/images/
-    - assets/music/Fire.mp3
-    - assets/music/Tropic Love.mp3
-    - assets/music/Wait For You.mp3
+    - assets/music/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

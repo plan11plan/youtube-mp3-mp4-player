@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:player/screen/Music.dart';
+import 'package:player/screen/other/Music.dart';
 import 'package:player/screen/Setting.dart';
-import 'package:player/screen/Video.dart';
-import 'Youtube.dart';
+import 'package:player/screen/other/Video.dart';
+import 'other/Youtube.dart';
 import 'home_screen.dart';
 
 class MyApp extends StatefulWidget {
