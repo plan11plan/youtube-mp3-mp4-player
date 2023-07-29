@@ -34,11 +34,18 @@ class _MusicState extends State<Music> {
           content: SingleChildScrollView(
             child: ListBody(
               children: const <Widget>[
-                Text('Do you want to delete this song?',style: TextStyle(color: Colors.black),),
+                Text('Do you want to delete this song?',
+                style: TextStyle(color: Colors.black),),
               ],
             ),
           ),
           actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
@@ -46,13 +53,6 @@ class _MusicState extends State<Music> {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-
           ],
         );
       },
@@ -73,8 +73,9 @@ class _MusicState extends State<Music> {
           )),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: ListView.builder(
+        body: ListView.separated(
           itemCount: songs.length,
+          separatorBuilder: (context, index) => Divider(color: Colors.white54),
           itemBuilder: (context, index) {
             return InkWell(
               onTap: () {
