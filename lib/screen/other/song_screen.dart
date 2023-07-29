@@ -126,8 +126,7 @@ class _SongScreenState extends State<SongScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(30.0),
-                child: Image.asset(Song.songs[currentSongIndex].coverUrl,width: 270.0,
-                ),
+                child: Image.asset(Song.songs[currentSongIndex].coverUrl,width: 270.0,),
               ),
               SizedBox(height: 240),
             ],
