@@ -68,6 +68,12 @@ class _MusicState extends State<Music> {
             end: Alignment.bottomCenter,
             colors: [
               Colors.deepPurple.shade800.withOpacity(0.8),
+              Colors.deepPurple.shade700.withOpacity(0.99),
+
+              Colors.indigo.shade800.withOpacity(0.76),
+              Colors.indigo.shade700.withOpacity(0.76),
+              Colors.deepPurple.shade300.withOpacity(0.9),
+
               Colors.deepPurple.shade200.withOpacity(0.8),
             ],
           )),
