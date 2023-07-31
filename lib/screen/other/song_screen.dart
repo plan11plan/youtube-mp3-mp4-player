@@ -222,6 +222,7 @@ class _MusicPlayer extends StatelessWidget {
               audioPlayer: audioPlayer,
               onPrevious: onPrevious,
               onNext: onNext),
+          //맨 아랫줄
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,

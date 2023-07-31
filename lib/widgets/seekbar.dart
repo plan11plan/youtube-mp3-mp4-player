@@ -2,26 +2,19 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-class SeekBarData {
-  final Duration position;
-  final Duration duration;
-
-  SeekBarData(this.position, this.duration);
-}
-
 class SeekBar extends StatefulWidget {
   final Duration position;
   final Duration duration;
   final ValueChanged<Duration>? onChanged;
   final ValueChanged<Duration>? onChangeEnd;
 
-  const SeekBar(
-      {Key? key,
-        required this.position,
-        required this.duration,
-        this.onChanged,
-        this.onChangeEnd})
-      : super(key: key);
+  const SeekBar({
+    Key? key,
+    required this.position,
+    required this.duration,
+    this.onChanged,
+    this.onChangeEnd,
+  }) : super(key: key);
 
   @override
   State<SeekBar> createState() => _SeekBarState();
@@ -44,14 +37,20 @@ class _SeekBarState extends State<SeekBar> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(_formatDuration(widget.position)),
+        Container(
+          width: 60,
+          child: Text(
+            _formatDuration(widget.position),
+            textAlign: TextAlign.right,
+          ),
+        ),
         Expanded(
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              trackHeight: 4,
+              trackHeight: 5,
               thumbShape: const RoundSliderThumbShape(
-                disabledThumbRadius: 4,
-                enabledThumbRadius: 4,
+                disabledThumbRadius: 6,
+                enabledThumbRadius: 6,
               ),
               overlayShape: const RoundSliderOverlayShape(
                 overlayRadius: 10,
@@ -91,7 +90,10 @@ class _SeekBarState extends State<SeekBar> {
             ),
           ),
         ),
-        Text(_formatDuration(widget.duration)),
+        Container(
+          width: 60,
+          child: Text(_formatDuration(widget.duration)),
+        ),
       ],
     );
   }
