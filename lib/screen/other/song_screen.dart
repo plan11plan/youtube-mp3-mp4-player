@@ -49,6 +49,15 @@ class _SongScreenState extends State<SongScreen> {
     // 선택된 노래를 자동으로 재생합니다.
     audioPlayer.seek(Duration.zero, index: currentSongIndex);
     audioPlayer.play();
+
+    // currentIndexStream을 활용하여 currentSongIndex를 업데이트합니다.
+    audioPlayer.currentIndexStream.listen((index) {
+      if (index != null) {
+        setState(() {
+          currentSongIndex = index;
+        });
+      }
+    });
   }
 
   void onPrevious() {
@@ -109,6 +118,7 @@ class _SongScreenState extends State<SongScreen> {
             ),
           ),
 
+          //배경 중간 사진
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -120,7 +130,7 @@ class _SongScreenState extends State<SongScreen> {
               SizedBox(height: 240),
             ],
           ),
-
+          //배경 필터
           const _BackgroundFilter(),
           _MusicPlayer(
               song: Song.songs[currentSongIndex],
@@ -168,9 +178,11 @@ class _MusicPlayer extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50.0),
       child: Column(
+        // 위젯 전체적인 정렬
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          //제목
           Text(
             song.title,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
@@ -179,6 +191,7 @@ class _MusicPlayer extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
+          //부제목
           Text(
             song.description,
             maxLines: 2,
@@ -187,6 +200,7 @@ class _MusicPlayer extends StatelessWidget {
             ),
           ),
           SizedBox(height: 30),
+          //위젯 바
           StreamBuilder<PositionData>(
             stream: _positionDataStream,
             builder: (context, snapshot) {
@@ -203,6 +217,7 @@ class _MusicPlayer extends StatelessWidget {
               );
             },
           ),
+          // 버튼 세가지
           PlayerButtons(
               audioPlayer: audioPlayer,
               onPrevious: onPrevious,

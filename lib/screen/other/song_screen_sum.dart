@@ -1,54 +1,55 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 import '../../models/song_model.dart';
 import '../../widgets/player_buttons.dart';
-import '../../widgets/seekbar.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
 
 class SongScreen extends StatefulWidget {
-  final Song? song;
-
-  const SongScreen({Key? key, this.song}) : super(key: key);
+  const SongScreen({Key? key}) : super(key: key);
 
   @override
   State<SongScreen> createState() => _SongScreenState();
 }
 
 class _SongScreenState extends State<SongScreen> {
-  LoopMode loopMode = LoopMode.off;
   late AudioPlayer audioPlayer;
-  int currentSongIndex = 0;
+  int currentSongIndex = Song.songs.indexOf(Get.arguments ?? Song.songs[0]);
 
-  @override
-  void initState() {
-    super.initState();
-    audioPlayer = AudioPlayer();
+  Future<String> copyAssetToTempDirectory(String assetPath) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
 
-    // Get.arguments를 사용하여 선택된 노래의 인덱스를 가져옵니다.
-    currentSongIndex = Song.songs.indexOf(Get.arguments ?? widget.song ?? Song.songs[0]);
+    ByteData data = await rootBundle.load(assetPath);
 
-    audioPlayer.setAudioSource(ConcatenatingAudioSource(
-      children: Song.songs.map((song) => AudioSource.uri(
-        Uri.parse('asset:///${song.url}'),
-        tag: MediaItem(
-          id: song.title,
-          title: song.title,
-          album: song.description,
-          artUri: Uri.parse('asset:///${song.coverUrl}'),
-        ),
-      )).toList(),
-    ));
+    String filePath = '$tempPath/${assetPath.split("/").last}';
+    File tempFile = File(filePath);
+    await tempFile.writeAsBytes(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
 
-    // 선택된 노래를 자동으로 재생합니다.
-    audioPlayer.seek(Duration.zero, index: currentSongIndex);
-    audioPlayer.play();
+    return filePath;
+  }
+
+  Future<List<AudioSource>> copySongsAndGetAudioSources(List<Song> songs) async {
+    List<AudioSource> audioSources = [];
+
+    for (Song song in songs) {
+      String filePath = await copyAssetToTempDirectory(song.url);
+      AudioSource audioSource = AudioSource.uri(
+        Uri.parse('file://$filePath'),
+      );
+      audioSources.add(audioSource);
+    }
+
+    return audioSources;
   }
 
   void onPrevious() {
@@ -68,19 +69,26 @@ class _SongScreenState extends State<SongScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    audioPlayer = AudioPlayer();
+    copySongsAndGetAudioSources(Song.songs).then((audioSources) {
+      audioPlayer.setAudioSource(ConcatenatingAudioSource(children: audioSources));
+    });
+  }
+
+  @override
   void dispose() {
     audioPlayer.dispose();
     super.dispose();
   }
 
-  Stream<PositionData> get _positiondataStream =>
-      rxdart.Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        audioPlayer.positionStream,
-        audioPlayer.bufferedPositionStream,
-        audioPlayer.durationStream,
-            (position, bufferedPosition, duration) => PositionData(
-            position, bufferedPosition, duration ?? Duration.zero),
-      );
+  Stream<SeekBarData> get _seekBarDataSteam =>
+      rxdart.Rx.combineLatest3<Duration, Duration, Duration?, SeekBarData>(
+          audioPlayer.positionStream, audioPlayer.bufferedPositionStream, audioPlayer.durationStream,
+              (position, bufferedPosition, duration) {
+            return SeekBarData(position, bufferedPosition, duration ?? Duration.zero);
+          });
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +117,7 @@ class _SongScreenState extends State<SongScreen> {
             ),
           ),
 
+          // 이미지를 BackdropFilter 위젯 위에 위치시킵니다.
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -124,7 +133,7 @@ class _SongScreenState extends State<SongScreen> {
           const _BackgroundFilter(),
           _MusicPlayer(
               song: Song.songs[currentSongIndex],
-              positionDataStream: _positiondataStream,
+              seekBarDataSteam: _seekBarDataSteam,
               audioPlayer: audioPlayer,
               onPrevious: onPrevious,
               onNext: onNext),
@@ -134,31 +143,19 @@ class _SongScreenState extends State<SongScreen> {
   }
 }
 
-class PositionData {
-  const PositionData(
-      this.position,
-      this.bufferedPosition,
-      this.duration,
-      );
-
-  final Duration position;
-  final Duration bufferedPosition;
-  final Duration duration;
-}
-
 class _MusicPlayer extends StatelessWidget {
   const _MusicPlayer({
     Key? key,
     required this.song,
-    required Stream<PositionData> positionDataStream,
+    required Stream<SeekBarData> seekBarDataSteam,
     required this.audioPlayer,
     required this.onPrevious,
     required this.onNext,
-  })  : _positionDataStream = positionDataStream,
+  })  : _seekBarDataSteam = seekBarDataSteam,
         super(key: key);
 
   final Song song;
-  final Stream<PositionData> _positionDataStream;
+  final Stream<SeekBarData> _seekBarDataSteam;
   final AudioPlayer audioPlayer;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
@@ -187,19 +184,14 @@ class _MusicPlayer extends StatelessWidget {
             ),
           ),
           SizedBox(height: 30),
-          StreamBuilder<PositionData>(
-            stream: _positionDataStream,
+          StreamBuilder<SeekBarData>(
+            stream: _seekBarDataSteam,
             builder: (context, snapshot) {
               final positionData = snapshot.data;
               return SeekBar(
                 position: positionData?.position ?? Duration.zero,
+                bufferedPosition: positionData?.bufferedPosition ?? Duration.zero,
                 duration: positionData?.duration ?? Duration.zero,
-                onChanged: (duration) {
-                  audioPlayer.seek(duration);
-                },
-                onChangeEnd: (duration) {
-                  audioPlayer.seek(duration);
-                },
               );
             },
           ),
@@ -220,11 +212,9 @@ class _MusicPlayer extends StatelessWidget {
                   )),
               IconButton(
                   iconSize: 35,
-                  onPressed: () {
-                    audioPlayer.setLoopMode(LoopMode.one);
-                  },
+                  onPressed: () {},
                   icon: const Icon(
-                    Icons.repeat_one,
+                    Icons.cloud_download,
                     color: Colors.white,
                   )),
             ],
@@ -270,6 +260,90 @@ class _BackgroundFilter extends StatelessWidget {
               ],
             )),
       ),
+    );
+  }
+}
+
+class SeekBarData {
+  final Duration position;
+  final Duration bufferedPosition;
+  final Duration duration;
+
+  SeekBarData(this.position, this.bufferedPosition, this.duration);
+}
+
+class SeekBar extends StatefulWidget {
+  final Duration position;
+  final Duration bufferedPosition;
+  final Duration duration;
+
+  const SeekBar(
+      {Key? key,
+        required this.position,
+        required this.bufferedPosition,
+        required this.duration})
+      : super(key: key);
+
+  @override
+  State<SeekBar> createState() => _SeekBarState();
+}
+
+class _SeekBarState extends State<SeekBar> {
+  double? _dragValue;
+
+  String _formatDuration(Duration? duration) {
+    if (duration == null) {
+      return '--:--';
+    } else {
+      String minutes = duration.inMinutes.toString().padLeft(2, '0');
+      String seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+      return '$minutes:$seconds';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(_formatDuration(widget.position)),
+        Expanded(
+          child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(
+                disabledThumbRadius: 4,
+                enabledThumbRadius: 4,
+              ),
+              overlayShape: const RoundSliderOverlayShape(
+                overlayRadius: 10,
+              ),
+              activeTrackColor: Colors.white.withOpacity(0.2),
+              inactiveTrackColor: Colors.white,
+              thumbColor: Colors.white,
+              overlayColor: Colors.white,
+            ),
+            child: Slider(
+              min: 0.0,
+              max: widget.duration.inMilliseconds.toDouble(),
+              value: min(
+                _dragValue ?? widget.position.inMilliseconds.toDouble(),
+                widget.duration.inMilliseconds.toDouble(),
+              ),
+              activeColor: Colors.white,
+              inactiveColor: Colors.white54,
+              onChanged: (value) {
+                setState(() {
+                  _dragValue = value;
+                });
+              },
+              onChangeEnd: (value) {
+                _dragValue = null;
+              },
+            ),
+          ),
+        ),
+        Text(_formatDuration(widget.duration)),
+      ],
     );
   }
 }
