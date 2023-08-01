@@ -89,13 +89,30 @@ class _MusicState extends State<Music> {
                 Get.toNamed('/song', arguments: songs[index]);
               },
               child: Padding(
-                padding: EdgeInsets.all(10.0),
+                padding: EdgeInsets.all(12.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row( // Thumbnail image added to the row
                       children: [
-                        Image.asset(songs[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(5.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 3,
+                                blurRadius: 7,
+                                offset: Offset(0, 3), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(5.0),
+                            child: Image.asset(songs[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
+                          ),
+                        ),
                         SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
