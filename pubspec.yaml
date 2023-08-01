@@ -41,6 +41,8 @@ dependencies:
   just_audio_background: ^0.0.1-beta.7
   get: ^4.6.5
   youtube_downloader: ^0.0.6
+  lecle_downloads_path_provider: ^0.0.2+8
+  path_provider: ^2.0.15
 
 
 dev_dependencies:
@@ -66,10 +68,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - asset/image/
     - assets/images/
     - assets/music/
-    -
+    - assets/video/
 
 
   # To add assets to your application, add an assets section, like this:
