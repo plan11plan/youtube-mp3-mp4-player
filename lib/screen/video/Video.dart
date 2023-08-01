@@ -35,7 +35,7 @@ class _VideoState extends State<Video> {
             child: ListBody(
               children: const <Widget>[
                 Text('Do you want to delete this video?',
-                  style: TextStyle(color: Colors.black),),
+                  style: TextStyle(color: Colors.white),),
               ],
             ),
           ),
@@ -61,55 +61,54 @@ class _VideoState extends State<Video> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.deepPurple.shade800.withOpacity(0.8),
-              Colors.deepPurple.shade200.withOpacity(0.8),
-            ],
-          )),
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Color(0xFF191414), // Spotify dark black
+      appBar: AppBar(
         backgroundColor: Colors.transparent,
-        body: ListView.separated(
-          itemCount: videos.length,
-          separatorBuilder: (context, index) => Divider(color: Colors.white54),
-          itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => VideoPlayerScreen(url: videos[index].url),
-                  ),
-                );
-              },
-              child: Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 10),
-                        Text(videos[index].title, style: Theme.of(context).textTheme.headline6),
-                        SizedBox(height: 5),
-                        Text(videos[index].description, style: Theme.of(context).textTheme.subtitle1),
-                      ],
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.white),
-                      onPressed: () => showDeleteConfirmationDialog(index),
-                    ),
-                  ],
+        title: Text('Videos', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+      ),
+      body: ListView.separated(
+        itemCount: videos.length,
+        separatorBuilder: (context, index) => Divider(color: Colors.grey),
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VideoPlayerScreen(url: videos[index].url),
                 ),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      // Display video thumbnail
+                      Image.asset(videos[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
+                      SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(videos[index].title, style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text(videos[index].description, style: TextStyle(color: Colors.grey, fontSize: 14)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.grey),
+                    onPressed: () => showDeleteConfirmationDialog(index),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

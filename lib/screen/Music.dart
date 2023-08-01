@@ -35,7 +35,7 @@ class _MusicState extends State<Music> {
             child: ListBody(
               children: const <Widget>[
                 Text('Do you want to delete this song?',
-                style: TextStyle(color: Colors.black),),
+                  style: TextStyle(color: Colors.black),),
               ],
             ),
           ),
@@ -92,13 +92,19 @@ class _MusicState extends State<Music> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row( // Thumbnail image added to the row
                       children: [
-                        SizedBox(height: 10),
-                        Text(songs[index].title, style: Theme.of(context).textTheme.headline6),
-                        SizedBox(height: 5),
-                        Text(songs[index].description, style: Theme.of(context).textTheme.subtitle1),
+                        Image.asset(songs[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
+                        SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 10),
+                            Text(songs[index].title, style: Theme.of(context).textTheme.headline6),
+                            SizedBox(height: 5),
+                            Text(songs[index].description, style: Theme.of(context).textTheme.subtitle1),
+                          ],
+                        ),
                       ],
                     ),
                     IconButton(
