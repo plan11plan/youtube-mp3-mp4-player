@@ -38,7 +38,7 @@ class _SeekBarState extends State<SeekBar> {
     return Row(
       children: [
         Container(
-          width: 60,
+          width: 45,
           child: Text(
             _formatDuration(widget.position),
             textAlign: TextAlign.right,
@@ -47,13 +47,13 @@ class _SeekBarState extends State<SeekBar> {
         Expanded(
           child: SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              trackHeight: 5,
+              trackHeight: 4,
               thumbShape: const RoundSliderThumbShape(
-                disabledThumbRadius: 6,
-                enabledThumbRadius: 6,
+                disabledThumbRadius: 7,
+                enabledThumbRadius: 7,
               ),
               overlayShape: const RoundSliderOverlayShape(
-                overlayRadius: 10,
+                overlayRadius: 1,
               ),
               activeTrackColor: Colors.white.withOpacity(0.2),
               inactiveTrackColor: Colors.white,
@@ -91,7 +91,7 @@ class _SeekBarState extends State<SeekBar> {
           ),
         ),
         Container(
-          width: 60,
+          width: 45,
           child: Text(_formatDuration(widget.duration)),
         ),
       ],
