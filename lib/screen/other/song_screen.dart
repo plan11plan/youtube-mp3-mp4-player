@@ -61,6 +61,7 @@ class _SongScreenState extends State<SongScreen> {
       setState(() {
         currentSongIndex--;
       });
+      audioPlayer.seek(Duration.zero, index: currentSongIndex);
     }
   }
 
@@ -69,8 +70,10 @@ class _SongScreenState extends State<SongScreen> {
       setState(() {
         currentSongIndex++;
       });
+      audioPlayer.seek(Duration.zero, index: currentSongIndex);
     }
   }
+
 
   @override
   void dispose() {
@@ -89,49 +92,58 @@ class _SongScreenState extends State<SongScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Container(
-            constraints: BoxConstraints.expand(),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(Song.songs[currentSongIndex].coverUrl),
-                  fit: BoxFit.cover
+    return GestureDetector(
+      onHorizontalDragEnd: (DragEndDetails details) {
+        if (details.primaryVelocity! > 0) {
+          onPrevious();
+        } else if (details.primaryVelocity! < 0) {
+          onNext();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        extendBodyBehindAppBar: true,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Container(
+              constraints: BoxConstraints.expand(),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(Song.songs[currentSongIndex].coverUrl),
+                    fit: BoxFit.cover
+                ),
+              ),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+                child: Container(
+                    color: Colors.black54
+                ),
               ),
             ),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-              child: Container(
-                  color: Colors.black54
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(30.0),
+                  child: Image.asset(Song.songs[currentSongIndex].coverUrl,width: 270.0,),
+                ),
+                SizedBox(height: 240),
+              ],
             ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(30.0),
-                child: Image.asset(Song.songs[currentSongIndex].coverUrl,width: 270.0,),
-              ),
-              SizedBox(height: 240),
-            ],
-          ),
-          const _BackgroundFilter(),
-          _MusicPlayer(
-              song: Song.songs[currentSongIndex],
-              positionDataStream: _positiondataStream,
-              audioPlayer: audioPlayer,
-              onPrevious: onPrevious,
-              onNext: onNext),
-        ],
+            const _BackgroundFilter(),
+            _MusicPlayer(
+                song: Song.songs[currentSongIndex],
+                positionDataStream: _positiondataStream,
+                audioPlayer: audioPlayer,
+                onPrevious: onPrevious,
+                onNext: onNext),
+          ],
+        ),
       ),
     );
   }

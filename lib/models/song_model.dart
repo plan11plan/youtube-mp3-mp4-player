@@ -49,6 +49,12 @@ class Song{
       url: 'assets/music/aka.mp3',
       coverUrl: 'assets/images/아까워어.jpeg',
     ),
+    Song(
+      title: 'Seven',
+      description: 'BTS 정국',
+      url: 'assets/music/seven.mp3',
+      coverUrl: 'assets/images/seven.jpeg',
+    ),
 
 
   ];
