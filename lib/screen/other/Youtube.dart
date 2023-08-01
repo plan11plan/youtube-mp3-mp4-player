@@ -31,7 +31,7 @@ class _YoutubeState extends State<Youtube> {
           textInputAction: TextInputAction.go,
           autocorrect: false, // 자동 수정 기능 비활성화
         ),
-
+//
       ),
       body: WebView(
         initialUrl: 'https://www.youtube.com/',
