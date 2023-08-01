@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../models/song_model.dart';
+
+import '../../models/song_model.dart';
 
 class Music extends StatefulWidget {
   const Music({Key? key}) : super(key: key);
@@ -108,7 +109,7 @@ class _MusicState extends State<Music> {
                       ],
                     ),
                     IconButton(
-                      icon: Icon(Icons.delete, color: Colors.white),
+                      icon: Icon(Icons.more_vert, color: Colors.white),
                       onPressed: () => showDeleteConfirmationDialog(index),
                     ),
                   ],

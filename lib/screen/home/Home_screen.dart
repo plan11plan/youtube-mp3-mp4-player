@@ -1,10 +1,10 @@
 // 필요한 라이브러리들을 import 합니다.
 import 'package:flutter/material.dart';
 import 'package:player/models/playlist_model.dart';
-import '../models/song_model.dart';
-import '../widgets/playlist_card.dart';
-import '../widgets/section_header.dart';
-import '../widgets/song_card.dart';
+import '../../models/song_model.dart';
+import '../../widgets/playlist_card.dart';
+import '../../widgets/section_header.dart';
+import '../../widgets/song_card.dart';
 
 // HomeScreen이라는 StatelessWidget을 정의합니다. 이 클래스는 앱의 홈 화면을 나타냅니다.
 class HomeScreen extends StatelessWidget {

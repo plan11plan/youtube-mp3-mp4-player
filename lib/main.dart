@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // <- Add this line
 import 'package:get/get.dart';
-import 'package:player/screen/Home_screen.dart';
-import 'package:player/screen/Music.dart';
-import 'package:player/screen/video/Video.dart';
+import 'package:player/screen/home/Home_screen.dart';
+import 'package:player/screen/home/Music.dart';
+import 'package:player/screen/home/Video.dart';
 import 'package:player/screen/playlist_screen.dart';
 import 'package:player/screen/song_screen.dart';
-import 'package:player/screen/Youtube.dart';
+import 'package:player/screen/home/Youtube.dart';
 
 
 
