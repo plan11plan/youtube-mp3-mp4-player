@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:player/screen/video/video_player_screen.dart';
-import '../../models/video_model.dart';
+import 'package:get/get.dart';
 
-class Video extends StatefulWidget {
-  const Video({Key? key}) : super(key: key);
+import '../../models/song_model.dart';
+
+class Music extends StatefulWidget {
+  const Music({Key? key}) : super(key: key);
 
   @override
-  _VideoState createState() => _VideoState();
+  _MusicState createState() => _MusicState();
 }
 
-class _VideoState extends State<Video> {
-  List<downVideo> videos = [];
+class _MusicState extends State<Music> {
+  List<Song> songs = [];
 
   @override
   void initState() {
     super.initState();
-    videos = downVideo.videos;
+    songs = Song.songs;
   }
 
-  void removeVideo(int index) {
+  void removeSong(int index) {
     setState(() {
-      videos.removeAt(index);
+      songs.removeAt(index);
     });
   }
 
@@ -34,7 +35,7 @@ class _VideoState extends State<Video> {
           content: SingleChildScrollView(
             child: ListBody(
               children: const <Widget>[
-                Text('Do you want to delete this video?',
+                Text('Do you want to delete this song?',
                   style: TextStyle(color: Colors.black),),
               ],
             ),
@@ -43,7 +44,7 @@ class _VideoState extends State<Video> {
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
-                removeVideo(index);
+                removeSong(index);
                 Navigator.of(context).pop();
               },
             ),
@@ -63,34 +64,26 @@ class _VideoState extends State<Video> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.deepPurple.shade800.withOpacity(0.8),
-              Colors.deepPurple.shade700.withOpacity(0.99),
-
-              Colors.indigo.shade800.withOpacity(0.76),
-              Colors.indigo.shade700.withOpacity(0.76),
-              Colors.deepPurple.shade300.withOpacity(0.9),
-
-              Colors.deepPurple.shade200.withOpacity(0.8),
-            ],
-          )),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.indigo.shade800,
+            Colors.indigo.shade700,
+            Colors.pink.shade200,
+            Colors.yellow.shade200,
+          ],
+        ),
+      ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: ListView.separated(
-          itemCount: videos.length,
+          itemCount: songs.length,
           separatorBuilder: (context, index) => Divider(color: Colors.white54),
           itemBuilder: (context, index) {
             return InkWell(
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => VideoPlayerScreen(url: videos[index].url),
-                  ),
-                );
+                Get.toNamed('/song', arguments: songs[index]);
               },
               child: Padding(
                 padding: EdgeInsets.all(12.0),
@@ -114,7 +107,7 @@ class _VideoState extends State<Video> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(5.0),
-                            child: Image.asset(videos[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
+                            child: Image.asset(songs[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -122,9 +115,9 @@ class _VideoState extends State<Video> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             SizedBox(height: 10),
-                            Text(videos[index].title, style: Theme.of(context).textTheme.headline6),
+                            Text(songs[index].title, style: Theme.of(context).textTheme.headline6),
                             SizedBox(height: 5),
-                            Text(videos[index].description, style: Theme.of(context).textTheme.subtitle1),
+                            Text(songs[index].description, style: Theme.of(context).textTheme.subtitle1),
                           ],
                         ),
                       ],

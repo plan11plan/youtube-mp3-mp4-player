@@ -82,7 +82,7 @@ class _MyAppState extends State<MyApp> {
           )
       ),
       getPages: [
-        GetPage(name: '/', page: () => const HomeScreen()),
+        GetPage(name: '/', page: () =>  HomeScreen()),
         GetPage(name: '/song', page: () => SongScreen()),
         GetPage(name: '/playlist', page: () => const PlaylistScreen()),
       ],

@@ -64,20 +64,17 @@ class _MusicState extends State<Music> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.deepPurple.shade800.withOpacity(0.8),
-              Colors.deepPurple.shade700.withOpacity(0.99),
-
-              Colors.indigo.shade800.withOpacity(0.76),
-              Colors.indigo.shade700.withOpacity(0.76),
-              Colors.deepPurple.shade300.withOpacity(0.9),
-
-              Colors.deepPurple.shade200.withOpacity(0.8),
-            ],
-          )),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.fromRGBO(57, 2, 63, 1),
+            Color.fromRGBO(96, 18, 82, 1),
+            Color.fromRGBO(125, 46, 86, 1),
+            Color.fromRGBO(187, 135, 84, 1),
+          ],
+        ),
+      ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: ListView.separated(
@@ -101,7 +98,7 @@ class _MusicState extends State<Music> {
                             borderRadius: BorderRadius.circular(5.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
+                                color: Colors.black54.withOpacity(0.5),
                                 spreadRadius: 3,
                                 blurRadius: 7,
                                 offset: Offset(0, 3), // changes position of shadow

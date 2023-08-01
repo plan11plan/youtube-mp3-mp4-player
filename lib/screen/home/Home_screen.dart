@@ -20,18 +20,18 @@ class HomeScreen extends StatelessWidget {
     // Scaffold 위젯을 사용해 앱바와 바디를 구성합니다.
     return Container(
 
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-    Colors.deepPurple.shade800.withOpacity(0.99),
-      Colors.deepPurple.shade500.withOpacity(0.99),
-      Colors.indigo.shade800.withOpacity(0.76),
-      Colors.indigo.shade700.withOpacity(0.76),
-      Colors.deepPurple.shade300.withOpacity(0.99),
-    ],
-    )),
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.deepPurple.shade800.withOpacity(0.99),
+                Colors.deepPurple.shade500.withOpacity(0.99),
+                Colors.indigo.shade800.withOpacity(0.76),
+                Colors.indigo.shade700.withOpacity(0.76),
+                Colors.deepPurple.shade300.withOpacity(0.99),
+              ],
+            )),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           // appBar: _CustomAppBar(),
