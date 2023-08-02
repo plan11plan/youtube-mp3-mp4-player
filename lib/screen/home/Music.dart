@@ -77,60 +77,70 @@ class _MusicState extends State<Music> {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: ListView.separated(
-          itemCount: songs.length,
-          separatorBuilder: (context, index) => Divider(color: Colors.white54),
-          itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () {
-                Get.toNamed('/song', arguments: songs[index]);
-              },
-              child: Padding(
-                padding: EdgeInsets.all(12.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row( // Thumbnail image added to the row
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(5.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black54.withOpacity(0.5),
-                                spreadRadius: 3,
-                                blurRadius: 7,
-                                offset: Offset(0, 3), // changes position of shadow
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView.separated(
+                itemCount: songs.length,
+                separatorBuilder: (context, index) => Divider(color: Colors.white54),
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () {
+                      Get.toNamed('/song', arguments: songs[index]);
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black54.withOpacity(0.5),
+                                      spreadRadius: 3,
+                                      blurRadius: 7,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5.0),
+                                  child: Image.asset(songs[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 10),
+                                  Text(songs[index].title, style: Theme.of(context).textTheme.headline6),
+                                  SizedBox(height: 5),
+                                  Text(songs[index].description, style: Theme.of(context).textTheme.subtitle1),
+                                ],
                               ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(5.0),
-                            child: Image.asset(songs[index].coverUrl, height: 50, width: 50, fit: BoxFit.cover),
+                          IconButton(
+                            icon: Icon(Icons.more_vert, color: Colors.white),
+                            onPressed: () => showDeleteConfirmationDialog(index),
                           ),
-                        ),
-                        SizedBox(width: 10),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 10),
-                            Text(songs[index].title, style: Theme.of(context).textTheme.headline6),
-                            SizedBox(height: 5),
-                            Text(songs[index].description, style: Theme.of(context).textTheme.subtitle1),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.more_vert, color: Colors.white),
-                      onPressed: () => showDeleteConfirmationDialog(index),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+            Container(
+              height: 90, // adjust this value as needed
+              color: Colors.transparent,
+            ),
+          ],
         ),
       ),
     );

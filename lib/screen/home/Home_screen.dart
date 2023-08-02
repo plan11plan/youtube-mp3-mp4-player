@@ -19,7 +19,6 @@ class HomeScreen extends StatelessWidget {
     // 컨테이너 위젯을 사용해 배경의 그라디언트를 설정하고,
     // Scaffold 위젯을 사용해 앱바와 바디를 구성합니다.
     return Container(
-
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -35,16 +34,32 @@ class HomeScreen extends StatelessWidget {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           // appBar: _CustomAppBar(),
-          body: SingleChildScrollView(
-            child: Column(
-                children: [
-                  _DiscoverMusic(),  // "Discover Music" 부분을 그립니다.
-                  _RecentMusic(songs: songs),  // "Recent Music" 부분을 그립니다.
-                  _PlaylistMusic(playlists: playlists)  // "Playlist Music" 부분을 그립니다.
-                ]),
+          body: Column(
+            children: [
+              Container(
+                height: 30, // adjust this value as needed
+                color: Colors.transparent,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _DiscoverMusic(),  // "Discover Music" 부분을 그립니다.
+                      _RecentMusic(songs: songs),  // "Recent Music" 부분을 그립니다.
+                      _PlaylistMusic(playlists: playlists)  // "Playlist Music" 부분을 그립니다.
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                height: 40, // adjust this value as needed
+                color: Colors.transparent,
+              ),
+            ],
           ),
         ));
   }
+
 }
 
 // _PlaylistMusic이라는 StatelessWidget을 정의합니다.

@@ -52,6 +52,7 @@ class _MyAppState extends State<MyApp> {
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
+                padding: EdgeInsets.only(bottom: 0), // adjust this value as needed
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
