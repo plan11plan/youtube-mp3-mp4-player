@@ -83,48 +83,34 @@ class _YoutubeState extends State<GoDownload> {
     _format = (await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Select download format'),
-          content: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, 'Video');
-                },
-                child: Text(
-                  'Video',
-                  style: TextStyle(color: Colors.black54),
-                ),
+        return SimpleDialog(
+          title: const Text('Select download format',
+              style: TextStyle(color: Colors.black54)),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 'Video');
+              },
+              child: const Text(
+                'Video',
+                style: TextStyle(color: Colors.black54),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, 'Audio');
-                },
-                child: Text(
-                  'Audio',
-                  style: TextStyle(color: Colors.black54),
-                ),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, 'Audio');
+              },
+              child: const Text(
+                'Audio',
+                style: TextStyle(color: Colors.black54),
               ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, 'Cancel');
-                },
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.black54),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     ))!;
-    if (_format != 'Cancel') {
-      _webViewController.reload();
-    }
+    _webViewController.reload();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +161,7 @@ class _YoutubeState extends State<GoDownload> {
                 });
               },
               onPageFinished: (url) {
-                if (_format.isNotEmpty && _format != 'Cancel') {
+                if (_format.isNotEmpty) {
                   if (_format == 'Video') {
                     _downloadVideo();
                   } else {
