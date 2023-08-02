@@ -34,7 +34,8 @@ class _YoutubeState extends State<GoDownload> {
 
   Future<void> _downloadVideo() async {
     try {
-      var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
+      var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
+      var manifest = await yt.videos.streamsClient.getManifest(videoId);
       var muxedStreamInfos = manifest.muxed.toList()
         ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
       var muxedStreamInfo = muxedStreamInfos.first;
@@ -68,7 +69,8 @@ class _YoutubeState extends State<GoDownload> {
 
   Future<void> _downloadAudio() async {
     try {
-      var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
+      var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
+      var manifest = await yt.videos.streamsClient.getManifest(videoId);
       var audioInfo = manifest.audioOnly.withHighestBitrate();
 
       if (audioInfo != null) {
