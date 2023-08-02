@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:player/screen/home/GoDownload.dart';
 import 'package:player/screen/home/Home_screen.dart';
 import 'package:player/screen/home/Music.dart';
 import 'package:player/screen/home/Video.dart';
 import 'package:player/screen/playlist_screen.dart';
 import 'package:player/screen/song_screen.dart';
-import 'package:player/screen/home/Youtube.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,7 @@ class _MyAppState extends State<MyApp> {
     HomeScreen(),
     Music(),
     Video(),
-    Youtube(),
+    GoDownload(),
   ];
 
   @override
