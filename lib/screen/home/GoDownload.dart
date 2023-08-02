@@ -13,65 +13,72 @@ class GoDownload extends StatefulWidget {
 
 class _YoutubeState extends State<GoDownload> {
   final YoutubeExplode yt = YoutubeExplode();
-  final String videoUrl = 'https://www.youtube.com/watch?v=Pp07icnTPGE'; // The URL of the video you chose.
+  String videoUrl = 'https://www.google.com'; // Start with Google Chrome.
+  final TextEditingController _controller = TextEditingController();
+  late WebViewController _webViewController; // WebView controller
 
   @override
   void initState() {
     super.initState();
-    _getMetaData();
-  }////
+    _controller.text = videoUrl;
+  }
 
   Future<void> _getMetaData() async {
-    var video = await yt.videos.get(videoUrl);
-    print('Title: ${video.title}');
-    print('Author: ${video.author}');
-    print('Duration: ${video.duration}');
+    if (videoUrl.contains('youtube.com/watch?v=')) {
+      var video = await yt.videos.get(videoUrl);
+      print('Title: ${video.title}');
+      print('Author: ${video.author}');
+      print('Duration: ${video.duration}');
+    }
   }
 
   Future<void> _downloadVideo() async {
-    var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
+    if (videoUrl.contains('youtube.com/watch?v=')) {
+      var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
+      var muxedStreamInfos = manifest.muxed.toList()
+        ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
+      var muxedStreamInfo = muxedStreamInfos.first;
 
-    var muxedStreamInfos = manifest.muxed.toList()
-      ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
-    var muxedStreamInfo = muxedStreamInfos.first;
+      if (muxedStreamInfo != null) {
+        var stream = yt.videos.streamsClient.get(muxedStreamInfo);
 
-    if (muxedStreamInfo != null) {
-      var stream = yt.videos.streamsClient.get(muxedStreamInfo);
+        var directory = await getApplicationDocumentsDirectory();
+        var file = File('${directory.path}/video.mp4');
 
-      var directory = await getApplicationDocumentsDirectory();
-      var file = File('${directory.path}/video.mp4');
+        var fileStream = file.openWrite();
 
-      var fileStream = file.openWrite();
+        await (await stream).pipe(fileStream);
 
-      await (await stream).pipe(fileStream);
+        await fileStream.flush();
+        await fileStream.close();
 
-      await fileStream.flush();
-      await fileStream.close();
-
-      print('Download complete');
-      print('Video file saved at: ${file.path}');
+        print('Download complete');
+        print('Video file saved at: ${file.path}');
+      }
     }
   }
 
   Future<void> _downloadAudio() async {
-    var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
-    var audioInfo = manifest.audioOnly.withHighestBitrate();
+    if (videoUrl.contains('youtube.com/watch?v=')) {
+      var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
+      var audioInfo = manifest.audioOnly.withHighestBitrate();
 
-    if (audioInfo != null) {
-      var audioStream = yt.videos.streamsClient.get(audioInfo);
+      if (audioInfo != null) {
+        var audioStream = yt.videos.streamsClient.get(audioInfo);
 
-      var directory = await getApplicationDocumentsDirectory();
-      var audioFile = File('${directory.path}/audio.mp3');
+        var directory = await getApplicationDocumentsDirectory();
+        var audioFile = File('${directory.path}/audio.mp3');
 
-      var audioFileStream = audioFile.openWrite();
+        var audioFileStream = audioFile.openWrite();
 
-      await (await audioStream).pipe(audioFileStream);
+        await (await audioStream).pipe(audioFileStream);
 
-      await audioFileStream.flush();
-      await audioFileStream.close();
+        await audioFileStream.flush();
+        await audioFileStream.close();
 
-      print('Download complete');
-      print('Audio file saved at: ${audioFile.path}');
+        print('Download complete');
+        print('Audio file saved at: ${audioFile.path}');
+      }
     }
   }
 
@@ -124,11 +131,29 @@ class _YoutubeState extends State<GoDownload> {
       ),
       child: Scaffold(
         appBar: AppBar(
-          title: Text('YouTube Downloader'),
+          title: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: 'Enter a search term',
+            ),
+            onSubmitted: (url) {
+              if (!url.startsWith('http')) {
+                url = 'https://$url';
+              }
+              _webViewController.loadUrl(url);
+            },
+          ),
           actions: <Widget>[
             IconButton(
               icon: Icon(Icons.download),
               onPressed: _showDownloadDialog,
+            ),
+            IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                _webViewController.reload(); // Reload WebView
+              },
             ),
           ],
         ),
@@ -137,6 +162,19 @@ class _YoutubeState extends State<GoDownload> {
             WebView(
               initialUrl: videoUrl,
               javascriptMode: JavascriptMode.unrestricted,
+              onWebViewCreated: (controller) {
+                _webViewController = controller;
+              },
+              onPageStarted: (url) {
+                setState(() {
+                  _controller.text = url;
+                  if (url.contains('youtube.com/watch?v=')) {
+                    videoUrl = url;
+                    _getMetaData();
+                  }
+                  print('Current URL: $url'); // Print the current URL.
+                });
+              },
             ),
           ],
         ),
