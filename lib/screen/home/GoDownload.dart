@@ -19,7 +19,7 @@ class _YoutubeState extends State<GoDownload> {
   void initState() {
     super.initState();
     _getMetaData();
-  }//
+  }////
 
   Future<void> _getMetaData() async {
     var video = await yt.videos.get(videoUrl);
