@@ -52,7 +52,7 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               Container(
-                height: 40, // adjust this value as needed
+                height: 90, // adjust this value as needed
                 color: Colors.transparent,
               ),
             ],
