@@ -1,16 +1,33 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-
 import '../models/song_model.dart';
 import '../widgets/player_buttons.dart';
 import '../widgets/seekbar.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
+
+class SlideUpRoute<T> extends PageRouteBuilder<T> {
+  final Widget Function(BuildContext context) builder;
+  SlideUpRoute({required this.builder})
+      : super(
+    transitionDuration: Duration(milliseconds: 400),
+    reverseTransitionDuration: Duration(milliseconds: 400),
+    pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      );
+    },
+  );
+}
 
 class SongScreen extends StatefulWidget {
   final Song? song;
@@ -74,7 +91,6 @@ class _SongScreenState extends State<SongScreen> {
     }
   }
 
-
   @override
   void dispose() {
     audioPlayer.dispose();
@@ -93,6 +109,11 @@ class _SongScreenState extends State<SongScreen> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onVerticalDragEnd: (DragEndDetails details) {
+        if (details.primaryVelocity! > 0) {
+          Get.back();
+        }
+      },
       onHorizontalDragEnd: (DragEndDetails details) {
         if (details.primaryVelocity! > 0) {
           onPrevious();

@@ -21,17 +21,17 @@ class HomeScreen extends StatelessWidget {
     return Container(
 
         decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.deepPurple.shade800.withOpacity(0.99),
-                Colors.deepPurple.shade500.withOpacity(0.99),
-                Colors.indigo.shade800.withOpacity(0.76),
-                Colors.indigo.shade700.withOpacity(0.76),
-                Colors.deepPurple.shade300.withOpacity(0.99),
-              ],
-            )),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.indigo.shade800,
+              Colors.indigo.shade700,
+              Colors.pink.shade200,
+              Colors.yellow.shade200,
+            ],
+          ),
+        ),
         child: Scaffold(
           backgroundColor: Colors.transparent,
           // appBar: _CustomAppBar(),
@@ -39,7 +39,7 @@ class HomeScreen extends StatelessWidget {
             child: Column(
                 children: [
                   _DiscoverMusic(),  // "Discover Music" 부분을 그립니다.
-                  _TrendingMusic(songs: songs),  // "Trending Music" 부분을 그립니다.
+                  _RecentMusic(songs: songs),  // "Recent Music" 부분을 그립니다.
                   _PlaylistMusic(playlists: playlists)  // "Playlist Music" 부분을 그립니다.
                 ]),
           ),
@@ -78,10 +78,10 @@ class _PlaylistMusic extends StatelessWidget {
   }
 }
 
-// _TrendingMusic이라는 StatelessWidget을 정의합니다.
+// _RecentMusic이라는 StatelessWidget을 정의합니다.
 // 이 클래스는 트렌딩 음악을 보여주는 부분을 나타냅니다.
-class _TrendingMusic extends StatelessWidget {
-  const _TrendingMusic({
+class _RecentMusic extends StatelessWidget {
+  const _RecentMusic({
     super.key,
     required this.songs,
   });
@@ -99,7 +99,7 @@ class _TrendingMusic extends StatelessWidget {
           const Padding(
             padding: const EdgeInsets.only(right: 20.0),
             child: SectionHeader(
-              title: 'Trending Music',
+              title: 'Recent Music',
               action: 'View More',
             ),
           ),

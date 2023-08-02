@@ -55,6 +55,12 @@ class Song{
       url: 'assets/music/seven.mp3',
       coverUrl: 'assets/images/seven.jpeg',
     ),
+    Song(
+      title: 'Always Awake',
+      description: 'JazzFact',
+      url: 'assets/music/Always Awake.mp3',
+      coverUrl: 'assets/images/Always Awake.jpeg',
+    ),
 
 
   ];
