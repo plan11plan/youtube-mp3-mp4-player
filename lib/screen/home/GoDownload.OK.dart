@@ -13,10 +13,9 @@ class GoDownload extends StatefulWidget {
 
 class _YoutubeState extends State<GoDownload> {
   final YoutubeExplode yt = YoutubeExplode();
-  String videoUrl = 'https://www.youtube.com'; // Start with Google Chrome.
+  String videoUrl = 'https://m.youtube.com/';
   final TextEditingController _controller = TextEditingController();
   late WebViewController _webViewController; // WebView controller
-  String _format = '';
 
   @override
   void initState() {
@@ -34,58 +33,95 @@ class _YoutubeState extends State<GoDownload> {
   }
 
   Future<void> _downloadVideo() async {
-    var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
-    var muxedStreamInfos = manifest.muxed.toList()
-      ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
-    var muxedStreamInfo = muxedStreamInfos.first;
+    try {
+      var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
+      var manifest = await yt.videos.streamsClient.getManifest(videoId);
+      var muxedStreamInfos = manifest.muxed.toList()
+        ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
+      var muxedStreamInfo = muxedStreamInfos.first;
 
-    if (muxedStreamInfo != null) {
-      var stream = yt.videos.streamsClient.get(muxedStreamInfo);
+      if (muxedStreamInfo != null) {
+        var stream = yt.videos.streamsClient.get(muxedStreamInfo);
 
-      var directory = await getApplicationDocumentsDirectory();
-      var file = File('${directory.path}/video.mp4');
+        var directory = await getApplicationDocumentsDirectory();
 
-      var fileStream = file.openWrite();
+        var video = await yt.videos.get(videoUrl);
+        var title = video.title;
+        title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
 
-      await (await stream).pipe(fileStream);
+        var file = File('${directory.path}/$title.mp4');
 
-      await fileStream.flush();
-      await fileStream.close();
+        var fileStream = file.openWrite();
 
-      print('Download complete');
-      print('Video file saved at: ${file.path}');
+        await (await stream).pipe(fileStream);
+
+        await fileStream.flush();
+        await fileStream.close();
+
+        print('Download complete');
+        print('Video file saved at: ${file.path}');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      _downloadVideo(); // Retry download on failure
     }
   }
 
   Future<void> _downloadAudio() async {
-    var manifest = await yt.videos.streamsClient.getManifest(videoUrl.split('v=')[1]);
-    var audioInfo = manifest.audioOnly.withHighestBitrate();
+    try {
+      var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
+      var manifest = await yt.videos.streamsClient.getManifest(videoId);
+      var audioInfo = manifest.audioOnly.withHighestBitrate();
 
-    if (audioInfo != null) {
-      var audioStream = yt.videos.streamsClient.get(audioInfo);
+      if (audioInfo != null) {
+        var audioStream = yt.videos.streamsClient.get(audioInfo);
 
-      var directory = await getApplicationDocumentsDirectory();
-      var audioFile = File('${directory.path}/audio.mp3');
+        var directory = await getApplicationDocumentsDirectory();
 
-      var audioFileStream = audioFile.openWrite();
+        var video = await yt.videos.get(videoUrl);
+        var title = video.title;
+        title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
 
-      await (await audioStream).pipe(audioFileStream);
+        var audioFile = File('${directory.path}/$title.mp3');
 
-      await audioFileStream.flush();
-      await audioFileStream.close();
+        var audioFileStream = audioFile.openWrite();
 
-      print('Download complete');
-      print('Audio file saved at: ${audioFile.path}');
+        await (await audioStream).pipe(audioFileStream);
+
+        await audioFileStream.flush();
+        await audioFileStream.close();
+
+        print('Download complete');
+        print('Audio file saved at: ${audioFile.path}');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      _downloadAudio(); // Retry download on failure
     }
   }
 
   Future<void> _showDownloadDialog() async {
-    _format = (await showDialog<String>(
+    _webViewController.reload(); // Reload the WebView before showing the dialog
+    switch (await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
-          title: const Text('Select download format',
-              style: TextStyle(color: Colors.black54)),
+          titlePadding: EdgeInsets.all(16.0),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Select download format',
+                style: TextStyle(color: Colors.black54),
+                overflow: TextOverflow.ellipsis,
+              ),
+              IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.cancel, color: Colors.black54),
+              ),
+            ],
+          ),
           children: <Widget>[
             SimpleDialogOption(
               onPressed: () {
@@ -108,8 +144,14 @@ class _YoutubeState extends State<GoDownload> {
           ],
         );
       },
-    ))!;
-    _webViewController.reload();
+    )) {
+      case 'Video':
+        _downloadVideo();
+        break;
+      case 'Audio':
+        _downloadAudio();
+        break;
+    }
   }
 
   @override
@@ -157,18 +199,7 @@ class _YoutubeState extends State<GoDownload> {
                     videoUrl = url;
                     _getMetaData();
                   }
-                  print('Current URL: $url'); // Print the current URL.
                 });
-              },
-              onPageFinished: (url) {
-                if (_format.isNotEmpty) {
-                  if (_format == 'Video') {
-                    _downloadVideo();
-                  } else {
-                    _downloadAudio();
-                  }
-                  _format = '';
-                }
               },
             ),
           ],

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class GoDownload extends StatefulWidget {
   const GoDownload({Key? key}) : super(key: key);
@@ -32,6 +33,25 @@ class _YoutubeState extends State<GoDownload> {
     }
   }
 
+  Future<void> _downloadThumbnail(String videoId) async {
+    var video = await yt.videos.get(videoId);
+    var title = video.title;
+    title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
+
+    var directory = await getApplicationDocumentsDirectory();
+    var filePath = '${directory.path}/$title.jpg';
+
+    var response = await http.get(Uri.parse(video.thumbnails.highResUrl));
+
+    if (response.statusCode == 200) {
+      await File(filePath).writeAsBytes(response.bodyBytes);
+      print('Thumbnail download complete');
+      print('Thumbnail file saved at: $filePath');
+    } else {
+      print('Failed to download thumbnail');
+    }
+  }
+
   Future<void> _downloadVideo() async {
     try {
       var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
@@ -45,7 +65,7 @@ class _YoutubeState extends State<GoDownload> {
 
         var directory = await getApplicationDocumentsDirectory();
 
-        var video = await yt.videos.get(videoUrl);
+        var video = await yt.videos.get(videoId);
         var title = video.title;
         title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
 
@@ -60,6 +80,9 @@ class _YoutubeState extends State<GoDownload> {
 
         print('Download complete');
         print('Video file saved at: ${file.path}');
+
+        // Download thumbnail
+        _downloadThumbnail(videoId);
       }
     } catch (e) {
       print('An error occurred: $e');
@@ -78,7 +101,7 @@ class _YoutubeState extends State<GoDownload> {
 
         var directory = await getApplicationDocumentsDirectory();
 
-        var video = await yt.videos.get(videoUrl);
+        var video = await yt.videos.get(videoId);
         var title = video.title;
         title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
 
@@ -93,6 +116,9 @@ class _YoutubeState extends State<GoDownload> {
 
         print('Download complete');
         print('Audio file saved at: ${audioFile.path}');
+
+        // Download thumbnail
+        _downloadThumbnail(videoId);
       }
     } catch (e) {
       print('An error occurred: $e');

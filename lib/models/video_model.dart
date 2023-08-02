@@ -31,6 +31,18 @@ class downVideo{
       url: 'assets/video/ride3.mp4',
       coverUrl: 'assets/images/Tropic Love.jpeg',
     ),
+    downVideo(
+      title: '금요일 밤',
+      description: '블랙넛',
+      url: 'assets/video/금요일 밤.mp4',
+      coverUrl: 'assets/images/금요일 밤.jpeg',
+    ),
+    downVideo(
+      title: '시차',
+      description: '우원재',
+      url: 'assets/video/시차.mp4',
+      coverUrl: 'assets/images/시차.jpeg',
+    ),
 
 
   ];

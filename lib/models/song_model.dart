@@ -61,6 +61,19 @@ class Song{
       url: 'assets/music/Always Awake.mp3',
       coverUrl: 'assets/images/Always Awake.jpeg',
     ),
+    Song(
+      title: '금요일 밤',
+      description: '블랙 넛',
+      url: 'assets/music/금요일 밤.mp3',
+      coverUrl: 'assets/images/금요일 밤.jpeg',
+    ),
+    Song(
+      title: '시차',
+      description: '우원재',
+      url: 'assets/music/시차.mp3',
+      coverUrl: 'assets/images/시차.jpeg',
+    ),
+
 
 
   ];
