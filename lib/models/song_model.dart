@@ -73,6 +73,12 @@ class Song{
       url: 'assets/music/시차.mp3',
       coverUrl: 'assets/images/시차.jpeg',
     ),
+    Song(
+      title: 'Dynamite',
+      description: 'BTS',
+      url: 'assets/music/seven.mp3',
+      coverUrl: 'assets/images/BTS - Dynamite (Lyrics).jpg',
+    ),
 
 
 

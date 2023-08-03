@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:player/screen/home/GoDownload.dart';
 import 'package:player/screen/home/Home_screen.dart';
 import 'package:player/screen/home/Music.dart';
@@ -8,8 +10,13 @@ import 'package:player/screen/home/Video.dart';
 import 'package:player/screen/playlist_screen.dart';
 import 'package:player/screen/song_screen.dart';
 
-void main() {
+import 'models/file_model.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final appDocumentDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDir.path);
+  Hive.registerAdapter(MediaFileAdapter());
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(const MyApp());

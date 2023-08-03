@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+
+import '../../models/file_model.dart';
 
 class GoDownload extends StatefulWidget {
   const GoDownload({Key? key}) : super(key: key);
@@ -33,7 +36,7 @@ class _YoutubeState extends State<GoDownload> {
     }
   }
 
-  Future<void> _downloadThumbnail(String videoId) async {
+  Future<String> _downloadThumbnail(String videoId) async {
     var video = await yt.videos.get(videoId);
     var title = video.title;
     title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
@@ -50,6 +53,7 @@ class _YoutubeState extends State<GoDownload> {
     } else {
       print('Failed to download thumbnail');
     }
+    return filePath;
   }
 
   Future<void> _downloadVideo() async {
@@ -78,11 +82,17 @@ class _YoutubeState extends State<GoDownload> {
         await fileStream.flush();
         await fileStream.close();
 
-        print('Download complete');
-        print('Video file saved at: ${file.path}');
-
+        print('다운로드 완료');
+        print('영상 저장 파일 경로 : ${file.path}');
         // Download thumbnail
         _downloadThumbnail(videoId);
+        var thumbnailPath = await _downloadThumbnail(videoId);
+        print('이미지 저장 완료');
+
+        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video');
+        var box = await Hive.openBox('mediaFiles');
+        box.add(mediaFile);
+        print('Video metadata saved to Hive');
       }
     } catch (e) {
       print('An error occurred: $e');
@@ -119,6 +129,13 @@ class _YoutubeState extends State<GoDownload> {
 
         // Download thumbnail
         _downloadThumbnail(videoId);
+        var thumbnailPath = await _downloadThumbnail(videoId);
+
+        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'video');
+        var box = await Hive.openBox('mediaFiles');
+        box.add(mediaFile);
+        print('Video metadata saved to Hive');
+
       }
     } catch (e) {
       print('An error occurred: $e');
