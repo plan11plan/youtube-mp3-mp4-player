@@ -37,8 +37,6 @@ dependencies:
   image_picker: ^1.0.1
   webview_flutter: ^3.0.0
   rxdart: ^0.27.7
-  just_audio: ^0.9.30
-  just_audio_background: ^0.0.1-beta.7
   get: ^4.6.5
   youtube_downloader: ^0.0.6
   lecle_downloads_path_provider: ^0.0.2+8
@@ -48,7 +46,9 @@ dependencies:
   http: ^0.13.3
   hive: ^2.0.4
   hive_flutter: ^1.1.0
-
+  just_audio: any
+  just_audio_background: ^0.0.1-beta.7
+  assets_audio_player: ^3.0.6
 
 
 dev_dependencies:

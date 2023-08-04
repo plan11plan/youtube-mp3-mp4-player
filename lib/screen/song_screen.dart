@@ -1,14 +1,11 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import '../models/song_model.dart';
-import '../widgets/player_buttons.dart';
+import 'package:hive/hive.dart';
 import '../widgets/seekbar.dart';
 import 'package:rxdart/rxdart.dart' as rxdart;
+import '../models/file_model.dart';
+import 'package:assets_audio_player/assets_audio_player.dart';
 
 class SlideUpRoute<T> extends PageRouteBuilder<T> {
   final Widget Function(BuildContext context) builder;
@@ -16,7 +13,8 @@ class SlideUpRoute<T> extends PageRouteBuilder<T> {
       : super(
     transitionDuration: Duration(milliseconds: 400),
     reverseTransitionDuration: Duration(milliseconds: 400),
-    pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        builder(context),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       return SlideTransition(
         position: Tween<Offset>(
@@ -30,80 +28,88 @@ class SlideUpRoute<T> extends PageRouteBuilder<T> {
 }
 
 class SongScreen extends StatefulWidget {
-  final Song? song;
+  final MediaFile? mediaFile;
+  final int? index;
 
-  const SongScreen({Key? key, this.song}) : super(key: key);
+  const SongScreen({Key? key, this.mediaFile, this.index}) : super(key: key);
 
   @override
   State<SongScreen> createState() => _SongScreenState();
 }
 
 class _SongScreenState extends State<SongScreen> {
-  late AudioPlayer audioPlayer;
-  int currentSongIndex = 0;
+  late AssetsAudioPlayer assetsAudioPlayer;
+  int currentMediaFileIndex = 0;
+  List<MediaFile> mediaFiles = [];
 
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer();
+    openBox();
+    assetsAudioPlayer = AssetsAudioPlayer();
 
-    currentSongIndex = Song.songs.indexOf(Get.arguments ?? widget.song ?? Song.songs[0]);
+    currentMediaFileIndex = mediaFiles.indexOf(Get.arguments ?? widget.mediaFile ?? mediaFiles[0]);
 
-    audioPlayer.setAudioSource(ConcatenatingAudioSource(
-      children: Song.songs.map((song) => AudioSource.uri(
-        Uri.parse('asset:///${song.url}'),
-        tag: MediaItem(
-          id: song.title,
-          title: song.title,
-          album: song.description,
-          artUri: Uri.parse('asset:///${song.coverUrl}'),
+    assetsAudioPlayer.open(
+      Playlist(audios: mediaFiles.map((mediaFile) => Audio.network(
+        mediaFile.filePath,
+        metas: Metas(
+          id: mediaFile.title,
+          title: mediaFile.title,
+          album: mediaFile.description,
+          image: MetasImage.network(mediaFile.thumbnailPath),
         ),
-      )).toList(),
-    ));
+      )).toList()),
+      autoStart: false,
+      respectSilentMode: true,
+    );
 
-    audioPlayer.seek(Duration.zero, index: currentSongIndex);
-    audioPlayer.play();
-
-    audioPlayer.currentIndexStream.listen((index) {
-      if (index != null) {
-        setState(() {
-          currentSongIndex = index;
-        });
+    assetsAudioPlayer.playlistAudioFinished.listen((event) {
+      if (assetsAudioPlayer.currentPosition.value.compareTo(assetsAudioPlayer.current.value!.audio.duration) == 0) {
+        onNext();
       }
+    });
+
+    assetsAudioPlayer.playOrPause();
+  }
+
+  Future openBox() async {
+    var box = await Hive.openBox<MediaFile>('mediaFiles');
+    setState(() {
+      mediaFiles = box.values.where((mediaFile) => mediaFile.fileType == 'audio').toList();
     });
   }
 
   void onPrevious() {
-    if (currentSongIndex > 0) {
+    if (currentMediaFileIndex > 0) {
       setState(() {
-        currentSongIndex--;
+        currentMediaFileIndex--;
       });
-      audioPlayer.seek(Duration.zero, index: currentSongIndex);
+      assetsAudioPlayer.playlistPlayAtIndex(currentMediaFileIndex);
     }
   }
 
   void onNext() {
-    if (currentSongIndex < Song.songs.length - 1) {
+    if (currentMediaFileIndex < mediaFiles.length - 1) {
       setState(() {
-        currentSongIndex++;
+        currentMediaFileIndex++;
       });
-      audioPlayer.seek(Duration.zero, index: currentSongIndex);
+      assetsAudioPlayer.playlistPlayAtIndex(currentMediaFileIndex);
     }
   }
 
   @override
   void dispose() {
-    audioPlayer.dispose();
+    assetsAudioPlayer.dispose();
     super.dispose();
   }
 
   Stream<PositionData> get _positiondataStream =>
-      rxdart.Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
-        audioPlayer.positionStream,
-        audioPlayer.bufferedPositionStream,
-        audioPlayer.durationStream,
-            (position, bufferedPosition, duration) => PositionData(
-            position, bufferedPosition, duration ?? Duration.zero),
+      rxdart.Rx.combineLatest2<Duration, Duration, PositionData>(
+        assetsAudioPlayer.currentPosition,
+        assetsAudioPlayer.isBuffering.map((isBuffering) => isBuffering ? Duration(seconds: 1) : Duration.zero),
+            (position, bufferedPosition) => PositionData(
+            position, bufferedPosition),
       );
 
   @override
@@ -134,7 +140,7 @@ class _SongScreenState extends State<SongScreen> {
               constraints: BoxConstraints.expand(),
               decoration: BoxDecoration(
                 image: DecorationImage(
-                    image: AssetImage(Song.songs[currentSongIndex].coverUrl),
+                    image: NetworkImage(mediaFiles[currentMediaFileIndex].thumbnailPath),
                     fit: BoxFit.cover
                 ),
               ),
@@ -150,19 +156,47 @@ class _SongScreenState extends State<SongScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(30.0),
-                  child: Image.asset(Song.songs[currentSongIndex].coverUrl,width: 270.0,),
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.network(
+                    mediaFiles[currentMediaFileIndex].thumbnailPath,
+                    fit: BoxFit.cover,
+                    height: MediaQuery.of(context).size.width - 100,
+                  ),
                 ),
-                SizedBox(height: 240),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    mediaFiles[currentMediaFileIndex].title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                StreamBuilder<PositionData>(
+                  stream: _positiondataStream,
+                  builder: (context, snapshot) {
+                    final positionData = snapshot.data;
+                    final position = positionData?.position ?? Duration.zero;
+                    return SeekBar(
+                      duration: assetsAudioPlayer.current.value?.audio.duration ?? Duration.zero,
+                      position: position,
+                      onChangeEnd: (newPosition) {
+                        assetsAudioPlayer.seek(newPosition);
+                      },
+                    );
+                  },
+                ),
+
+                SizedBox(height: 16),
+                PlayerButtons(
+                  onPrevious: onPrevious,
+                  onNext: onNext,
+                  assetsAudioPlayer: assetsAudioPlayer,
+                ),
               ],
             ),
-            const _BackgroundFilter(),
-            _MusicPlayer(
-                song: Song.songs[currentSongIndex],
-                positionDataStream: _positiondataStream,
-                audioPlayer: audioPlayer,
-                onPrevious: onPrevious,
-                onNext: onNext),
           ],
         ),
       ),
@@ -174,167 +208,48 @@ class PositionData {
   const PositionData(
       this.position,
       this.bufferedPosition,
-      this.duration,
       );
 
   final Duration position;
   final Duration bufferedPosition;
-  final Duration duration;
 }
 
-class _MusicPlayer extends StatelessWidget {
-  const _MusicPlayer({
-    Key? key,
-    required this.song,
-    required Stream<PositionData> positionDataStream,
-    required this.audioPlayer,
-    required this.onPrevious,
-    required this.onNext,
-  })  : _positionDataStream = positionDataStream,
-        super(key: key);
-
-  final Song song;
-  final Stream<PositionData> _positionDataStream;
-  final AudioPlayer audioPlayer;
+class PlayerButtons extends StatelessWidget {
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+  final AssetsAudioPlayer assetsAudioPlayer;
 
-  Icon _getLoopIcon(LoopMode loopMode) {
-    switch (loopMode) {
-      case LoopMode.all:
-        return Icon(Icons.repeat_outlined, color: Colors.white);
-      case LoopMode.one:
-        return Icon(Icons.repeat_one, color: Colors.white);
-      case LoopMode.off:
-      default:
-        return Icon(Icons.repeat_one, color: Colors.grey);
-
-    }
-  }
+  PlayerButtons({
+    required this.onPrevious,
+    required this.onNext,
+    required this.assetsAudioPlayer,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 50.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            song.title,
-            style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            song.description,
-            maxLines: 2,
-            style: Theme.of(context).textTheme.bodySmall!.copyWith(
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 30),
-          StreamBuilder<PositionData>(
-            stream: _positionDataStream,
-            builder: (context, snapshot) {
-              final positionData = snapshot.data;
-              return SeekBar(
-                position: positionData?.position ?? Duration.zero,
-                duration: positionData?.duration ?? Duration.zero,
-                onChanged: (duration) {
-                  audioPlayer.seek(duration);
-                },
-                onChangeEnd: (duration) {
-                  audioPlayer.seek(duration);
-                },
-              );
-            },
-          ),
-          PlayerButtons(
-              audioPlayer: audioPlayer,
-              onPrevious: onPrevious,
-              onNext: onNext),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IconButton(
-                  iconSize: 35,
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.settings,
-                    color: Colors.white,
-                  )),
-              StreamBuilder<LoopMode>(
-                stream: audioPlayer.loopModeStream,
-                builder: (context, snapshot) {
-                  final loopMode = snapshot.data ?? LoopMode.off;
-                  return IconButton(
-                    iconSize: 35,
-                    onPressed: () {
-                      switch (loopMode) {
-                        case LoopMode.off:
-                          audioPlayer.setLoopMode(LoopMode.one);
-                          break;
-                        case LoopMode.one:
-                          audioPlayer.setLoopMode(LoopMode.all);
-                          break;
-                        case LoopMode.all:
-                        default:
-                          audioPlayer.setLoopMode(LoopMode.off);
-                          break;
-                      }
-                    },
-                    icon: _getLoopIcon(loopMode),
-                  );
-                },
-              ),
-
-            ],
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class _BackgroundFilter extends StatelessWidget {
-  const _BackgroundFilter({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ShaderMask(
-      shaderCallback: (rect) {
-        return LinearGradient(
-            begin: Alignment.center,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              Colors.white.withOpacity(0.5),
-              Colors.white.withOpacity(0.0),
-            ],
-            stops: [
-              0.0,
-              0.4,
-              0.6
-            ]).createShader(rect);
-      },
-      blendMode: BlendMode.dstOut,
-      child: Container(
-        decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.black,
-                Colors.grey,
-              ],
-            )),
-      ),
+    return Row(
+      children: [
+        IconButton(
+          onPressed: onPrevious,
+          icon: Icon(Icons.skip_previous),
+        ),
+        StreamBuilder<PlayerState>(
+          stream: assetsAudioPlayer.playerState,
+          builder: (context, snapshot) {
+            final playerState = snapshot.data;
+            return IconButton(
+              onPressed: () {
+                playerState == PlayerState.play ? assetsAudioPlayer.pause() : assetsAudioPlayer.play();
+              },
+              icon: Icon(playerState == PlayerState.play ? Icons.pause : Icons.play_arrow),
+            );
+          },
+        ),
+        IconButton(
+          onPressed: onNext,
+          icon: Icon(Icons.skip_next),
+        ),
+      ],
     );
   }
 }

@@ -16,6 +16,7 @@ class GoDownload extends StatefulWidget {
 }
 
 class _YoutubeState extends State<GoDownload> {
+  final int maxTextLength =2;
   final YoutubeExplode yt = YoutubeExplode();
   String videoUrl = 'https://m.youtube.com/';
   final TextEditingController _controller = TextEditingController();
@@ -42,6 +43,9 @@ class _YoutubeState extends State<GoDownload> {
     title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
 
     var directory = await getApplicationDocumentsDirectory();
+    if (title.length > maxTextLength) {
+      title = title.substring(0, maxTextLength ) + '...';
+    }
     var filePath = '${directory.path}/$title.jpg';
 
     var response = await http.get(Uri.parse(video.thumbnails.highResUrl));
@@ -56,7 +60,7 @@ class _YoutubeState extends State<GoDownload> {
     return filePath;
   }
 
-  Future<void> _downloadVideo() async {
+  Future<void> _downloadVideo({int retryCount = 0}) async {
     try {
       var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
       var manifest = await yt.videos.streamsClient.getManifest(videoId);
@@ -71,8 +75,11 @@ class _YoutubeState extends State<GoDownload> {
 
         var video = await yt.videos.get(videoId);
         var title = video.title;
-        title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
 
+        title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
+        if (title.length > maxTextLength ) {
+          title = title.substring(0, maxTextLength ) + '...';
+        }
         var file = File('${directory.path}/$title.mp4');
 
         var fileStream = file.openWrite();
@@ -89,18 +96,29 @@ class _YoutubeState extends State<GoDownload> {
         var thumbnailPath = await _downloadThumbnail(videoId);
         print('이미지 저장 완료');
 
-        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video');
-        var box = await Hive.openBox('mediaFiles');
+        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title);
+        Box<MediaFile>? box;
+        if(Hive.isBoxOpen('mediaFiles')) {
+          box = Hive.box('mediaFiles');
+        } else {
+          box = await Hive.openBox('mediaFiles');
+        }
         box.add(mediaFile);
         print('Video metadata saved to Hive');
       }
     } catch (e) {
       print('An error occurred: $e');
-      _downloadVideo(); // Retry download on failure
+      if (retryCount < 2) { // retry only if retry count is less than 3
+        Future.delayed(Duration(seconds: 1), () {
+          _downloadVideo(retryCount: retryCount + 1);
+        });
+      } else {
+        print('Download failed after 3 attempts');
+      }
     }
   }
 
-  Future<void> _downloadAudio() async {
+  Future<void> _downloadAudio({int retryCount = 0}) async {
     try {
       var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
       var manifest = await yt.videos.streamsClient.getManifest(videoId);
@@ -113,8 +131,10 @@ class _YoutubeState extends State<GoDownload> {
 
         var video = await yt.videos.get(videoId);
         var title = video.title;
-        title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
-
+        title = title.replaceAll(RegExp(r'[\/:*?"<>|\-]'), '_'); // Replace invalid characters
+        if (title.length > maxTextLength ) {
+          title = title.substring(0, maxTextLength ) + '...';
+        }
         var audioFile = File('${directory.path}/$title.mp3');
 
         var audioFileStream = audioFile.openWrite();
@@ -131,15 +151,24 @@ class _YoutubeState extends State<GoDownload> {
         _downloadThumbnail(videoId);
         var thumbnailPath = await _downloadThumbnail(videoId);
 
-        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'video');
-        var box = await Hive.openBox('mediaFiles');
+        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title);
+        Box<MediaFile>? box;
+        if(Hive.isBoxOpen('mediaFiles')) {
+          box = Hive.box('mediaFiles');
+        } else {
+          box = await Hive.openBox('mediaFiles');
+        }
         box.add(mediaFile);
-        print('Video metadata saved to Hive');
+        print('Audio metadata saved to Hive');
 
       }
     } catch (e) {
       print('An error occurred: $e');
-      _downloadAudio(); // Retry download on failure
+      if (retryCount < 2) { // retry only if retry count is less than 3
+        Future.delayed(Duration(seconds: 1), () {
+          _downloadAudio(retryCount: retryCount + 1);
+        });
+      }
     }
   }
 

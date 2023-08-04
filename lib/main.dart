@@ -34,10 +34,10 @@ class _MyAppState extends State<MyApp> {
   int currentindex = 0;
 
   List tabs = [
-    HomeScreen(),
     Music(),
     Video(),
     GoDownload(),
+    // HomeScreen(),
   ];
 
   @override
@@ -107,9 +107,9 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
       getPages: [
-        GetPage(name: '/', page: () => const HomeScreen()),
-        GetPage(name: '/song', page: () => SongScreen()),
-        GetPage(name: '/playlist', page: () => const PlaylistScreen()),
+        // GetPage(name: '/', page: () => const HomeScreen()),
+        // GetPage(name: '/song', page: () => SongScreen()),
+        // GetPage(name: '/playlist', page: () => const PlaylistScreen()),
       ],
     );
   }
