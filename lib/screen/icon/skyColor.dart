@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class SkyColor {
@@ -79,6 +80,16 @@ class SkyColor {
       gradient: colors[colorIndex],
     );
   }
+  static Future<void> saveColorIndex() async {
+    var box = await Hive.openBox('settings');
+    await box.put('colorIndex', colorIndex);
+  }
+
+  static Future<void> loadColorIndex() async {
+    var box = await Hive.openBox('settings');
+    colorIndex = box.get('colorIndex', defaultValue: 0);
+  }
+
 }
 
 class MoonIconButton extends StatefulWidget {
@@ -110,9 +121,11 @@ class _MoonIconButtonState extends State<MoonIconButton> {
         setState(() {
           currentPhase = (currentPhase + 1) % moonPhases.length;
           SkyColor.colorIndex = (SkyColor.colorIndex + 1) % SkyColor.colors.length;
+          SkyColor.saveColorIndex(); // Save color index whenever the icon is pressed
           widget.callback();
         });
       },
     );
   }
+
 }

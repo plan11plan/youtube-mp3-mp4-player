@@ -23,6 +23,7 @@ class _MusicState extends State<Music> {
   void initState() {
     super.initState();
     openBox();
+    SkyColor.loadColorIndex(); // Video에는 할필요없음 static
     _searchController.addListener(_onSearchChanged);
   }
 

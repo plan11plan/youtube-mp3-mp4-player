@@ -4,7 +4,6 @@ import 'package:hive/hive.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';
-import '../song_screen.dart';
 import '../video/video_player_screen.dart';
 
 class Video extends StatefulWidget {
@@ -60,6 +59,8 @@ class _VideoState extends State<Video> {
     var updatedVideoFiles = await MediaFile.loadAllVideoFiles();
     setState(() {
       mediaFiles = updatedVideoFiles;
+      filteredMediaFiles = updatedVideoFiles;
+
     });
   }
 

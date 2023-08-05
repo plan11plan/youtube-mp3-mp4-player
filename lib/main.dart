@@ -14,9 +14,17 @@ import 'models/file_model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final appDocumentDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
+
+
+
   Hive.registerAdapter(MediaFileAdapter());
+
+  await Hive.openBox<int>('skyColorBox');
+
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(const MyApp());
