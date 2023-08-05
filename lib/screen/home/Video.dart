@@ -5,6 +5,7 @@ import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';
 import '../song_screen.dart';
+import '../video/video_player_screen.dart';
 
 class Video extends StatefulWidget {
   const Video({Key? key}) : super(key: key);
@@ -161,7 +162,7 @@ class _VideoState extends State<Video> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SongScreen(mediaFile: filteredMediaFiles[index],index: index),
+                          builder: (context) => VideoPlayerScreen(url: mediaFiles[index].filePath),
                         ),
                       );
                     },
