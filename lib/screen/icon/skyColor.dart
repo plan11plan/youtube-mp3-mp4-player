@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:avatar_glow/avatar_glow.dart';
 
 class SkyColor {
   static int colorIndex = 0;
@@ -115,17 +116,20 @@ class _MoonIconButtonState extends State<MoonIconButton> {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(moonPhases[currentPhase], color: Colors.yellow[100]),
-      onPressed: () {
-        setState(() {
-          currentPhase = (currentPhase + 1) % moonPhases.length;
-          SkyColor.colorIndex = (SkyColor.colorIndex + 1) % SkyColor.colors.length;
-          SkyColor.saveColorIndex(); // Save color index whenever the icon is pressed
-          widget.callback();
-        });
-      },
+    return AvatarGlow(
+      endRadius: 25,
+      glowColor: Colors.blueGrey[300]!,
+      child: IconButton(
+        icon: Icon(moonPhases[currentPhase], color: Colors.yellow[100]),
+        onPressed: () {
+          setState(() {
+            currentPhase = (currentPhase + 1) % moonPhases.length;
+            SkyColor.colorIndex = (SkyColor.colorIndex + 1) % SkyColor.colors.length;
+            SkyColor.saveColorIndex(); // Save color index whenever the icon is pressed
+            widget.callback();
+          });
+        },
+      ),
     );
   }
-
 }
