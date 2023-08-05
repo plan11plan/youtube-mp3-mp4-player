@@ -5,6 +5,7 @@ import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';
 import '../song_screen.dart';
+
 class Music extends StatefulWidget {
   const Music({Key? key}) : super(key: key);
 
@@ -14,6 +15,8 @@ class Music extends StatefulWidget {
 
 class _MusicState extends State<Music> {
   List<MediaFile> mediaFiles = [];
+  TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
 
   @override
   void initState() {
@@ -61,6 +64,14 @@ class _MusicState extends State<Music> {
     );
   }
 
+  void _cancelSearch() {
+    _searchController.clear();
+    setState(() {
+      _isSearching = false;
+    });
+    // You may want to clear your search results here as well, if applicable
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -89,6 +100,12 @@ class _MusicState extends State<Music> {
                         ],
                       ),
                       child: TextFormField(
+                        controller: _searchController,
+                        onChanged: (text) {
+                          setState(() {
+                            _isSearching = text.isNotEmpty;
+                          });
+                        },
                         decoration: InputDecoration(
                           hintText: "Search the music",
                           hintStyle: TextStyle(
@@ -99,11 +116,17 @@ class _MusicState extends State<Music> {
                             icon: Icon(Icons.search, size: 23, color: Colors.white.withOpacity(0.5)),
                             onPressed: () {},
                           ),
+                          suffixIcon: _isSearching
+                              ? IconButton(
+                            icon: Icon(Icons.clear, color: Colors.white),
+                            onPressed: _cancelSearch,
+                          )
+                              : null,
+
                         ),
                       ),
                     ),
                   ),
-
                   Expanded(
                     flex: 1,
                     child: Padding(
