@@ -49,7 +49,7 @@ dependencies:
   just_audio: any
   just_audio_background: ^0.0.1-beta.7
   assets_audio_player: ^3.0.6
-
+  material_design_icons_flutter: ^5.0.5955
 
 dev_dependencies:
   flutter_test:

@@ -78,10 +78,7 @@ class _MyAppState extends State<MyApp> {
                   showUnselectedLabels: false,
                   showSelectedLabels: false,
                   items: const [
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'Home',
-                    ),
+
                     BottomNavigationBarItem(
                       icon: Icon(Icons.queue_music_sharp),
                       label: 'Music',
@@ -93,7 +90,11 @@ class _MyAppState extends State<MyApp> {
                     BottomNavigationBarItem(
                       icon: Icon(Icons.youtube_searched_for),
                       label: 'Youtube',
-                    )
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home),
+                      label: 'Home',
+                    ),
                   ],
                   onTap: (index) {
                     setState(() {

@@ -16,7 +16,7 @@ class GoDownload extends StatefulWidget {
 }
 
 class _YoutubeState extends State<GoDownload> {
-  final int maxTextLength =2;
+  final int maxTextLength =15;
   final YoutubeExplode yt = YoutubeExplode();
   String videoUrl = 'https://m.youtube.com/';
   final TextEditingController _controller = TextEditingController();
