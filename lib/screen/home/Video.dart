@@ -210,8 +210,8 @@ class _VideoState extends State<Video> {
                             ],
                           ),
                           IconButton(
-                            icon: Icon(Icons.more_vert, color: Colors.white),
-                            onPressed: () => showDeleteConfirmationDialog(index),
+                            icon: Icon(Icons.chevron_left, color: Colors.white),
+                            onPressed: () {},
                           ),
                         ],
                       ),

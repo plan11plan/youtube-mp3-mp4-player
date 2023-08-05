@@ -211,8 +211,8 @@ class _MusicState extends State<Music> {
                               ],
                             ),
                             IconButton(
-                              icon: Icon(Icons.more_vert, color: Colors.white),
-                              onPressed: () => showDeleteConfirmationDialog(index),
+                              icon: Icon(Icons.chevron_left, color: Colors.white),
+                              onPressed: () {},
                             ),
                           ],
                         ),
