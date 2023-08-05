@@ -86,10 +86,14 @@ class _VideoState extends State<Video> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: SkyColor.skyDecoration,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
+    return GestureDetector(
+        onTap: () {
+      FocusScope.of(context).unfocus();
+    },
+    child: Container(
+    decoration: SkyColor.skyDecoration,
+    child: Scaffold(
+    backgroundColor: Colors.transparent,
         body: Column(
           children: [
             SafeArea(
@@ -218,6 +222,7 @@ class _VideoState extends State<Video> {
           ],
         ),
       ),
+    )
     );
   }
 }
