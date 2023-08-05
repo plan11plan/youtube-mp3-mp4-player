@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';
@@ -96,14 +95,15 @@ class _MusicState extends State<Music> {
                             color: Colors.white.withOpacity(0.5),
                           ),
                           border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: Icon(Icons.search, size: 28, color: Colors.white.withOpacity(0.5)),
+                          prefixIcon: IconButton(
+                            icon: Icon(Icons.search, size: 23, color: Colors.white.withOpacity(0.5)),
                             onPressed: () {},
                           ),
                         ),
                       ),
                     ),
                   ),
+
                   Expanded(
                     flex: 1,
                     child: Padding(
