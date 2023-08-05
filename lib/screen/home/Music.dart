@@ -15,6 +15,7 @@ class Music extends StatefulWidget {
 
 class _MusicState extends State<Music> {
   List<MediaFile> mediaFiles = [];
+  List<MediaFile> filteredMediaFiles = [];
   TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
 
@@ -22,18 +23,29 @@ class _MusicState extends State<Music> {
   void initState() {
     super.initState();
     openBox();
+    _searchController.addListener(_onSearchChanged);
   }
 
   Future openBox() async {
     var files = await MediaFile.loadAllAudioFiles();
-    setState(()  {
+    setState(() {
       mediaFiles = files;
+      filteredMediaFiles = mediaFiles;
+    });
+  }
+
+  void _onSearchChanged() {
+    var search = _searchController.text.toLowerCase();
+    setState(() {
+      filteredMediaFiles = mediaFiles
+          .where((file) => file.title.toLowerCase().contains(search))
+          .toList();
     });
   }
 
   void removeAudioFile(int index) async {
     var box = Hive.box<MediaFile>('mediaFiles');
-    var fileToDelete = mediaFiles[index];
+    var fileToDelete = filteredMediaFiles[index];
     var file = File(fileToDelete.filePath);
 
     if (file.existsSync()) {
@@ -48,6 +60,15 @@ class _MusicState extends State<Music> {
     var updatedAudioFiles = await MediaFile.loadAllAudioFiles();
     setState(() {
       mediaFiles = updatedAudioFiles;
+      filteredMediaFiles = updatedAudioFiles;
+    });
+  }
+
+  void _cancelSearch() {
+    _searchController.clear();
+    setState(() {
+      _isSearching = false;
+      filteredMediaFiles = mediaFiles;
     });
   }
 
@@ -62,14 +83,6 @@ class _MusicState extends State<Music> {
         );
       },
     );
-  }
-
-  void _cancelSearch() {
-    _searchController.clear();
-    setState(() {
-      _isSearching = false;
-    });
-    // You may want to clear your search results here as well, if applicable
   }
 
   @override
@@ -101,11 +114,6 @@ class _MusicState extends State<Music> {
                       ),
                       child: TextFormField(
                         controller: _searchController,
-                        onChanged: (text) {
-                          setState(() {
-                            _isSearching = text.isNotEmpty;
-                          });
-                        },
                         decoration: InputDecoration(
                           hintText: "Search the music",
                           hintStyle: TextStyle(
@@ -118,12 +126,16 @@ class _MusicState extends State<Music> {
                           ),
                           suffixIcon: _isSearching
                               ? IconButton(
-                            icon: Icon(Icons.clear, color: Colors.white),
+                            icon: Icon(Icons.close, size: 23, color: Colors.white.withOpacity(0.5)),
                             onPressed: _cancelSearch,
                           )
                               : null,
-
                         ),
+                        onChanged: (value) {
+                          setState(() {
+                            _isSearching = value.isNotEmpty;
+                          });
+                        },
                       ),
                     ),
                   ),
@@ -143,7 +155,7 @@ class _MusicState extends State<Music> {
             ),
             Expanded(
               child: ListView.separated(
-                itemCount: mediaFiles.length,
+                itemCount: filteredMediaFiles.length,
                 separatorBuilder: (context, index) => Divider(color: Colors.white54),
                 itemBuilder: (context, index) {
                   return InkWell(
@@ -151,7 +163,7 @@ class _MusicState extends State<Music> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SongScreen(mediaFile: mediaFiles[index],index: index),
+                          builder: (context) => SongScreen(mediaFile: filteredMediaFiles[index],index: index),
                         ),
                       );
                     },
@@ -178,7 +190,7 @@ class _MusicState extends State<Music> {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(5.0),
-                                  child: Image.file(File(mediaFiles[index].thumbnailPath), height: 50, width: 50, fit: BoxFit.cover),
+                                  child: Image.file(File(filteredMediaFiles[index].thumbnailPath), height: 50, width: 50, fit: BoxFit.cover),
                                 ),
                               ),
                               SizedBox(width: 10),
@@ -186,9 +198,9 @@ class _MusicState extends State<Music> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   SizedBox(height: 10),
-                                  Text(mediaFiles[index].title, style: Theme.of(context).textTheme.headline6),
+                                  Text(filteredMediaFiles[index].title, style: Theme.of(context).textTheme.headline6),
                                   SizedBox(height: 5),
-                                  Text(mediaFiles[index].fileType, style: Theme.of(context).textTheme.subtitle1),
+                                  Text(filteredMediaFiles[index].fileType, style: Theme.of(context).textTheme.subtitle1),
                                 ],
                               ),
                             ],
