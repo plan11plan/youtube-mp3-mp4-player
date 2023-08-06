@@ -117,10 +117,10 @@ class _MoonIconButtonState extends State<MoonIconButton> {
   @override
   Widget build(BuildContext context) {
     return AvatarGlow(
-      endRadius: 25,
+      endRadius: 20,
       glowColor: Colors.blueGrey[300]!,
       child: AnimatedSwitcher(
-        duration: Duration(milliseconds: 300), // 여기서 애니메이션 지속시간을 조정할 수 있습니다.
+        duration: Duration(milliseconds: 500), // 여기서 애니메이션 지속시간을 조정할 수 있습니다.
         child: IconButton(
           key: ValueKey<int>(currentPhase), // 키를 사용하여 어떤 위젯이 애니메이션되어야 할지 결정합니다.
           icon: Icon(moonPhases[currentPhase], color: Colors.yellow[100]),

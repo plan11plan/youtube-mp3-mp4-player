@@ -20,7 +20,7 @@ class MediaFile {
   String description;
 
   @HiveField(5)
-  bool like;
+  String like;
 
 
   MediaFile(this.title, this.filePath, this.thumbnailPath, this.fileType, this.description, this.like );
@@ -31,18 +31,27 @@ class MediaFile {
     Hive.box<MediaFile>('mediaFiles').put(this.filePath, this);
   }
 
-  void updateLikeStatus(bool newLikeStatus) {
+  void updateLikeStatus(String newLikeStatus) {
     this.like = newLikeStatus;
     Hive.box<MediaFile>('mediaFiles').put(this.filePath, this);
   }
 
   static Future<List<MediaFile>> loadAllAudioFiles() async {
     var box = await Hive.openBox<MediaFile>('mediaFiles');
-    return box.values.where((mediaFile) => mediaFile.fileType == 'audio').toList();
+    var audioFiles = box.values.where((mediaFile) => mediaFile.fileType == 'audio').toList();
+    audioFiles.forEach((file) {
+      print('Loaded file: ${file.title} with like status: ${file.like}');
+    });
+    return audioFiles;
   }
 
   static Future<List<MediaFile>> loadAllVideoFiles() async {
     var box = await Hive.openBox<MediaFile>('mediaFiles');
     return box.values.where((mediaFile) => mediaFile.fileType == 'video').toList();
   }
+  static Future<List<MediaFile>> loadAllLikedAudioFiles() async {
+    var box = await Hive.openBox<MediaFile>('mediaFiles');
+    return box.values.where((mediaFile) => (mediaFile.fileType == 'video' && mediaFile.like == true)).toList();
+  }
+
 }

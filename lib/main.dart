@@ -1,3 +1,4 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -5,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:player/screen/home/GoDownload.dart';
 import 'package:player/screen/home/Home_screen.dart';
+import 'package:player/screen/home/Liked.dart';
 import 'package:player/screen/home/Music.dart';
 import 'package:player/screen/home/Video.dart';
 import 'package:player/screen/playlist_screen.dart';
@@ -18,12 +20,9 @@ Future<void> main() async {
   final appDocumentDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
 
-
-
   Hive.registerAdapter(MediaFileAdapter());
 
   await Hive.openBox<int>('skyColorBox');
-
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
@@ -39,12 +38,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+
   int currentindex = 0;
 
   List tabs = [
     Music(),
     Video(),
     GoDownload(),
+    Liked()
     // HomeScreen(),
   ];
 
@@ -68,42 +70,23 @@ class _MyAppState extends State<MyApp> {
               alignment: Alignment.bottomCenter,
               child: Container(
                 padding: EdgeInsets.only(bottom: 0), // adjust this value as needed
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: Colors.grey,
-                      width: 0.4,
-                    ),
-                  ),
-                ),
-                child: BottomNavigationBar(
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  unselectedItemColor: Colors.white,
-                  selectedItemColor: Colors.white,
-                  currentIndex: currentindex,
-                  type: BottomNavigationBarType.fixed,
-                  showUnselectedLabels: false,
-                  showSelectedLabels: false,
+                child: CurvedNavigationBar(
+                  key: _bottomNavigationKey,
                   items: const [
-
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.queue_music_sharp),
-                      label: 'Music',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.play_circle_outline),
-                      label: 'Video',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.youtube_searched_for),
-                      label: 'Youtube',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(Icons.home),
-                      label: 'Home',
-                    ),
+                    Icon(Icons.queue_music_sharp, size: 25,color: Colors.grey,),
+                    Icon(Icons.play_circle_outline, size: 25,color: Colors.grey),
+                    Icon(Icons.youtube_searched_for, size: 25,color: Colors.grey),
+                    Icon(Icons.home, size: 25,color: Colors.grey),
                   ],
+                  color: Colors.grey.withOpacity(0.4),
+                  // color: Colors.black.withOpacity(0.3),
+                  // buttonBackgroundColor: Colors.blueAccent.withOpacity(0.1),
+                  // buttonBackgroundColor: Colors.black.withOpacity(0.3),
+                  buttonBackgroundColor: Colors.transparent,
+
+                  backgroundColor: Colors.transparent,
+                  animationCurve: Curves.easeInOut,
+                  animationDuration: Duration(milliseconds: 500),
                   onTap: (index) {
                     setState(() {
                       currentindex = index;

@@ -52,7 +52,7 @@ dependencies:
   material_design_icons_flutter: ^5.0.5955
   avatar_glow: ^2.0.1
   flutter_slidable: ^2.0.0
-
+  curved_navigation_bar: ^1.0.3
 
 dev_dependencies:
   flutter_test:
@@ -81,19 +81,25 @@ flutter:
     - assets/images/
     - assets/music/
     - assets/video/
+    - assets/font/
 
   fonts:
     - family: font1
       fonts:
         - asset: /Users/jins/Desktop/player/assets/font/IndieFlower-Regular.ttf
+          weight: 800
 
     - family: font2
       fonts:
         - asset: /Users/jins/Desktop/player/assets/font/PermanentMarker-Regular.ttf
+          weight: 800
+
 
     - family: font3
       fonts:
         - asset: /Users/jins/Desktop/player/assets/font/ShadowsIntoLight-Regular.ttf
+          weight: 800
+
 
 
 

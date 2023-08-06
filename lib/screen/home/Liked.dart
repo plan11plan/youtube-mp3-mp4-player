@@ -7,14 +7,14 @@ import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';
 import '../song_screen.dart';
 
-class Music extends StatefulWidget {
-  const Music({Key? key}) : super(key: key);
+class Liked extends StatefulWidget {
+  const Liked({Key? key}) : super(key: key);
 
   @override
-  _MusicState createState() => _MusicState();
+  _LikedState createState() => _LikedState();
 }
 
-class _MusicState extends State<Music> {
+class _LikedState extends State<Liked> {
   List<MediaFile> mediaFiles = [];
   List<MediaFile> filteredMediaFiles = [];
   TextEditingController _searchController = TextEditingController();
@@ -29,19 +29,12 @@ class _MusicState extends State<Music> {
   }
 
   Future openBox() async {
-    Box<MediaFile>? box;
-    if(Hive.isBoxOpen('mediaFiles')) {
-      box = Hive.box<MediaFile>('mediaFiles');
-    } else {
-      box = await Hive.openBox<MediaFile>('mediaFiles');
-    }
-    var files = box.values.where((mediaFile) => mediaFile.fileType == 'audio').toList();
+    var files = await MediaFile.loadAllLikedAudioFiles();
     setState(() {
       mediaFiles = files;
       filteredMediaFiles = mediaFiles;
     });
   }
-
 
   void _onSearchChanged() {
     var search = _searchController.text.toLowerCase();
@@ -66,7 +59,7 @@ class _MusicState extends State<Music> {
       box.deleteAt(hiveIndex);
     }
 
-    var updatedAudioFiles = await MediaFile.loadAllAudioFiles();
+    var updatedAudioFiles = await MediaFile.loadAllLikedAudioFiles();
     setState(() {
       mediaFiles = updatedAudioFiles;
       filteredMediaFiles = updatedAudioFiles;
@@ -164,25 +157,29 @@ class _MusicState extends State<Music> {
       },
     );
   }
-
-  void updateLikeStatus(int index) async {
+  Future<void> updateLikeStatus(int index) async {
     var box = Hive.box<MediaFile>('mediaFiles');
     var fileToUpdate = filteredMediaFiles[index];
 
     int hiveIndex = box.values.toList().indexOf(fileToUpdate);
     if (hiveIndex != -1) {
-      fileToUpdate.like = (fileToUpdate.like == "on") ? "off" : "on";
-      print('(mediaFile)Updated like status for file: ${mediaFiles[index].title} to ${mediaFiles[index].like}');
-      print('(fileToUpdate)Updated like status for file: ${fileToUpdate.title} to ${fileToUpdate.like}');
-      box.putAt(hiveIndex, fileToUpdate);
+      if(fileToUpdate.like =='on'){
+        fileToUpdate.like ='off';
+        box.putAt(hiveIndex, fileToUpdate);
+
+      }
+     else{
+        fileToUpdate.like ='on';
+        box.putAt(hiveIndex, fileToUpdate);      }
     }
 
-    var updatedAudioFiles = await MediaFile.loadAllAudioFiles();
-    setState(() {  // 이 부분을 추가합니다.
+    var updatedAudioFiles = await MediaFile.loadAllLikedAudioFiles();
+    setState(() {
       mediaFiles = updatedAudioFiles;
       filteredMediaFiles = updatedAudioFiles;
     });
   }
+
   void updateFileDetails(int index, String newTitle, String newDescription) async {
     var box = Hive.box<MediaFile>('mediaFiles');
     var fileToUpdate = filteredMediaFiles[index];
@@ -194,7 +191,7 @@ class _MusicState extends State<Music> {
       box.putAt(hiveIndex, fileToUpdate);
     }
 
-    var updatedAudioFiles = await MediaFile.loadAllAudioFiles();
+    var updatedAudioFiles = await MediaFile.loadAllLikedAudioFiles();
     setState(() {
       mediaFiles = updatedAudioFiles;
       filteredMediaFiles = updatedAudioFiles;
@@ -288,6 +285,23 @@ class _MusicState extends State<Music> {
                         motion: const ScrollMotion(),
                         children: [
                           SlidableAction(
+                            onPressed: (context) async {
+                              await updateLikeStatus(index);
+                              setState(() {}); // UI를 갱신합니다.
+                            },
+                            backgroundColor: filteredMediaFiles[index].like == "on"
+                                ? Colors.red.shade300
+                                : Colors.transparent, // 좋아요 상태에 따라 배경색을 변경
+                            foregroundColor: filteredMediaFiles[index].like == "on"
+                                ? Colors.white
+                                : Colors.grey, // 좋아요 상태에 따라 아이콘 색을 변경
+                            icon: Icons.favorite,
+                            label: 'like',
+                          ),
+
+
+
+                          SlidableAction(
                             onPressed: (context) => showEditDialog(context, index),
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.grey,
@@ -350,25 +364,13 @@ class _MusicState extends State<Music> {
                                   ),
                                 ],
                               ),
-                              Row(  // 이 Row 위젯을 추가합니다.ㅂ
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.favorite, color: Colors.white),  // 하트 아이콘을 추가합니다.
-                                    onPressed: () {
-                                      // 원하는 기능을 여기에 추가하세요.
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.chevron_left, color: Colors.white),
-                                    onPressed: () {},
-                                  ),
-                                ],
+                              IconButton(
+                                icon: Icon(Icons.chevron_left, color: Colors.white),
+                                onPressed: () {},
                               ),
                             ],
                           ),
                         ),
-
-
                       ),
                     );
                   },

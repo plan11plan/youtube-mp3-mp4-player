@@ -96,7 +96,7 @@ class _YoutubeState extends State<GoDownload> {
         var thumbnailPath = await _downloadThumbnail(videoId);
         print('이미지 저장 완료');
 
-        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title, false);
+        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title, 'off');
         Box<MediaFile>? box;
         if(Hive.isBoxOpen('mediaFiles')) {
           box = Hive.box('mediaFiles');
@@ -151,7 +151,7 @@ class _YoutubeState extends State<GoDownload> {
         _downloadThumbnail(videoId);
         var thumbnailPath = await _downloadThumbnail(videoId);
 
-        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title,false);
+        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title,'off');
         Box<MediaFile>? box;
         if(Hive.isBoxOpen('mediaFiles')) {
           box = Hive.box('mediaFiles');

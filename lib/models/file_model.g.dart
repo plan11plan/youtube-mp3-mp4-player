@@ -21,7 +21,7 @@ class MediaFileAdapter extends TypeAdapter<MediaFile> {
       fields[2] as String? ?? '',
       fields[3] as String? ?? '',
       fields[4] as String? ?? '',
-      fields[5] as bool? ?? false,  // If the value is Null, use false
+      fields[5] as String? ?? '',  // If the value is Null, use false
     );
   }
 
