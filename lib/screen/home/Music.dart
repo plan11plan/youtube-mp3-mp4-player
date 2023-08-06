@@ -106,13 +106,13 @@ class _MusicState extends State<Music> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 SizedBox(height: 20), // 여기서 공간을 추가합니다.
-                Text("Title : ", style: TextStyle(color: Colors.white, fontSize: 16)),
+                Text("Title : ", style: TextStyle(color: Colors.white, fontSize: 20)),
                 SizedBox(height: 10),
                 TextField(
                   controller: titleController,
                   decoration: InputDecoration(
                     hintText: 'Title',
-                    hintStyle: TextStyle(color: Colors.white),
+                    hintStyle: TextStyle(color: Colors.grey),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
                     ),
@@ -120,13 +120,13 @@ class _MusicState extends State<Music> {
                   style: TextStyle(color: Colors.white),
                 ),
                 SizedBox(height: 20), // 여기서 공간을 추가합니다.
-                Text("Artist : ", style: TextStyle(color: Colors.white, fontSize: 16)),
+                Text("Artist : ", style: TextStyle(color: Colors.white, fontSize: 20)),
                 SizedBox(height: 10),
                 TextField(
                   controller: descriptionController,
                   decoration: InputDecoration(
                     hintText: 'Artist',
-                    hintStyle: TextStyle(color: Colors.white),
+                    hintStyle: TextStyle(color: Colors.grey),
                     enabledBorder: UnderlineInputBorder(
                       borderSide: BorderSide(color: Colors.white),
                     ),
@@ -209,7 +209,7 @@ class _MusicState extends State<Music> {
                     Expanded(
                       flex: 2,
                       child: Container(
-                        margin: EdgeInsets.symmetric(horizontal: 15),
+                        margin: EdgeInsets.symmetric(horizontal: 19),
                         height: 45,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
@@ -228,7 +228,7 @@ class _MusicState extends State<Music> {
                             hintText: "Search the music",
                             hintStyle: TextStyle(
                               color: Colors.white.withOpacity(0.5),
-                              fontFamily: 'font2'
+                              fontFamily: 'font1',fontWeight: FontWeight.w800,fontSize: 17
                             ),
                             border: InputBorder.none,
                             prefixIcon: IconButton(
