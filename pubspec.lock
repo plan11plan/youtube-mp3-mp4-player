@@ -1141,14 +1141,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
-  youtube_downloader:
-    dependency: "direct main"
-    description:
-      name: youtube_downloader
-      sha256: c5dd2bcfe1c64a6f1e6f8dc548161546e84a90fa6a745b71c48d1eaeb16b76c0
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.6"
   youtube_explode_dart:
     dependency: "direct main"
     description:
