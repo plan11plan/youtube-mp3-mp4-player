@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive/hive.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
@@ -72,7 +73,7 @@ class _VideoState extends State<Video> {
     });
   }
 
-  Future<void> showDeleteConfirmationDialog(int index) async {
+  Future<void> showDeleteConfirmationDialog(BuildContext context, int index) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -160,9 +161,44 @@ class _VideoState extends State<Video> {
             Expanded(
               child: ListView.separated(
                 itemCount: filteredMediaFiles.length,
-                separatorBuilder: (context, index) => Divider(color: Colors.white54),
+                separatorBuilder: (context, index) =>
+                    Divider(color: Colors.white54),
                 itemBuilder: (context, index) {
-                  return InkWell(
+                  return Slidable(
+                      key: Key(filteredMediaFiles[index].title),
+                  startActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  children: const [
+                  // 왼쪽(또는 위쪽)에 표시할 액션을 여기에 추가합니다.
+                  ],
+                  ),
+                  endActionPane: ActionPane(
+                  motion: const ScrollMotion(),
+                  children: [
+                  SlidableAction(
+                  onPressed: (context) => showDeleteConfirmationDialog(context, index),
+                  backgroundColor: Colors.red.shade300,
+                  foregroundColor: Colors.white,
+                  icon: Icons.favorite,
+                  label: 'like',
+                  ),
+                  SlidableAction(
+                  onPressed: (context) => showDeleteConfirmationDialog(context, index),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  icon: Icons.settings,
+                  label: 'set',
+                  ),
+                  SlidableAction(
+                  onPressed: (context) => showDeleteConfirmationDialog(context, index),
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'delete',
+                  ),
+                  ],
+                  ),
+                  child: InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -216,6 +252,7 @@ class _VideoState extends State<Video> {
                         ],
                       ),
                     ),
+                  ),
                   );
                 },
               ),

@@ -51,6 +51,8 @@ dependencies:
   assets_audio_player: ^3.0.6
   material_design_icons_flutter: ^5.0.5955
   avatar_glow: ^2.0.1
+  flutter_slidable: ^2.0.0
+
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +81,20 @@ flutter:
     - assets/images/
     - assets/music/
     - assets/video/
+
+  fonts:
+    - family: font1
+      fonts:
+        - asset: /Users/jins/Desktop/player/assets/font/IndieFlower-Regular.ttf
+
+    - family: font2
+      fonts:
+        - asset: /Users/jins/Desktop/player/assets/font/PermanentMarker-Regular.ttf
+
+    - family: font3
+      fonts:
+        - asset: /Users/jins/Desktop/player/assets/font/ShadowsIntoLight-Regular.ttf
+
 
 
   # To add assets to your application, add an assets section, like this:

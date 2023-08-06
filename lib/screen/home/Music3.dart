@@ -87,110 +87,8 @@ class _MusicState extends State<Music> {
       },
     );
   }
-  Future<void> showEditDialog(BuildContext context, int index) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        var titleController = TextEditingController(text: filteredMediaFiles[index].title);
-        var descriptionController = TextEditingController(text: filteredMediaFiles[index].description);
-
-        return AlertDialog(
-          title: Text('Edit File',style: TextStyle(color: Colors.black, fontSize: 45,fontFamily:'font1'),),
-          contentPadding: EdgeInsets.all(15.0),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-          backgroundColor: Colors.grey[800],
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SizedBox(height: 20), // 여기서 공간을 추가합니다.
-                Text("Title : ", style: TextStyle(color: Colors.white, fontSize: 16)),
-                SizedBox(height: 10),
-                TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(
-                    hintText: 'Title',
-                    hintStyle: TextStyle(color: Colors.white),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                ),
-                SizedBox(height: 20), // 여기서 공간을 추가합니다.
-                Text("Artist : ", style: TextStyle(color: Colors.white, fontSize: 16)),
-                SizedBox(height: 10),
-                TextField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    hintText: 'Artist',
-                    hintStyle: TextStyle(color: Colors.white),
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
-                  style: TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Save', style: TextStyle(color: Colors.green)),
-              onPressed: () {
-                updateFileDetails(index, titleController.text, descriptionController.text);
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Cancel', style: TextStyle(color: Colors.white)),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
 
 
-
-      },
-    );
-  }
-  void updateLikeStatus(int index) async {
-    var box = Hive.box<MediaFile>('mediaFiles');
-    var fileToUpdate = filteredMediaFiles[index];
-
-    int hiveIndex = box.values.toList().indexOf(fileToUpdate);
-    if (hiveIndex != -1) {
-      fileToUpdate.like = !fileToUpdate.like;
-      box.putAt(hiveIndex, fileToUpdate);
-    }
-
-    var updatedAudioFiles = await MediaFile.loadAllAudioFiles();
-    setState(() {
-      mediaFiles = updatedAudioFiles;
-      filteredMediaFiles = updatedAudioFiles;
-    });
-  }
-  void updateFileDetails(int index, String newTitle, String newDescription) async {
-    var box = Hive.box<MediaFile>('mediaFiles');
-    var fileToUpdate = filteredMediaFiles[index];
-
-    int hiveIndex = box.values.toList().indexOf(fileToUpdate);
-    if (hiveIndex != -1) {
-      fileToUpdate.title = newTitle;
-      fileToUpdate.description = newDescription;
-      box.putAt(hiveIndex, fileToUpdate);
-    }
-
-    var updatedAudioFiles = await MediaFile.loadAllAudioFiles();
-    setState(() {
-      mediaFiles = updatedAudioFiles;
-      filteredMediaFiles = updatedAudioFiles;
-    });
-  }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -228,7 +126,6 @@ class _MusicState extends State<Music> {
                             hintText: "Search the music",
                             hintStyle: TextStyle(
                               color: Colors.white.withOpacity(0.5),
-                              fontFamily: 'font2'
                             ),
                             border: InputBorder.none,
                             prefixIcon: IconButton(
@@ -285,21 +182,63 @@ class _MusicState extends State<Music> {
                         children: [
                           SlidableAction(
                             onPressed: (context) {
-                              updateLikeStatus(index);
+                              setState(() {
+                                filteredMediaFiles[index].updateLikeStatus(!filteredMediaFiles[index].like);
+                              });
                             },
                             backgroundColor: filteredMediaFiles[index].like
                                 ? Colors.red.shade300
-                                : Colors.transparent,  // 색상은 좋아요 여부에 따라 변경
+                                : Colors.transparent,
                             foregroundColor: filteredMediaFiles[index].like
                                 ? Colors.white
-                                : Colors.grey,  // 색상은 좋아요 여부에 따라 변경
+                                : Colors.grey,
                             icon: Icons.favorite,
                             label: 'like',
-
                           ),
 
                           SlidableAction(
-                            onPressed: (context) => showEditDialog(context, index),
+                            onPressed: (context) {
+                              showDialog<void>(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  TextEditingController titleController = TextEditingController();
+                                  TextEditingController descriptionController = TextEditingController();
+                                  return AlertDialog(
+                                    title: Text('Update Title and Description'),
+                                    content: Column(
+                                      children: <Widget>[
+                                        TextField(
+                                          controller: titleController,
+                                          decoration: InputDecoration(hintText: "New Title"),
+                                        ),
+                                        TextField(
+                                          controller: descriptionController,
+                                          decoration: InputDecoration(hintText: "New Description"),
+                                        ),
+                                      ],
+                                    ),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: Text('Cancel'),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: Text('Update'),
+                                        onPressed: () {
+                                          setState(() {
+                                            filteredMediaFiles[index].updateTitleAndDescription(titleController.text, descriptionController.text);
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.grey,
                             icon: Icons.settings,
@@ -356,7 +295,7 @@ class _MusicState extends State<Music> {
                                       SizedBox(height: 10),
                                       Text(filteredMediaFiles[index].title, style: Theme.of(context).textTheme.headline6),
                                       SizedBox(height: 5),
-                                      Text(filteredMediaFiles[index].description, style: Theme.of(context).textTheme.subtitle1),
+                                      Text(filteredMediaFiles[index].fileType, style: Theme.of(context).textTheme.subtitle1),
                                     ],
                                   ),
                                 ],

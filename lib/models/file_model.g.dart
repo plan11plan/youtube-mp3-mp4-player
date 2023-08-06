@@ -5,7 +5,6 @@ part of 'file_model.dart';
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
-
 class MediaFileAdapter extends TypeAdapter<MediaFile> {
   @override
   final int typeId = 0;
@@ -22,13 +21,14 @@ class MediaFileAdapter extends TypeAdapter<MediaFile> {
       fields[2] as String? ?? '',
       fields[3] as String? ?? '',
       fields[4] as String? ?? '',
+      fields[5] as bool? ?? false,  // If the value is Null, use false
     );
   }
 
   @override
   void write(BinaryWriter writer, MediaFile obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)  // We are now writing 5 fields
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -36,7 +36,11 @@ class MediaFileAdapter extends TypeAdapter<MediaFile> {
       ..writeByte(2)
       ..write(obj.thumbnailPath)
       ..writeByte(3)
-      ..write(obj.fileType);
+      ..write(obj.fileType)
+      ..writeByte(4)
+      ..write(obj.description)
+      ..writeByte(5)
+      ..write(obj.like);  // Write the 'liked' field
   }
 
   @override
@@ -45,7 +49,7 @@ class MediaFileAdapter extends TypeAdapter<MediaFile> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MediaFileAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+          other is MediaFileAdapter &&
+              runtimeType == other.runtimeType &&
+              typeId == other.typeId;
 }

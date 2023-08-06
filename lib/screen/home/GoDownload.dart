@@ -16,7 +16,7 @@ class GoDownload extends StatefulWidget {
 }
 
 class _YoutubeState extends State<GoDownload> {
-  final int maxTextLength =15;
+  final int maxTextLength =12;
   final YoutubeExplode yt = YoutubeExplode();
   String videoUrl = 'https://m.youtube.com/';
   final TextEditingController _controller = TextEditingController();
@@ -96,7 +96,7 @@ class _YoutubeState extends State<GoDownload> {
         var thumbnailPath = await _downloadThumbnail(videoId);
         print('이미지 저장 완료');
 
-        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title);
+        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title, false);
         Box<MediaFile>? box;
         if(Hive.isBoxOpen('mediaFiles')) {
           box = Hive.box('mediaFiles');
@@ -151,7 +151,7 @@ class _YoutubeState extends State<GoDownload> {
         _downloadThumbnail(videoId);
         var thumbnailPath = await _downloadThumbnail(videoId);
 
-        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title);
+        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title,false);
         Box<MediaFile>? box;
         if(Hive.isBoxOpen('mediaFiles')) {
           box = Hive.box('mediaFiles');
