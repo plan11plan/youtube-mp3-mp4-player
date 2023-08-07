@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:avatar_glow/avatar_glow.dart';
@@ -76,22 +77,25 @@ class SkyColor {
     ),
   ];
 
-  static BoxDecoration get skyDecoration {
-    return BoxDecoration(
-      gradient: colors[colorIndex],
-    );
+  static ValueListenable<Box> getColorBoxListenable() {
+    return Hive.box('settings').listenable(keys: ['colorIndex']);
   }
+
   static Future<void> saveColorIndex() async {
     var box = await Hive.openBox('settings');
     await box.put('colorIndex', colorIndex);
   }
 
-  static Future<void> loadColorIndex() async {
-    var box = await Hive.openBox('settings');
-    colorIndex = box.get('colorIndex', defaultValue: 0);
+  static BoxDecoration get skyDecoration {
+    return BoxDecoration(gradient: colors[colorIndex]);
   }
 
+  ValueListenable<Box> get listenableSettingsBox {
+    return Hive.box('settings').listenable();
+  }
 }
+
+
 
 class MoonIconButton extends StatefulWidget {
   final Function callback;
@@ -99,10 +103,10 @@ class MoonIconButton extends StatefulWidget {
   MoonIconButton({required this.callback});
 
   @override
-  _MoonIconButtonState createState() => _MoonIconButtonState();
+  MoonIconButtonState createState() => MoonIconButtonState();
 }
 
-class _MoonIconButtonState extends State<MoonIconButton> {
+class MoonIconButtonState extends State<MoonIconButton> {
   final List<IconData> moonPhases = [
     MdiIcons.moonWaxingCrescent,
     MdiIcons.moonFirstQuarter,
@@ -112,23 +116,37 @@ class _MoonIconButtonState extends State<MoonIconButton> {
     MdiIcons.moonLastQuarter,
     MdiIcons.moonWaningCrescent,
   ];
-  int currentPhase = 0;
+  static int currentPhase = 0;
 
+  static Future<void> saveCurrentPhase() async {
+    var box = await Hive.openBox('settings');
+    await box.put('moonPhase', currentPhase);
+  }
+
+  static ValueListenable<Box> getMoonPhaseBoxListenable() {
+    return Hive.box('settings').listenable(keys: ['moonPhase']);
+  }
+
+  static Future<void> loadCurrentPhase() async {
+    var box = await Hive.openBox('settings');
+    currentPhase = box.get('moonPhase', defaultValue: 0);
+  }
   @override
   Widget build(BuildContext context) {
     return AvatarGlow(
-      endRadius: 20,
+      endRadius: 30,
       glowColor: Colors.blueGrey[300]!,
       child: AnimatedSwitcher(
-        duration: Duration(milliseconds: 500), // 여기서 애니메이션 지속시간을 조정할 수 있습니다.
+        duration: Duration(milliseconds: 500),
         child: IconButton(
-          key: ValueKey<int>(currentPhase), // 키를 사용하여 어떤 위젯이 애니메이션되어야 할지 결정합니다.
-          icon: Icon(moonPhases[currentPhase], color: Colors.yellow[100]),
+          key: ValueKey<int>(currentPhase),
+          icon: Icon(moonPhases[currentPhase], color: Colors.yellow[100], size: 30,),
           onPressed: () {
             setState(() {
               currentPhase = (currentPhase + 1) % moonPhases.length;
+              saveCurrentPhase();  // Save the current phase of the moon icon
               SkyColor.colorIndex = (SkyColor.colorIndex + 1) % SkyColor.colors.length;
-              SkyColor.saveColorIndex(); // Save color index whenever the icon is pressed
+              SkyColor.saveColorIndex();
               widget.callback();
             });
           },

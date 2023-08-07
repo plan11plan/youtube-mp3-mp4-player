@@ -45,33 +45,40 @@ class _SongScreenState extends State<SongScreen> {
   @override
   void initState() {
     super.initState();
-    openBox();
     assetsAudioPlayer = AssetsAudioPlayer();
 
-    currentMediaFileIndex = mediaFiles.indexOf(Get.arguments ?? widget.mediaFile ?? mediaFiles[0]);
-
-    assetsAudioPlayer.open(
-      Playlist(audios: mediaFiles.map((mediaFile) => Audio.network(
-        mediaFile.filePath,
-        metas: Metas(
-          id: mediaFile.title,
-          title: mediaFile.title,
-          album: mediaFile.description,
-          image: MetasImage.network(mediaFile.thumbnailPath),
-        ),
-      )).toList()),
-      autoStart: false,
-      respectSilentMode: true,
-    );
-
-    assetsAudioPlayer.playlistAudioFinished.listen((event) {
-      if (assetsAudioPlayer.currentPosition.value.compareTo(assetsAudioPlayer.current.value!.audio.duration) == 0) {
-        onNext();
+    openBox().then((_) {
+      if (mediaFiles.isNotEmpty) {
+        currentMediaFileIndex = mediaFiles.indexOf(Get.arguments ?? widget.mediaFile ?? mediaFiles[0]);
+        currentMediaFileIndex = currentMediaFileIndex != -1 ? currentMediaFileIndex : 0;
+      } else {
+        currentMediaFileIndex = 0;
       }
-    });
 
-    assetsAudioPlayer.playOrPause();
+      assetsAudioPlayer.open(
+        Playlist(audios: mediaFiles.map((mediaFile) => Audio.network(
+          mediaFile.filePath,
+          metas: Metas(
+            id: mediaFile.title,
+            title: mediaFile.title,
+            album: mediaFile.description,
+            image: MetasImage.network(mediaFile.thumbnailPath),
+          ),
+        )).toList()),
+        autoStart: false,
+        respectSilentMode: true,
+      );
+
+      assetsAudioPlayer.playlistAudioFinished.listen((event) {
+        if (assetsAudioPlayer.currentPosition.value.compareTo(assetsAudioPlayer.current.value!.audio.duration) == 0) {
+          onNext();
+        }
+      });
+
+      assetsAudioPlayer.playOrPause();
+    });
   }
+
 
   Future openBox() async {
     var box = await Hive.openBox<MediaFile>('mediaFiles');
@@ -79,6 +86,7 @@ class _SongScreenState extends State<SongScreen> {
       mediaFiles = box.values.where((mediaFile) => mediaFile.fileType == 'audio').toList();
     });
   }
+
 
   void onPrevious() {
     if (currentMediaFileIndex > 0) {
@@ -140,7 +148,7 @@ class _SongScreenState extends State<SongScreen> {
               constraints: BoxConstraints.expand(),
               decoration: BoxDecoration(
                 image: DecorationImage(
-                    image: NetworkImage(mediaFiles[currentMediaFileIndex].thumbnailPath),
+                    image: NetworkImage(mediaFiles[currentMediaFileIndex].thumbnailPath), // 오류가 발생하는 위치
                     fit: BoxFit.cover
                 ),
               ),

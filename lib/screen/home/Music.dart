@@ -24,7 +24,7 @@ class _MusicState extends State<Music> {
   void initState() {
     super.initState();
     _openHiveBox();
-    SkyColor.loadColorIndex();
+    // _MoonIconButtonState.loadCurrentPhase();  // Load the current phase of the moon icon
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -57,7 +57,7 @@ class _MusicState extends State<Music> {
     var box = Hive.box<MediaFile>('mediaFiles');
     _filteredMediaFiles = box.values
         .where((file) =>
-        file.title.toLowerCase().contains(searchText.toLowerCase()))
+            file.title.toLowerCase().contains(searchText.toLowerCase()))
         .toList();
   }
 
@@ -85,7 +85,7 @@ class _MusicState extends State<Music> {
     var currentFile = box.getAt(index);
     var titleController = TextEditingController(text: currentFile?.title ?? "");
     var descriptionController =
-    TextEditingController(text: currentFile?.description ?? "");
+        TextEditingController(text: currentFile?.description ?? "");
 
     return showDialog<void>(
       context: context,
@@ -99,7 +99,7 @@ class _MusicState extends State<Music> {
           ),
           contentPadding: EdgeInsets.all(15.0),
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
           backgroundColor: Colors.grey[800],
           content: SingleChildScrollView(
             child: Column(
@@ -187,11 +187,15 @@ class _MusicState extends State<Music> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
-        builder: (context, Box<MediaFile> box, _) {
-          var mediaFiles =
-          _isSearching ? _filteredMediaFiles : box.values.toList();
-          return GestureDetector(
+      valueListenable: SkyColor.getColorBoxListenable(),
+      builder: (context, Box colorBox, _) {
+        SkyColor.colorIndex = colorBox.get('colorIndex', defaultValue: 0);
+        return ValueListenableBuilder(
+          valueListenable: MoonIconButtonState.getMoonPhaseBoxListenable(),
+          builder: (context, Box moonBox, _) {
+            MoonIconButtonState.currentPhase =
+                moonBox.get('moonPhase', defaultValue: 0);
+            return GestureDetector(
               onTap: () {
                 FocusScope.of(context).unfocus();
               },
@@ -238,12 +242,12 @@ class _MusicState extends State<Music> {
                                     ),
                                     suffixIcon: _isSearching
                                         ? IconButton(
-                                      icon: Icon(Icons.close,
-                                          size: 23,
-                                          color: Colors.white
-                                              .withOpacity(0.5)),
-                                      onPressed: _cancelSearch,
-                                    )
+                                            icon: Icon(Icons.close,
+                                                size: 23,
+                                                color: Colors.white
+                                                    .withOpacity(0.5)),
+                                            onPressed: _cancelSearch,
+                                          )
                                         : null,
                                   ),
                                   onChanged: (value) {
@@ -257,7 +261,7 @@ class _MusicState extends State<Music> {
                             Expanded(
                               flex: 1,
                               child: Padding(
-                                padding: EdgeInsets.only(right: 10),
+                                padding: EdgeInsets.only(right: 20),
                                 child: MoonIconButton(
                                   callback: () {
                                     setState(() {});
@@ -269,172 +273,165 @@ class _MusicState extends State<Music> {
                         ),
                       ),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: mediaFiles.length,
-                          itemBuilder: (context, index) {
-                            ////////////////////////////////////////
-                            return Container(
-                              width: MediaQuery.of(context).size.width * 1.0,  // Adjust this value to control the width
-                              // Adjust this value to control the width
-                              margin: EdgeInsets.symmetric(
-                                  vertical: 9.0, horizontal:20.0),
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(15.0),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.3),
-                                    spreadRadius: 0.2,
-                                    blurRadius: 4,
-                                    offset: Offset(1, 3),
-                                  ),
-                                ],
-                              ),
-                     ///////////////////////////////////////////////////         /////////////////
-                              child: Slidable(
-                                key: Key(mediaFiles[index].title),
-                                endActionPane: ActionPane(
-                                  motion: const ScrollMotion(),
-                                  children: [
-                                    SlidableAction(
-                                      onPressed: (context) {
-                                        updateLikeStatus(index);
-                                      },
-                                      backgroundColor: mediaFiles[index].like ==
-                                          'on'
-                                          ? Colors.red.shade300
-                                          : Colors
-                                          .transparent, // 색상은 좋아요 여부에 따라 변경
-                                      foregroundColor: mediaFiles[index].like ==
-                                          'on'
-                                          ? Colors.white
-                                          : Colors.grey, // 색상은 좋아요 여부에 따라 변경
-                                      icon: Icons.favorite,
-                                      label: 'like',
-                                    ),
-                                    SlidableAction(
-                                      onPressed: (context) =>
-                                          showEditDialog(context, index),
-                                      backgroundColor: Colors.transparent,
-                                      foregroundColor: Colors.white,
-                                      icon: Icons.settings,
-                                      label: 'set',
-                                    ),
-                                    SlidableAction(
-                                      onPressed: (context) =>
-                                          showDeleteConfirmationDialog(
-                                              context, index),
-                                      backgroundColor: Colors.transparent,
-                                      foregroundColor: Colors.white,
-                                      icon: Icons.delete,
-                                      label: 'delete',
-                                    ),
-                                  ],
-                                ),
-                                /////
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => SongScreen(
-                                            mediaFile: mediaFiles[index],
-                                            index: index),
+                        child: ValueListenableBuilder(
+                          valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
+                          builder: (context, Box<MediaFile> box, _) {
+                            var mediaFiles = _isSearching
+                                ? _filteredMediaFiles
+                                : box.values.toList();
+
+                            return ListView.builder(
+                              itemCount: mediaFiles.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  width: MediaQuery.of(context).size.width * 1.0,
+                                  margin: EdgeInsets.symmetric(vertical: 9.0, horizontal: 35.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(15.0),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.grey.withOpacity(0.4),
+                                        spreadRadius: 0.2,
+                                        blurRadius: 3,
+                                        offset: Offset(5, 3),
                                       ),
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.all(5.0),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                    ],
+                                  ),
+                                  child: Slidable(
+                                    key: Key(mediaFiles[index].title),
+                                    endActionPane: ActionPane(
+                                      motion: const ScrollMotion(),
                                       children: [
-                                        Row(
+                                        SlidableAction(
+                                          onPressed: (context) {
+                                            updateLikeStatus(index);
+                                          },
+                                          backgroundColor:
+                                          mediaFiles[index].like == 'on'
+                                              ? Colors.red.shade300
+                                              : Colors.transparent,
+                                          foregroundColor:
+                                          mediaFiles[index].like == 'on'
+                                              ? Colors.white
+                                              : Colors.grey,
+                                          icon: Icons.favorite,
+                                        ),
+                                        SlidableAction(
+                                          onPressed: (context) =>
+                                              showEditDialog(context, index),
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          icon: Icons.settings,
+                                        ),
+                                        SlidableAction(
+                                          onPressed: (context) =>
+                                              showDeleteConfirmationDialog(context, index),
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: Colors.white,
+                                          icon: Icons.delete,
+                                        ),
+                                      ],
+                                    ),
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => SongScreen(
+                                                mediaFile: mediaFiles[index],
+                                                index: index),
+                                          ),
+                                        );
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.all(5.0),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            // SizedBox(width: 35),
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.grey[300],
-                                                borderRadius:
-                                                BorderRadius.circular(5.0),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black54
-                                                        .withOpacity(0.4),
-                                                    spreadRadius: 4,
-                                                    blurRadius: 8,
-                                                    offset: Offset(0, 5),
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey[300],
+                                                    borderRadius: BorderRadius.circular(5.0),
+                                                    boxShadow: [
+                                                      BoxShadow(
+                                                        color: Colors.black54.withOpacity(0.4),
+                                                        spreadRadius: 4,
+                                                        blurRadius: 8,
+                                                        offset: Offset(0, 5),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ),
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                BorderRadius.circular(5.0),
-                                                child: Image.file(
-                                                    File(mediaFiles[index]
-                                                        .thumbnailPath),
-                                                    height: 60,
-                                                    width: 60,
-                                                    fit: BoxFit.cover),
+                                                  child: ClipRRect(
+                                                    borderRadius: BorderRadius.circular(5.0),
+                                                    child: Image.file(
+                                                        File(mediaFiles[index].thumbnailPath),
+                                                        height: 60,
+                                                        width: 60,
+                                                        fit: BoxFit.cover),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 13),
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(height: 2),
+                                                    Text(mediaFiles[index].title,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .headline6
+                                                            ?.copyWith(fontSize: 15.0)),
+                                                    SizedBox(height: 10),
+                                                    Text(
+                                                        mediaFiles[index].description,
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .subtitle1
+                                                            ?.copyWith(fontSize: 10.0)),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            Spacer(),
+                                            Padding(
+                                              padding: EdgeInsets.only(top: 12.0, right: 0),
+                                              child: Text(
+                                                mediaFiles[index].duration,
+                                                style: TextStyle(
+                                                    fontSize: 14.0, color: Colors.white),
                                               ),
                                             ),
-                                            SizedBox(width: 13),
-                                            Column(
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(height: 14),
-                                                Text(mediaFiles[index].title,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .headline6
-                                                        ?.copyWith(
-                                                        fontSize: 15.0)),
-                                                SizedBox(height: 10),
-                                                Text(
-                                                    mediaFiles[index]
-                                                        .description,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .subtitle1
-                                                        ?.copyWith(
-                                                        fontSize: 10.0)),
-                                              ],
+                                            Padding(
+                                              padding: EdgeInsets.only(top: 5.0, right: 0),
+                                              child: IconButton(
+                                                icon: Icon(Icons.chevron_left, color: Colors.white),
+                                                onPressed: null,
+                                              ),
                                             ),
                                           ],
                                         ),
-                                        Spacer(),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                              top: 15.0, right: 5),
-                                          child: Text(
-                                            mediaFiles[index].duration,
-                                            style: TextStyle(
-                                                fontSize: 14.0,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.chevron_left,
-                                              color: Colors.white),
-                                          onPressed: () {},
-                                        ),
-                                        // SizedBox(width: 20),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
+                                );
+                              },
                             );
                           },
                         ),
                       ),
-
-                      SizedBox(height: 180,)
+                      SizedBox(
+                        height: 180,
+                      )
                     ],
                   ),
                 ),
-              ));
-        });
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

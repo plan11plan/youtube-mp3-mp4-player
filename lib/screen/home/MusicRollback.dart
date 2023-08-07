@@ -257,7 +257,7 @@
 //                             Expanded(
 //                               flex: 1,
 //                               child: Padding(
-//                                 padding: EdgeInsets.only(right: 10),
+//                                 padding: EdgeInsets.only(right: 20),
 //                                 child: MoonIconButton(
 //                                   callback: () {
 //                                     setState(() {});
@@ -277,16 +277,16 @@
 //                               width: MediaQuery.of(context).size.width * 1.0,  // Adjust this value to control the width
 //                               // Adjust this value to control the width
 //                               margin: EdgeInsets.symmetric(
-//                                   vertical: 9.0, horizontal:20.0),
+//                                   vertical: 9.0, horizontal:35.0),
 //                               decoration: BoxDecoration(
 //                                 color: Colors.transparent,
 //                                 borderRadius: BorderRadius.circular(15.0),
 //                                 boxShadow: [
 //                                   BoxShadow(
-//                                     color: Colors.grey.withOpacity(0.3),
+//                                     color: Colors.grey.withOpacity(0.4),
 //                                     spreadRadius: 0.2,
-//                                     blurRadius: 4,
-//                                     offset: Offset(1, 3),
+//                                     blurRadius: 3,
+//                                     offset: Offset(5, 3),
 //                                   ),
 //                                 ],
 //                               ),
@@ -310,7 +310,6 @@
 //                                           ? Colors.white
 //                                           : Colors.grey, // 색상은 좋아요 여부에 따라 변경
 //                                       icon: Icons.favorite,
-//                                       label: 'like',
 //                                     ),
 //                                     SlidableAction(
 //                                       onPressed: (context) =>
@@ -318,7 +317,6 @@
 //                                       backgroundColor: Colors.transparent,
 //                                       foregroundColor: Colors.white,
 //                                       icon: Icons.settings,
-//                                       label: 'set',
 //                                     ),
 //                                     SlidableAction(
 //                                       onPressed: (context) =>
@@ -327,7 +325,6 @@
 //                                       backgroundColor: Colors.transparent,
 //                                       foregroundColor: Colors.white,
 //                                       icon: Icons.delete,
-//                                       label: 'delete',
 //                                     ),
 //                                   ],
 //                                 ),
@@ -383,7 +380,7 @@
 //                                               crossAxisAlignment:
 //                                               CrossAxisAlignment.start,
 //                                               children: [
-//                                                 SizedBox(height: 14),
+//                                                 SizedBox(height: 2),
 //                                                 Text(mediaFiles[index].title,
 //                                                     style: Theme.of(context)
 //                                                         .textTheme
@@ -406,7 +403,7 @@
 //                                         Spacer(),
 //                                         Padding(
 //                                           padding: EdgeInsets.only(
-//                                               top: 15.0, right: 5),
+//                                               top: 12.0, right: 0),
 //                                           child: Text(
 //                                             mediaFiles[index].duration,
 //                                             style: TextStyle(
@@ -414,10 +411,14 @@
 //                                                 color: Colors.white),
 //                                           ),
 //                                         ),
-//                                         IconButton(
-//                                           icon: Icon(Icons.chevron_left,
-//                                               color: Colors.white),
-//                                           onPressed: () {},
+//                                         Padding(
+//                                           padding: EdgeInsets.only(
+//                                               top: 5.0, right: 0),
+//                                           child: IconButton(
+//                                             icon: Icon(Icons.chevron_left,
+//                                                 color: Colors.white),
+//                                             onPressed: null,
+//                                           ),
 //                                         ),
 //                                         // SizedBox(width: 20),
 //                                       ],

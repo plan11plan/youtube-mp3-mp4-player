@@ -26,7 +26,7 @@ Future<void> main() async {
   //박스 열기
   await Hive.openBox<MediaFile>('mediaFiles');
   await Hive.openBox<int>('skyColorBox');
-
+  await Hive.openBox('settings');  // 여기서 settings box를 열어줍니다.
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
@@ -48,7 +48,7 @@ class _MyAppState extends State<MyApp> {
 
   List tabs = [
     Music(),
-    Video(),
+    // Video(),
     GoDownload(),
     // Liked()
     // HomeScreen(),
@@ -104,7 +104,7 @@ class _MyAppState extends State<MyApp> {
       ),
       getPages: [
         // GetPage(name: '/', page: () => const HomeScreen()),
-        // GetPage(name: '/song', page: () => SongScreen()),
+        GetPage(name: '/song', page: () => SongScreen()),
         // GetPage(name: '/playlist', page: () => const PlaylistScreen()),
       ],
     );
