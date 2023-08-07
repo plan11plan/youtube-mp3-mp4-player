@@ -18,6 +18,7 @@ class Music extends StatefulWidget {
 class _MusicState extends State<Music> {
   TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
+  List<MediaFile> _filteredMediaFiles = [];
 
   @override
   void initState() {
@@ -36,6 +37,8 @@ class _MusicState extends State<Music> {
   void _onSearchChanged() {
     setState(() {
       _isSearching = _searchController.text.isNotEmpty;
+      _filterMediaFiles(_searchController.text);
+
     });
   }
 
@@ -49,6 +52,12 @@ class _MusicState extends State<Music> {
       }
       box.deleteAt(index);
     }
+  }
+  void _filterMediaFiles(String searchText) {
+    var box = Hive.box<MediaFile>('mediaFiles');
+    _filteredMediaFiles = box.values
+        .where((file) => file.title.toLowerCase().contains(searchText.toLowerCase()))
+        .toList();
   }
 
   void _cancelSearch() {
@@ -176,7 +185,7 @@ class _MusicState extends State<Music> {
     return ValueListenableBuilder(
       valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
       builder: (context, Box<MediaFile> box, _) {
-        var mediaFiles = box.values.toList();
+        var mediaFiles = _isSearching ? _filteredMediaFiles : box.values.toList();
         return GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
