@@ -38,7 +38,6 @@ class _MusicState extends State<Music> {
     setState(() {
       _isSearching = _searchController.text.isNotEmpty;
       _filterMediaFiles(_searchController.text);
-
     });
   }
 
@@ -53,10 +52,12 @@ class _MusicState extends State<Music> {
       box.deleteAt(index);
     }
   }
+
   void _filterMediaFiles(String searchText) {
     var box = Hive.box<MediaFile>('mediaFiles');
     _filteredMediaFiles = box.values
-        .where((file) => file.title.toLowerCase().contains(searchText.toLowerCase()))
+        .where((file) =>
+        file.title.toLowerCase().contains(searchText.toLowerCase()))
         .toList();
   }
 
@@ -79,6 +80,7 @@ class _MusicState extends State<Music> {
   }
 
   Future<void> showEditDialog(BuildContext context, int index) async {
+    final int maxTextLength = 12;
     var box = Hive.box<MediaFile>('mediaFiles');
     var currentFile = box.getAt(index);
     var titleController = TextEditingController(text: currentFile?.title ?? "");
@@ -110,6 +112,7 @@ class _MusicState extends State<Music> {
                 SizedBox(height: 10),
                 TextField(
                   controller: titleController,
+                  maxLength: maxTextLength,
                   decoration: InputDecoration(
                     hintText: 'Title',
                     hintStyle: TextStyle(color: Colors.grey),
@@ -125,6 +128,7 @@ class _MusicState extends State<Music> {
                 SizedBox(height: 10),
                 TextField(
                   controller: descriptionController,
+                  maxLength: maxTextLength,
                   decoration: InputDecoration(
                     hintText: 'Artist',
                     hintStyle: TextStyle(color: Colors.grey),
@@ -170,7 +174,6 @@ class _MusicState extends State<Music> {
     }
   }
 
-
   void updateFileDetails(int index, String newTitle, String newDescription) {
     var box = Hive.box<MediaFile>('mediaFiles');
     var fileToUpdate = box.getAt(index);
@@ -180,231 +183,258 @@ class _MusicState extends State<Music> {
       box.putAt(index, fileToUpdate);
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
-      builder: (context, Box<MediaFile> box, _) {
-        var mediaFiles = _isSearching ? _filteredMediaFiles : box.values.toList();
-        return GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: Container(
-            decoration: SkyColor.skyDecoration,
-            child: Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Column(
-                children: [
-                  SafeArea(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 19),
-                            height: 45,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.blueGrey.withOpacity(0.2),
-                                  spreadRadius: 4,
-                                  blurRadius: 14,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
-                            ),
-                            child: TextFormField(
-                              controller: _searchController,
-                              decoration: InputDecoration(
-                                hintText: "Search the music",
-                                hintStyle: TextStyle(
-                                    color: Colors.white.withOpacity(0.5),
-                                    fontFamily: 'font1',
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 17),
-                                border: InputBorder.none,
-                                prefixIcon: IconButton(
-                                  icon: Icon(Icons.search,
-                                      size: 23,
-                                      color: Colors.white.withOpacity(0.5)),
-                                  onPressed: () {},
-                                ),
-                                suffixIcon: _isSearching
-                                    ? IconButton(
-                                  icon: Icon(Icons.close,
-                                      size: 23,
-                                      color: Colors.white.withOpacity(0.5)),
-                                  onPressed: _cancelSearch,
-                                )
-                                    : null,
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _isSearching = value.isNotEmpty;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: MoonIconButton(
-                              callback: () {
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: ListView.separated(
-                      itemCount: mediaFiles.length,
-                      separatorBuilder: (context, index) =>
-                          Divider(color: Colors.white54),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          height: 70.0,  // Adjust this value to control the height
-                          child: Slidable(
-                            key: Key(mediaFiles[index].title),
-
-                            endActionPane:ActionPane(
-                              motion: const ScrollMotion(),
-                              children: [
-                                SlidableAction(
-                                  onPressed: (context) {
-                                    updateLikeStatus(index);
-                                  },
-                                  backgroundColor: mediaFiles[index].like == 'on'
-                                      ? Colors.red.shade300
-                                      : Colors.transparent,  // 색상은 좋아요 여부에 따라 변경
-                                  foregroundColor: mediaFiles[index].like == 'on'
-                                      ? Colors.white
-                                      : Colors.grey,  // 색상은 좋아요 여부에 따라 변경
-                                  icon: Icons.favorite,
-                                  label: 'like',
-                                ),
-
-
-                                SlidableAction(
-                                  onPressed: (context) => showEditDialog(context, index),
-                                  backgroundColor: Colors.transparent,
-                                  foregroundColor: Colors.grey,
-                                  icon: Icons.settings,
-                                  label: 'set',
-                                ),
-                                SlidableAction(
-                                  onPressed: (context) => showDeleteConfirmationDialog(context, index),
-                                  backgroundColor: Colors.transparent,
-                                  foregroundColor: Colors.grey,
-                                  icon: Icons.delete,
-                                  label: 'delete',
-                                ),
-                              ],
-                            ),
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => SongScreen(
-                                        mediaFile: mediaFiles[index], index: index),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.all(5.0),  // Reduce padding here
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        SizedBox(width:35),
-
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey[300],
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color:
-                                                Colors.black54.withOpacity(0.4),
-                                                spreadRadius: 4,
-                                                blurRadius: 8,
-                                                offset: Offset(0, 5),
-                                              ),
-                                            ],
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(5.0),
-                                            child: Image.file(
-                                                File(mediaFiles[index].thumbnailPath),
-                                                height: 60,  // Reduce height here
-                                                width: 60,  // Reduce width here
-                                                fit: BoxFit.cover),
-                                          ),
-                                        ),
-                                        SizedBox(width: 13),
-                                        Column(
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(height: 14),  // Reduce height here
-                                            Text(mediaFiles[index].title,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .headline6?.copyWith(fontSize: 15.0)),  // Adjust fontSize here
-                                            SizedBox(height:10 ),  // Reduce height here
-                                            Text(mediaFiles[index].description,
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .subtitle1?.copyWith(fontSize: 10.0)),  // Adjust fontSize here
-                                          ],
-                                        ),
-                                      ],
+        valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
+        builder: (context, Box<MediaFile> box, _) {
+          var mediaFiles =
+          _isSearching ? _filteredMediaFiles : box.values.toList();
+          return GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+              },
+              child: Container(
+                decoration: SkyColor.skyDecoration,
+                child: Scaffold(
+                  backgroundColor: Colors.transparent,
+                  body: Column(
+                    children: [
+                      SafeArea(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 19),
+                                height: 45,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.blueGrey.withOpacity(0.2),
+                                      spreadRadius: 5,
+                                      blurRadius: 14,
+                                      offset: Offset(0, 1),
                                     ),
-                                    Spacer(),  // This will take up all available space
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 15.0,right: 5),  // Reduce padding here
-                                      child: Text(
-                                        mediaFiles[index].duration,
-                                        style: TextStyle(fontSize: 14.0, color: Colors.white),  // Adjust fontSize here
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.chevron_left,
-                                          color: Colors.white),
+                                  ],
+                                ),
+                                child: TextFormField(
+                                  controller: _searchController,
+                                  decoration: InputDecoration(
+                                    hintText: "Search the music",
+                                    hintStyle: TextStyle(
+                                        color: Colors.white.withOpacity(0.5),
+                                        fontFamily: 'font1',
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 17),
+                                    border: InputBorder.none,
+                                    prefixIcon: IconButton(
+                                      icon: Icon(Icons.search,
+                                          size: 23,
+                                          color: Colors.white.withOpacity(0.5)),
                                       onPressed: () {},
                                     ),
-                                    SizedBox(width: 20),
-                                  ],
-
+                                    suffixIcon: _isSearching
+                                        ? IconButton(
+                                      icon: Icon(Icons.close,
+                                          size: 23,
+                                          color: Colors.white
+                                              .withOpacity(0.5)),
+                                      onPressed: _cancelSearch,
+                                    )
+                                        : null,
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isSearching = value.isNotEmpty;
+                                    });
+                                  },
                                 ),
-
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                            Expanded(
+                              flex: 1,
+                              child: Padding(
+                                padding: EdgeInsets.only(right: 10),
+                                child: MoonIconButton(
+                                  callback: () {
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: mediaFiles.length,
+                          itemBuilder: (context, index) {
+                            ////////////////////////////////////////
+                            return Container(
+                              width: MediaQuery.of(context).size.width * 1.0,  // Adjust this value to control the width
+                              // Adjust this value to control the width
+                              margin: EdgeInsets.symmetric(
+                                  vertical: 9.0, horizontal:20.0),
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(15.0),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 0.2,
+                                    blurRadius: 4,
+                                    offset: Offset(1, 3),
+                                  ),
+                                ],
+                              ),
+                     ///////////////////////////////////////////////////         /////////////////
+                              child: Slidable(
+                                key: Key(mediaFiles[index].title),
+                                endActionPane: ActionPane(
+                                  motion: const ScrollMotion(),
+                                  children: [
+                                    SlidableAction(
+                                      onPressed: (context) {
+                                        updateLikeStatus(index);
+                                      },
+                                      backgroundColor: mediaFiles[index].like ==
+                                          'on'
+                                          ? Colors.red.shade300
+                                          : Colors
+                                          .transparent, // 색상은 좋아요 여부에 따라 변경
+                                      foregroundColor: mediaFiles[index].like ==
+                                          'on'
+                                          ? Colors.white
+                                          : Colors.grey, // 색상은 좋아요 여부에 따라 변경
+                                      icon: Icons.favorite,
+                                      label: 'like',
+                                    ),
+                                    SlidableAction(
+                                      onPressed: (context) =>
+                                          showEditDialog(context, index),
+                                      backgroundColor: Colors.transparent,
+                                      foregroundColor: Colors.white,
+                                      icon: Icons.settings,
+                                      label: 'set',
+                                    ),
+                                    SlidableAction(
+                                      onPressed: (context) =>
+                                          showDeleteConfirmationDialog(
+                                              context, index),
+                                      backgroundColor: Colors.transparent,
+                                      foregroundColor: Colors.white,
+                                      icon: Icons.delete,
+                                      label: 'delete',
+                                    ),
+                                  ],
+                                ),
+                                /////
+                                child: InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => SongScreen(
+                                            mediaFile: mediaFiles[index],
+                                            index: index),
+                                      ),
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.all(5.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            // SizedBox(width: 35),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.grey[300],
+                                                borderRadius:
+                                                BorderRadius.circular(5.0),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black54
+                                                        .withOpacity(0.4),
+                                                    spreadRadius: 4,
+                                                    blurRadius: 8,
+                                                    offset: Offset(0, 5),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: ClipRRect(
+                                                borderRadius:
+                                                BorderRadius.circular(5.0),
+                                                child: Image.file(
+                                                    File(mediaFiles[index]
+                                                        .thumbnailPath),
+                                                    height: 60,
+                                                    width: 60,
+                                                    fit: BoxFit.cover),
+                                              ),
+                                            ),
+                                            SizedBox(width: 13),
+                                            Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(height: 14),
+                                                Text(mediaFiles[index].title,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .headline6
+                                                        ?.copyWith(
+                                                        fontSize: 15.0)),
+                                                SizedBox(height: 10),
+                                                Text(
+                                                    mediaFiles[index]
+                                                        .description,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .subtitle1
+                                                        ?.copyWith(
+                                                        fontSize: 10.0)),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        Spacer(),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              top: 15.0, right: 5),
+                                          child: Text(
+                                            mediaFiles[index].duration,
+                                            style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: Colors.white),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.chevron_left,
+                                              color: Colors.white),
+                                          onPressed: () {},
+                                        ),
+                                        // SizedBox(width: 20),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      SizedBox(height: 180,)
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
+                ),
+              ));
+        });
   }
-
-
-
-
-
 }
