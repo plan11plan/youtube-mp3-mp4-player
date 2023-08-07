@@ -81,6 +81,8 @@ class _YoutubeState extends State<GoDownload> {
           title = title.substring(0, maxTextLength ) + '...';
         }
         var file = File('${directory.path}/$title.mp4');
+        var duration = video.duration;
+
 
         var fileStream = file.openWrite();
 
@@ -97,7 +99,7 @@ class _YoutubeState extends State<GoDownload> {
         print('이미지 저장 완료');
 
         // 변수 선언
-        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title, 'off');
+        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title, 'off',_formatDuration(duration!));
         Box<MediaFile>? box;
 
         //박스 열기
@@ -140,6 +142,7 @@ class _YoutubeState extends State<GoDownload> {
           title = title.substring(0, maxTextLength ) + '...';
         }
         var audioFile = File('${directory.path}/$title.mp3');
+        var duration = video.duration;
 
         var audioFileStream = audioFile.openWrite();
 
@@ -156,7 +159,7 @@ class _YoutubeState extends State<GoDownload> {
         var thumbnailPath = await _downloadThumbnail(videoId);
 
         //변수 선언
-        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title,'off');
+        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title,'off',_formatDuration(duration!));
         Box<MediaFile>? box;
 
         //박스 열기
@@ -286,6 +289,13 @@ class _YoutubeState extends State<GoDownload> {
         ),
       ),
     );
+  }
+  String _formatDuration(Duration duration) {
+    if (duration.inHours > 0) {
+      return '${duration.inHours}:${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}';
+    } else {
+      return '${duration.inMinutes}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
+    }
   }
 
   @override

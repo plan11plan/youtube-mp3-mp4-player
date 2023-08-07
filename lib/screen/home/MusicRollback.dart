@@ -268,109 +268,125 @@
 //                       separatorBuilder: (context, index) =>
 //                           Divider(color: Colors.white54),
 //                       itemBuilder: (context, index) {
-//                         return Slidable(
-//                           key: Key(mediaFiles[index].title),
+//                         return Container(
+//                           height: 70.0,  // Adjust this value to control the height
+//                           child: Slidable(
+//                             key: Key(mediaFiles[index].title),
 //
-//                           endActionPane:ActionPane(
-//                             motion: const ScrollMotion(),
-//                             children: [
-//                               SlidableAction(
-//                                 onPressed: (context) {
-//                                   updateLikeStatus(index);
-//                                 },
-//                                 backgroundColor: mediaFiles[index].like == 'on'
-//                                     ? Colors.red.shade300
-//                                     : Colors.transparent,  // 색상은 좋아요 여부에 따라 변경
-//                                 foregroundColor: mediaFiles[index].like == 'on'
-//                                     ? Colors.white
-//                                     : Colors.grey,  // 색상은 좋아요 여부에 따라 변경
-//                                 icon: Icons.favorite,
-//                                 label: 'like',
-//                               ),
-//
-//
-//                               SlidableAction(
-//                                 onPressed: (context) => showEditDialog(context, index),
-//                                 backgroundColor: Colors.transparent,
-//                                 foregroundColor: Colors.grey,
-//                                 icon: Icons.settings,
-//                                 label: 'set',
-//                               ),
-//                               SlidableAction(
-//                                 onPressed: (context) => showDeleteConfirmationDialog(context, index),
-//                                 backgroundColor: Colors.transparent,
-//                                 foregroundColor: Colors.grey,
-//                                 icon: Icons.delete,
-//                                 label: 'delete',
-//                               ),
-//                             ],
-//                           ),
-//                           child: InkWell(
-//                             onTap: () {
-//                               Navigator.push(
-//                                 context,
-//                                 MaterialPageRoute(
-//                                   builder: (context) => SongScreen(
-//                                       mediaFile: mediaFiles[index], index: index),
+//                             endActionPane:ActionPane(
+//                               motion: const ScrollMotion(),
+//                               children: [
+//                                 SlidableAction(
+//                                   onPressed: (context) {
+//                                     updateLikeStatus(index);
+//                                   },
+//                                   backgroundColor: mediaFiles[index].like == 'on'
+//                                       ? Colors.red.shade300
+//                                       : Colors.transparent,  // 색상은 좋아요 여부에 따라 변경
+//                                   foregroundColor: mediaFiles[index].like == 'on'
+//                                       ? Colors.white
+//                                       : Colors.grey,  // 색상은 좋아요 여부에 따라 변경
+//                                   icon: Icons.favorite,
+//                                   label: 'like',
 //                                 ),
-//                               );
-//                             },
-//                             child: Padding(
-//                               padding: EdgeInsets.all(12.0),
-//                               child: Row(
-//                                 crossAxisAlignment: CrossAxisAlignment.start,
-//                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                                 children: [
-//                                   Row(
-//                                     children: [
-//                                       Container(
-//                                         decoration: BoxDecoration(
-//                                           color: Colors.grey[300],
-//                                           borderRadius: BorderRadius.circular(5.0),
-//                                           boxShadow: [
-//                                             BoxShadow(
-//                                               color:
-//                                               Colors.black54.withOpacity(0.5),
-//                                               spreadRadius: 3,
-//                                               blurRadius: 7,
-//                                               offset: Offset(0, 3),
-//                                             ),
+//
+//
+//                                 SlidableAction(
+//                                   onPressed: (context) => showEditDialog(context, index),
+//                                   backgroundColor: Colors.transparent,
+//                                   foregroundColor: Colors.grey,
+//                                   icon: Icons.settings,
+//                                   label: 'set',
+//                                 ),
+//                                 SlidableAction(
+//                                   onPressed: (context) => showDeleteConfirmationDialog(context, index),
+//                                   backgroundColor: Colors.transparent,
+//                                   foregroundColor: Colors.grey,
+//                                   icon: Icons.delete,
+//                                   label: 'delete',
+//                                 ),
+//                               ],
+//                             ),
+//                             child: InkWell(
+//                               onTap: () {
+//                                 Navigator.push(
+//                                   context,
+//                                   MaterialPageRoute(
+//                                     builder: (context) => SongScreen(
+//                                         mediaFile: mediaFiles[index], index: index),
+//                                   ),
+//                                 );
+//                               },
+//                               child: Padding(
+//                                 padding: EdgeInsets.all(5.0),  // Reduce padding here
+//                                 child: Row(
+//                                   crossAxisAlignment: CrossAxisAlignment.start,
+//                                   // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                                   children: [
+//                                     Row(
+//                                       children: [
+//                                         SizedBox(width:35),
+//
+//                                         Container(
+//                                           decoration: BoxDecoration(
+//                                             color: Colors.grey[300],
+//                                             borderRadius: BorderRadius.circular(5.0),
+//                                             boxShadow: [
+//                                               BoxShadow(
+//                                                 color:
+//                                                 Colors.black54.withOpacity(0.4),
+//                                                 spreadRadius: 4,
+//                                                 blurRadius: 8,
+//                                                 offset: Offset(0, 5),
+//                                               ),
+//                                             ],
+//                                           ),
+//                                           child: ClipRRect(
+//                                             borderRadius: BorderRadius.circular(5.0),
+//                                             child: Image.file(
+//                                                 File(mediaFiles[index].thumbnailPath),
+//                                                 height: 60,  // Reduce height here
+//                                                 width: 60,  // Reduce width here
+//                                                 fit: BoxFit.cover),
+//                                           ),
+//                                         ),
+//                                         SizedBox(width: 13),
+//                                         Column(
+//                                           crossAxisAlignment:
+//                                           CrossAxisAlignment.start,
+//                                           children: [
+//                                             SizedBox(height: 14),  // Reduce height here
+//                                             Text(mediaFiles[index].title,
+//                                                 style: Theme.of(context)
+//                                                     .textTheme
+//                                                     .headline6?.copyWith(fontSize: 15.0)),  // Adjust fontSize here
+//                                             SizedBox(height:10 ),  // Reduce height here
+//                                             Text(mediaFiles[index].description,
+//                                                 style: Theme.of(context)
+//                                                     .textTheme
+//                                                     .subtitle1?.copyWith(fontSize: 10.0)),  // Adjust fontSize here
 //                                           ],
 //                                         ),
-//                                         child: ClipRRect(
-//                                           borderRadius: BorderRadius.circular(5.0),
-//                                           child: Image.file(
-//                                               File(mediaFiles[index].thumbnailPath),
-//                                               height: 50,
-//                                               width: 50,
-//                                               fit: BoxFit.cover),
-//                                         ),
+//                                       ],
+//                                     ),
+//                                     Spacer(),  // This will take up all available space
+//                                     Padding(
+//                                       padding: EdgeInsets.only(top: 15.0,right: 5),  // Reduce padding here
+//                                       child: Text(
+//                                         mediaFiles[index].duration,
+//                                         style: TextStyle(fontSize: 14.0, color: Colors.white),  // Adjust fontSize here
 //                                       ),
-//                                       SizedBox(width: 10),
-//                                       Column(
-//                                         crossAxisAlignment:
-//                                         CrossAxisAlignment.start,
-//                                         children: [
-//                                           SizedBox(height: 10),
-//                                           Text(mediaFiles[index].title,
-//                                               style: Theme.of(context)
-//                                                   .textTheme
-//                                                   .headline6),
-//                                           SizedBox(height: 5),
-//                                           Text(mediaFiles[index].description,
-//                                               style: Theme.of(context)
-//                                                   .textTheme
-//                                                   .subtitle1),
-//                                         ],
-//                                       ),
-//                                     ],
-//                                   ),
-//                                   IconButton(
-//                                     icon: Icon(Icons.chevron_left,
-//                                         color: Colors.white),
-//                                     onPressed: () {},
-//                                   ),
-//                                 ],
+//                                     ),
+//                                     IconButton(
+//                                       icon: Icon(Icons.chevron_left,
+//                                           color: Colors.white),
+//                                       onPressed: () {},
+//                                     ),
+//                                     SizedBox(width: 20),
+//                                   ],
+//
+//                                 ),
+//
 //                               ),
 //                             ),
 //                           ),
@@ -386,6 +402,7 @@
 //       },
 //     );
 //   }
+//
 //
 //
 //

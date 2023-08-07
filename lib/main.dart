@@ -18,16 +18,15 @@ import 'models/file_model.dart';
 Future<void> main() async {
   await Hive.initFlutter();
   WidgetsFlutterBinding.ensureInitialized();
-  final appDocumentDir = await getApplicationDocumentsDirectory();
-  Hive.init(appDocumentDir.path);
 
 
   //어답터 등록하기
   Hive.registerAdapter<MediaFile>(MediaFileAdapter());
 
   //박스 열기
-  await Hive.openBox<int>('skyColorBox');
   await Hive.openBox<MediaFile>('mediaFiles');
+  await Hive.openBox<int>('skyColorBox');
+
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {

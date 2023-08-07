@@ -22,14 +22,16 @@ class MediaFileAdapter extends TypeAdapter<MediaFile> {
         fields[2] as String? ?? "",
         fields[3] as String? ?? "",
         fields[4] as String? ?? "",
-        fields[5] as String? ?? ""
+        fields[5] as String? ?? "",
+        fields[6] as String? ?? ""
+
     );
   }
 
   @override
   void write(BinaryWriter writer, MediaFile obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -41,7 +43,9 @@ class MediaFileAdapter extends TypeAdapter<MediaFile> {
       ..writeByte(4)
       ..write(obj.description)
       ..writeByte(5)
-      ..write(obj.like);
+      ..write(obj.like)
+      ..writeByte(6)
+      ..write(obj.duration);
   }
 
   @override

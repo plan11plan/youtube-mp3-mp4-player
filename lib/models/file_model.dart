@@ -23,8 +23,12 @@ class MediaFile {
   @HiveField(5)
   String like;
 
+  @HiveField(5)
+  String duration;
 
-  MediaFile(this.title, this.filePath, this.thumbnailPath, this.fileType, this.description, this.like);
+
+
+  MediaFile(this.title, this.filePath, this.thumbnailPath, this.fileType, this.description, this.like, this.duration);
 
   void updateTitleAndDescription(String newTitle, String newDescription) {
     this.title = newTitle;
