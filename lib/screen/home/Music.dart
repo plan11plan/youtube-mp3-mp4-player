@@ -381,17 +381,21 @@ class _MusicState extends State<Music> {
                                                       children: [
                                                         SizedBox(height: 2),
                                                         Text(mediaFiles[index].title,
-                                                            style: Theme.of(context)
-                                                                .textTheme
-                                                                .headline6
-                                                                ?.copyWith(fontSize: 15.0)),
+                                                            style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 15,
+                                                              fontFamily: 'font1',
+                                                              fontWeight: FontWeight.w700
+                                                            )),
                                                         SizedBox(height: 10),
                                                         Text(
                                                             mediaFiles[index].description,
-                                                            style: Theme.of(context)
-                                                                .textTheme
-                                                                .subtitle1
-                                                                ?.copyWith(fontSize: 10.0)),
+                                                            style:  TextStyle(
+                                                                color: Colors.white,
+                                                                fontSize: 12,
+                                                                fontFamily: 'font5',
+                                                                fontWeight: FontWeight.w700
+                                                            )),
                                                       ],
                                                     ),
                                                   ],

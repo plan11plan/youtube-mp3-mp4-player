@@ -80,24 +80,34 @@ flutter:
     - assets/images/
     - assets/music/
     - assets/video/
-    - assets/font/
 
   fonts:
     - family: font1
       fonts:
-        - asset: /Users/jins/Desktop/player/assets/font/IndieFlower-Regular.ttf
+        - asset: assets/font/IndieFlower-Regular.ttf
           weight: 800
 
     - family: font2
       fonts:
-        - asset: /Users/jins/Desktop/player/assets/font/PermanentMarker-Regular.ttf
+        - asset: assets/font/PermanentMarker-Regular.ttf
           weight: 800
 
 
     - family: font3
       fonts:
-        - asset: /Users/jins/Desktop/player/assets/font/ShadowsIntoLight-Regular.ttf
+        - asset: assets/font/ShadowsIntoLight-Regular.ttf
           weight: 800
+
+    - family: font4
+      fonts:
+        - asset: assets/font/YsabeauOffice-Light.ttf
+          weight: 800
+
+    - family: font5
+      fonts:
+        - asset: assets/font/YsabeauOffice-SemiBold.ttf
+          weight: 800
+
 
 
 
