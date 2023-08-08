@@ -1,15 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:player/screen/audio/audio_player_screen.dart';
 import '../../models/file_model.dart';
-import '../audio/audio_player_screen.dart';
 import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';
-import '../song_screen.dart';
 
-class Music extends StatefulWidget {
+class  Music extends StatefulWidget {
   const Music({Key? key}) : super(key: key);
 
   @override
@@ -22,12 +20,10 @@ class _MusicState extends State<Music> {
   List<MediaFile> _filteredMediaFiles = [];
   bool _isLiked = false;  // 좋아요 버튼의 상태를 관리합니다.
 
-
   @override
   void initState() {
     super.initState();
     _openHiveBox();
-    // _MoonIconButtonState.loadCurrentPhase();  // Load the current phase of the moon icon
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -49,17 +45,7 @@ class _MusicState extends State<Music> {
     });
   }
 
-  void removeAudioFile(int index) {
-    var box = Hive.box<MediaFile>('mediaFiles');
-    var fileToDelete = box.getAt(index);
-    if (fileToDelete != null) {
-      var file = File(fileToDelete.filePath);
-      if (file.existsSync()) {
-        file.deleteSync();
-      }
-      box.deleteAt(index);
-    }
-  }
+
 
   void _filterMediaFiles(String searchText) {
     var box = Hive.box<MediaFile>('mediaFiles');
@@ -76,23 +62,36 @@ class _MusicState extends State<Music> {
   }
 
   Future<void> showDeleteConfirmationDialog(
-      BuildContext context, int index) async {
+      BuildContext context, String title, String fileType) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return OneDeleteDialog(
-          onDelete: removeAudioFile,
-          index: index,
+          onDelete: (t, f) => removeAudioFile(t, f), // 수정된 부분
+          title: title,
+          fileType: fileType,
         );
       },
     );
   }
 
-  Future<void> showEditDialog(BuildContext context, int index) async {
+  void updateFileDetails(String title, String fileType, String newTitle, String newDescription) {
+    var box = Hive.box<MediaFile>('mediaFiles');
+    var fileToUpdate = box.values.firstWhere((file) => file.title == title && file.fileType == fileType);
+    if (fileToUpdate != null) {
+      fileToUpdate.title = newTitle;
+      fileToUpdate.description = newDescription;
+      var key = box.keyAt(box.values.toList().indexOf(fileToUpdate));
+      box.put(key, fileToUpdate);
+    }
+  }
+
+
+  Future<void> showEditDialog(BuildContext context, String title, String fileType) async {
     final int maxTextLength = 12;
     var box = Hive.box<MediaFile>('mediaFiles');
-    var currentFile = box.getAt(index);
+    var currentFile = box.values.firstWhere((file) => file.title == title && file.fileType == fileType);
     var titleController = TextEditingController(text: currentFile?.title ?? "");
     var descriptionController =
     TextEditingController(text: currentFile?.description ?? "");
@@ -155,8 +154,7 @@ class _MusicState extends State<Music> {
             TextButton(
               child: Text('Save', style: TextStyle(color: Colors.green)),
               onPressed: () {
-                updateFileDetails(
-                    index, titleController.text, descriptionController.text);
+                updateFileDetails(currentFile.title, currentFile.fileType, titleController.text, descriptionController.text);
                 Navigator.of(context).pop();
               },
             ),
@@ -171,28 +169,28 @@ class _MusicState extends State<Music> {
       },
     );
   }
-
-  //updateLikeStatus() 메서드 변경: ValueListenableBuilder를 사용하여
-  // Hive.box가 업데이트될 때마다 위젯이 다시 빌드되므로, 상태 업데이트가 필요 없어졌습니다.
-  void updateLikeStatus(int index) {
+  void removeAudioFile(String title, String fileType) {
     var box = Hive.box<MediaFile>('mediaFiles');
-    var fileToUpdate = box.getAt(index);
+    var fileToDelete = box.values.firstWhere((file) => file.title == title && file.fileType == fileType);
+    if (fileToDelete != null) {
+      var file = File(fileToDelete.filePath);
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+      var key = box.keyAt(box.values.toList().indexOf(fileToDelete));
+      box.delete(key);
+    }
+  }
+  void updateLikeStatus(String title, String fileType) {
+    var box = Hive.box<MediaFile>('mediaFiles');
+    var fileToUpdate = box.values.firstWhere((file) => file.title == title && file.fileType == fileType);
     if (fileToUpdate != null) {
-      // Toggle the like value
       fileToUpdate.like = fileToUpdate.like == 'off' ? 'on' : 'off';
-      box.putAt(index, fileToUpdate);
+      var key = box.keyAt(box.values.toList().indexOf(fileToUpdate));
+      box.put(key, fileToUpdate);
     }
   }
 
-  void updateFileDetails(int index, String newTitle, String newDescription) {
-    var box = Hive.box<MediaFile>('mediaFiles');
-    var fileToUpdate = box.getAt(index);
-    if (fileToUpdate != null) {
-      fileToUpdate.title = newTitle;
-      fileToUpdate.description = newDescription;
-      box.putAt(index, fileToUpdate);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -302,9 +300,8 @@ class _MusicState extends State<Music> {
                                     motion: const ScrollMotion(),
                                     children: [
                                       SlidableAction(
-                                        onPressed: (context) {
-                                          updateLikeStatus(index);
-                                        },
+                                        onPressed: (context) =>
+                                            updateLikeStatus(mediaFiles[index].title, mediaFiles[index].fileType),
                                         backgroundColor:
                                         mediaFiles[index].like == 'on'
                                             ? Colors.red.shade300
@@ -317,18 +314,19 @@ class _MusicState extends State<Music> {
                                       ),
                                       SlidableAction(
                                         onPressed: (context) =>
-                                            showEditDialog(context, index),
+                                            showEditDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: Colors.white,
                                         icon: Icons.settings,
                                       ),
                                       SlidableAction(
                                         onPressed: (context) =>
-                                            showDeleteConfirmationDialog(context, index),
+                                            showDeleteConfirmationDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: Colors.white,
                                         icon: Icons.delete,
                                       ),
+
                                     ],
                                   ),
                                   child: Column(
@@ -416,13 +414,13 @@ class _MusicState extends State<Music> {
                                                 Padding(
                                                   padding: EdgeInsets.only(top: 18.0, right: 0),
                                                   child: Text(
-                                                    mediaFiles[index].duration,
-                                                    style:TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 15,
-                                                        fontFamily: 'font5',
-                                                        fontWeight: FontWeight.w700
-                                                    )),
+                                                      mediaFiles[index].duration,
+                                                      style:TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15,
+                                                          fontFamily: 'font5',
+                                                          fontWeight: FontWeight.w700
+                                                      )),
                                                 ),
                                                 Padding(
                                                   padding: EdgeInsets.only(top: 5.0, right: 0),

@@ -7,11 +7,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:player/screen/home/GoDownload.dart';
 import 'package:player/screen/home/Home_screen.dart';
-import 'package:player/screen/home/Liked.dart';
 import 'package:player/screen/home/Music.dart';
 import 'package:player/screen/home/Video.dart';
 import 'package:player/screen/playlist_screen.dart';
-import 'package:player/screen/song_screen.dart';
 
 import 'models/file_model.dart';
 
@@ -50,7 +48,6 @@ class _MyAppState extends State<MyApp> {
     Music(),
     Video(),
     GoDownload(),
-    // Liked()
     // HomeScreen(),
   ];
 
@@ -104,7 +101,7 @@ class _MyAppState extends State<MyApp> {
       ),
       getPages: [
         // GetPage(name: '/', page: () => const HomeScreen()),
-        GetPage(name: '/song', page: () => SongScreen()),
+        // GetPage(name: '/song', page: () => SongScreen()),
         // GetPage(name: '/playlist', page: () => const PlaylistScreen()),
       ],
     );
