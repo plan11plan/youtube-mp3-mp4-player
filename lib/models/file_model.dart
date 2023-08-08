@@ -50,10 +50,13 @@ class MediaFile {
     var box = await Hive.openBox<MediaFile>('mediaFiles');
     return box.values.where((mediaFile) => mediaFile.fileType == 'video').toList();
   }
-  // static Future<List<MediaFile>> loadAllLikedAudioFiles() async {
-  //   var box = await Hive.openBox<MediaFile>('mediaFiles');
-  //   return box.values.where((mediaFile) => (mediaFile.fileType == 'audio' && mediaFile.like == 'on')).toList();
-  // }
+  static Future<List<String>> loadAllAudioFileTitles() async {
+    var box = await Hive.openBox<MediaFile>('mediaFiles');
+    var audioFiles = box.values.where((mediaFile) => mediaFile.fileType == 'audio').toList();
+
+    return audioFiles.map((mediaFile) => mediaFile.title).toList();
+  }
+
 
 
 }

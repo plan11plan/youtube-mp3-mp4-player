@@ -45,14 +45,13 @@ dependencies:
   http: ^0.13.3
   hive: ^2.0.6
   hive_flutter: ^1.1.0
-  just_audio: any
+  just_audio: ^0.9.30
   just_audio_background: ^0.0.1-beta.7
-  assets_audio_player: ^3.0.6
   material_design_icons_flutter: ^5.0.5955
   avatar_glow: ^2.0.1
   flutter_slidable: ^2.0.0
   curved_navigation_bar: ^1.0.3
-  audioplayers: ^5.0.0
+  ffmpeg_kit_flutter: ^5.1.0
 
 dev_dependencies:
   flutter_test:

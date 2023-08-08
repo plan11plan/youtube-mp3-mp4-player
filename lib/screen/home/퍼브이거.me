@@ -140,7 +140,7 @@ class _YoutubeState extends State<GoDownload> {
 
   Future<void> _downloadAudio({int retryCount = 0}) async {
     try {
-      var videoId = videoUrl.split('v=')[1].split('&')[0];
+      var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
       var manifest = await yt.videos.streamsClient.getManifest(videoId);
       var audioInfo = manifest.audioOnly.withHighestBitrate();
 
@@ -150,10 +150,11 @@ class _YoutubeState extends State<GoDownload> {
         var directory = await getApplicationDocumentsDirectory();
 
         var video = await yt.videos.get(videoId);
+
         var title = video.title;
-        title = title.replaceAll(RegExp(r'[\/:*?"<>|\-]'), '_');
-        if (title.length > maxTextLength) {
-          title = title.substring(0, maxTextLength) + '...';
+        title = title.replaceAll(RegExp(r'[\/:*?"<>|\-]'), '_'); // Replace invalid characters
+        if (title.length > maxTextLength ) {
+          title = title.substring(0, maxTextLength ) + '...';
         }
         var audioFile = File('${directory.path}/$title.mp3');
         var duration = video.duration;
@@ -168,35 +169,28 @@ class _YoutubeState extends State<GoDownload> {
         print('Download complete');
         print('Audio file saved at: ${audioFile.path}');
 
-        // Reduce Audio Quality using FFmpeg
-        var compressedAudioFile = File('${directory.path}/$title.mp3');
-        await FFmpegKit.execute('-i ${audioFile.path} -b:a 64k ${compressedAudioFile.path}').then((session) async {
-          final returnCode = await session.getReturnCode();
-
-          if (ReturnCode.isSuccess(returnCode)) {
-            print("Audio compression successful using FFmpeg");
-          } else {
-            print("Audio compression error using FFmpeg");
-          }
-        });
-
         // Download thumbnail
+        _downloadThumbnail(videoId);
         var thumbnailPath = await _downloadThumbnail(videoId);
 
-        // Save to Hive
-        var mediaFile = MediaFile(title, compressedAudioFile.path, thumbnailPath, 'audio', title, 'off', _formatDuration(duration!));
+        //변수 선언
+        var mediaFile = MediaFile(title, audioFile.path, thumbnailPath, 'audio',title,'off',_formatDuration(duration!));
         Box<MediaFile>? box;
-        if (Hive.isBoxOpen('mediaFiles')) {
+
+        //박스 열기
+        if(Hive.isBoxOpen('mediaFiles')) {
           box = Hive.box('mediaFiles');
         } else {
           box = await Hive.openBox('mediaFiles');
         }
+        //박스 넣기
         box.add(mediaFile);
         print('Audio metadata saved to Hive');
+
       }
     } catch (e) {
       print('An error occurred: $e');
-      if (retryCount < 2) {
+      if (retryCount < 2) { // retry only if retry count is less than 3
         Future.delayed(Duration(seconds: 1), () {
           _downloadAudio(retryCount: retryCount + 1);
         });

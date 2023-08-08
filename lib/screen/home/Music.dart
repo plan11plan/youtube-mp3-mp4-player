@@ -351,7 +351,7 @@ class _MusicState extends State<Music> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => AudioPlayerScreen(mediaFile: mediaFiles[index]),
+                                                builder: (context) => AudioPlayerScreen(mediaFiles: mediaFiles, currentIndex: index),
                                               ),
                                             );
 
