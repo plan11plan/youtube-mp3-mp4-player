@@ -48,7 +48,7 @@ class _MyAppState extends State<MyApp> {
 
   List tabs = [
     Music(),
-    // Video(),
+    Video(),
     GoDownload(),
     // Liked()
     // HomeScreen(),

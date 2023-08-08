@@ -64,9 +64,11 @@ class _MusicState extends State<Music> {
     var box = Hive.box<MediaFile>('mediaFiles');
     _filteredMediaFiles = box.values
         .where((file) =>
+    file.fileType == 'audio' &&
         file.title.toLowerCase().contains(searchText.toLowerCase()))
         .toList();
   }
+
 
   void _cancelSearch() {
     _searchController.clear();
@@ -283,11 +285,12 @@ class _MusicState extends State<Music> {
                         child: ValueListenableBuilder(
                           valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
                           builder: (context, Box<MediaFile> box, _) {
+                            // 기존에는 _isSearching 조건으로만 필터링하였지만, _isLiked 상태에 따라 좋아요가 눌린 항목만 가져오도록 수정하였습니다.
                             var mediaFiles = _isSearching
                                 ? _filteredMediaFiles
                                 : (_isLiked
-                                ? box.values.where((file) => file.like == 'on').toList()
-                                : box.values.toList());
+                                ? box.values.where((file) => file.fileType == 'audio' && file.like == 'on').toList()
+                                : box.values.where((file) => file.fileType == 'audio').toList());
 
 
                             return ListView.builder(
