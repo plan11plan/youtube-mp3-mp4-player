@@ -7,6 +7,7 @@ import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';
 import '../song_screen.dart';
+import '../video/video_player_screen.dart';
 
 class Video extends StatefulWidget {
   const Video({Key? key}) : super(key: key);
@@ -292,59 +293,58 @@ class _VideoState extends State<Video> {
                                 ? box.values.where((file) => file.fileType == 'video' && file.like == 'on').toList()
                                 : box.values.where((file) => file.fileType == 'video').toList());
 
-
                             return ListView.builder(
                               itemCount: mediaFiles.length,
                               itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    Container(
-                                      width: MediaQuery.of(context).size.width * 1.0,
-                                      margin: EdgeInsets.symmetric(vertical: 9.0, horizontal: 35.0),
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        borderRadius: BorderRadius.circular(15.0),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.4),
-                                            spreadRadius: 0.2,
-                                            blurRadius: 3,
-                                            offset: Offset(5, 3),
-                                          ),
-                                        ],
+                                return Slidable(
+                                  key: Key(mediaFiles[index].title),
+                                  endActionPane: ActionPane(
+                                    motion: const ScrollMotion(),
+                                    children: [
+                                      SlidableAction(
+                                        onPressed: (context) {
+                                          updateLikeStatus(index);
+                                        },
+                                        backgroundColor:
+                                        mediaFiles[index].like == 'on'
+                                            ? Colors.red.shade300
+                                            : Colors.transparent,
+                                        foregroundColor:
+                                        mediaFiles[index].like == 'on'
+                                            ? Colors.white
+                                            : Colors.grey,
+                                        icon: Icons.favorite,
                                       ),
-                                      child: Slidable(
-                                        key: Key(mediaFiles[index].title),
-                                        endActionPane: ActionPane(
-                                          motion: const ScrollMotion(),
-                                          children: [
-                                            SlidableAction(
-                                              onPressed: (context) {
-                                                updateLikeStatus(index);
-                                              },
-                                              backgroundColor:
-                                              mediaFiles[index].like == 'on'
-                                                  ? Colors.red.shade300
-                                                  : Colors.transparent,
-                                              foregroundColor:
-                                              mediaFiles[index].like == 'on'
-                                                  ? Colors.white
-                                                  : Colors.grey,
-                                              icon: Icons.favorite,
-                                            ),
-                                            SlidableAction(
-                                              onPressed: (context) =>
-                                                  showEditDialog(context, index),
-                                              backgroundColor: Colors.transparent,
-                                              foregroundColor: Colors.white,
-                                              icon: Icons.settings,
-                                            ),
-                                            SlidableAction(
-                                              onPressed: (context) =>
-                                                  showDeleteConfirmationDialog(context, index),
-                                              backgroundColor: Colors.transparent,
-                                              foregroundColor: Colors.white,
-                                              icon: Icons.delete,
+                                      SlidableAction(
+                                        onPressed: (context) =>
+                                            showEditDialog(context, index),
+                                        backgroundColor: Colors.transparent,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.settings,
+                                      ),
+                                      SlidableAction(
+                                        onPressed: (context) =>
+                                            showDeleteConfirmationDialog(context, index),
+                                        backgroundColor: Colors.transparent,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.delete,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: MediaQuery.of(context).size.width * 1.0,
+                                        margin: EdgeInsets.symmetric(vertical: 9.0, horizontal: 35.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          borderRadius: BorderRadius.circular(15.0),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.4),
+                                              spreadRadius: 0.2,
+                                              blurRadius: 3,
+                                              offset: Offset(5, 3),
                                             ),
                                           ],
                                         ),
@@ -353,11 +353,10 @@ class _VideoState extends State<Video> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => SongScreen(
-                                                    mediaFile: mediaFiles[index],
-                                                    index: index),
+                                                builder: (context) => VideoPlayerScreen(mediaFile: mediaFiles[index]),
                                               ),
                                             );
+
                                           },
                                           child: Padding(
                                             padding: EdgeInsets.all(5.0),
@@ -394,29 +393,36 @@ class _VideoState extends State<Video> {
                                                       children: [
                                                         SizedBox(height: 2),
                                                         Text(mediaFiles[index].title,
-                                                            style: Theme.of(context)
-                                                                .textTheme
-                                                                .headline6
-                                                                ?.copyWith(fontSize: 15.0)),
+                                                            style:  TextStyle(
+                                                                color: Colors.white,
+                                                                fontSize: 15,
+                                                                fontFamily: 'font4',
+                                                                fontWeight: FontWeight.w700
+                                                            )),
                                                         SizedBox(height: 10),
                                                         Text(
                                                             mediaFiles[index].description,
-                                                            style: Theme.of(context)
-                                                                .textTheme
-                                                                .subtitle1
-                                                                ?.copyWith(fontSize: 10.0)),
+                                                            style: TextStyle(
+                                                                color: Colors.white,
+                                                                fontSize: 12,
+                                                                fontFamily: 'font5',
+                                                                fontWeight: FontWeight.w700
+                                                            )),
                                                       ],
                                                     ),
                                                   ],
                                                 ),
                                                 Spacer(),
                                                 Padding(
-                                                  padding: EdgeInsets.only(top: 12.0, right: 0),
+                                                  padding: EdgeInsets.only(top: 18.0, right: 0),
                                                   child: Text(
-                                                    mediaFiles[index].duration,
-                                                    style: TextStyle(
-                                                        fontSize: 14.0, color: Colors.white),
-                                                  ),
+                                                      mediaFiles[index].duration,
+                                                      style:TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 15,
+                                                          fontFamily: 'font5',
+                                                          fontWeight: FontWeight.w700
+                                                      )),
                                                 ),
                                                 Padding(
                                                   padding: EdgeInsets.only(top: 5.0, right: 0),
@@ -430,32 +436,33 @@ class _VideoState extends State<Video> {
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    // if (index != mediaFiles.length - 1)  // 마지막 항목이 아닌 경우에만 SizedBox 추가
-                                    Transform.translate(
-                                      offset: Offset(0, -5),  // 여기에서 y 값을 조절하여 위로 또는 아래로 이동시킬 수 있습니다.
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.width * 0.7,
-                                        margin: EdgeInsets.symmetric(horizontal: 35.0),
-                                        height: 5,  // 원하는 높이를 설정합니다.
-                                        decoration: BoxDecoration(
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.3), // 검정색 그림자의 투명도 설정
-                                              spreadRadius: 1.2,  // 그림자의 확산 범위 설정
-                                              blurRadius: 8,      // 그림자의 흐림 정도 설정
-                                              offset: Offset(10,2),    // 그림자의 위치 오프셋 설정
-                                            ),
-                                          ],
+                                      Transform.translate(
+                                        offset: Offset(0, -5),
+                                        child: Container(
+                                          width: MediaQuery.of(context).size.width * 0.7,
+                                          margin: EdgeInsets.symmetric(horizontal: 35.0),
+                                          height: 5,
+                                          decoration: BoxDecoration(
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.3),
+                                                spreadRadius: 1.2,
+                                                blurRadius: 8,
+                                                offset: Offset(10,2),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),                                ],
+                                    ],
+                                  ),
                                 );
                               },
                             );
                           },
                         ),
                       ),
+
                       SizedBox(
                         height: 180,
                         child: Align(

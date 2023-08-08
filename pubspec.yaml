@@ -52,6 +52,7 @@ dependencies:
   avatar_glow: ^2.0.1
   flutter_slidable: ^2.0.0
   curved_navigation_bar: ^1.0.3
+  audioplayers: ^5.0.0
 
 dev_dependencies:
   flutter_test:
