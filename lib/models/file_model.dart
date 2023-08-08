@@ -50,4 +50,9 @@ class MediaFile {
     var box = await Hive.openBox<MediaFile>('mediaFiles');
     return box.values.where((mediaFile) => mediaFile.fileType == 'video').toList();
   }
+  static Future<List<MediaFile>> loadAllLikedAuioFiles() async {
+    var box = await Hive.openBox<MediaFile>('mediaFiles');
+    return box.values.where((mediaFile) => (mediaFile.fileType == 'audio' && mediaFile.like == 'on')).toList();
+  }
+
 }

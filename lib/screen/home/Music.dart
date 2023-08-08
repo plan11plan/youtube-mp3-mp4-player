@@ -19,6 +19,8 @@ class _MusicState extends State<Music> {
   TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   List<MediaFile> _filteredMediaFiles = [];
+  bool _isLiked = false;  // 좋아요 버튼의 상태를 관리합니다.
+
 
   @override
   void initState() {
@@ -32,6 +34,11 @@ class _MusicState extends State<Music> {
     if (!Hive.isBoxOpen('mediaFiles')) {
       await Hive.openBox<MediaFile>('mediaFiles');
     }
+  }
+  void _toggleLike() {
+    setState(() {
+      _isLiked = !_isLiked;
+    });
   }
 
   void _onSearchChanged() {
@@ -278,7 +285,10 @@ class _MusicState extends State<Music> {
                           builder: (context, Box<MediaFile> box, _) {
                             var mediaFiles = _isSearching
                                 ? _filteredMediaFiles
-                                : box.values.toList();
+                                : (_isLiked
+                                ? box.values.where((file) => file.like == 'on').toList()
+                                : box.values.toList());
+
 
                             return ListView.builder(
                               itemCount: mediaFiles.length,
@@ -381,21 +391,17 @@ class _MusicState extends State<Music> {
                                                       children: [
                                                         SizedBox(height: 2),
                                                         Text(mediaFiles[index].title,
-                                                            style: TextStyle(
-                                                              color: Colors.white,
-                                                              fontSize: 15,
-                                                              fontFamily: 'font1',
-                                                              fontWeight: FontWeight.w700
-                                                            )),
+                                                            style: Theme.of(context)
+                                                                .textTheme
+                                                                .headline6
+                                                                ?.copyWith(fontSize: 15.0)),
                                                         SizedBox(height: 10),
                                                         Text(
                                                             mediaFiles[index].description,
-                                                            style:  TextStyle(
-                                                                color: Colors.white,
-                                                                fontSize: 12,
-                                                                fontFamily: 'font5',
-                                                                fontWeight: FontWeight.w700
-                                                            )),
+                                                            style: Theme.of(context)
+                                                                .textTheme
+                                                                .subtitle1
+                                                                ?.copyWith(fontSize: 10.0)),
                                                       ],
                                                     ),
                                                   ],
@@ -440,26 +446,7 @@ class _MusicState extends State<Music> {
                                           ],
                                         ),
                                       ),
-                                    ),
-                                    Transform.translate(
-                                      offset: Offset(0, -4),  // 여기에서 y 값을 조절하여 위로 또는 아래로 이동시킬 수 있습니다.
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.width * 0.62,
-                                        margin: EdgeInsets.symmetric(horizontal: 35.0),
-                                        height: 5,  // 원하는 높이를 설정합니다.
-                                        decoration: BoxDecoration(
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.2), // 검정색 그림자의 투명도 설정
-                                              spreadRadius: 1.2,  // 그림자의 확산 범위 설정
-                                              blurRadius: 8,      // 그림자의 흐림 정도 설정
-                                              offset: Offset(10,2),    // 그림자의 위치 오프셋 설정
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                    ),                                ],
                                 );
                               },
                             );
@@ -468,7 +455,19 @@ class _MusicState extends State<Music> {
                       ),
                       SizedBox(
                         height: 180,
-                      )
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.favorite,
+                              color: _isLiked ? Colors.red : Colors.white,
+                              size: 40.0,
+                            ),
+                            onPressed: _toggleLike,
+                          ),
+                        ),
+                      ),
+
                     ],
                   ),
                 ),
