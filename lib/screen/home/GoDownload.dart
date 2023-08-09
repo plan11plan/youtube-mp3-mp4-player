@@ -18,60 +18,139 @@ class GoDownload extends StatefulWidget {
 }
 
 class _YoutubeState extends State<GoDownload> {
-  final int maxTextLength =12;
+  final int maxTextLength =12; // Title 허용 최대 길이.
   final YoutubeExplode yt = YoutubeExplode();
-  String videoUrl = 'https://m.youtube.com/';
+  String videoUrl = 'https://m.youtube.com/'; // 나중에 다운로드 버튼 누르면, 해당 영상으로 초기화
   final TextEditingController _controller = TextEditingController();
-  late WebViewController _webViewController; // WebView controller
+  late WebViewController _webViewController; // 새로고침하려고 가져옴.
 
   @override
   void initState() {
     super.initState();
     _controller.text = videoUrl;
   }
+  // Future<void> _getMetaData() async {
+  //   if (videoUrl.contains('youtube.com/watch?v=')) {
+  //     var video = await yt.videos.get(videoUrl);
+  //     print('Title: ${video.title}');
+  //     print('Author: ${video.author}');
+  //     print('Duration: ${video.duration}');
+  //   }
+  // }
+  String _formatDuration(Duration duration) {
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@ duration 조작 시작 및 종료 @@@@@@@@@@@@@@@@@@@@@@@@@");
 
-  Future<void> _getMetaData() async {
-    if (videoUrl.contains('youtube.com/watch?v=')) {
-      var video = await yt.videos.get(videoUrl);
-      print('Title: ${video.title}');
-      print('Author: ${video.author}');
-      print('Duration: ${video.duration}');
+    if (duration.inHours > 0) {
+      return '${duration.inHours}:${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}';
+    } else {
+      return '${duration.inMinutes}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
     }
   }
-  Future<void> reduceAudioQualityWithFFmpeg(String inputPath, String outputPath) async {
-    await FFmpegKit.execute('-i $inputPath -b:a 64k $outputPath').then((session) async {
-      final returnCode = await session.getReturnCode();
 
-      if (ReturnCode.isSuccess(returnCode)) {
-        print("Audio compression successful using FFmpeg");
-      } else if (ReturnCode.isCancel(returnCode)) {
-        print("Audio compression cancelled");
-      } else {
-        print("Audio compression error using FFmpeg");
-      }
-    });
-  }
   Future<String> _downloadThumbnail(String videoId) async {
+    // 썸네일 다운로드
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 메서드() 호출 @@@@@@@@@@@@@@@@@@@@@@@@@");
     var video = await yt.videos.get(videoId);
+
+    //제목 필터링
     var title = video.title;
     title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
-
-    var directory = await getApplicationDocumentsDirectory();
     if (title.length > maxTextLength) {
       title = title.substring(0, maxTextLength ) + '...';
     }
+    //저장할 파일 경로.
+    var directory = await getApplicationDocumentsDirectory();
     var filePath = '${directory.path}/$title.jpg';
 
+    //
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 시작  @@@@@@@@@@@@@@@@@@@@@@@@@");
     var response = await http.get(Uri.parse(video.thumbnails.highResUrl));
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 완료  @@@@@@@@@@@@@@@@@@@@@@@@@");
 
     if (response.statusCode == 200) {
+      print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 파일에 넣어주기 시작  @@@@@@@@@@@@@@@@@@@@@@@@@");
       await File(filePath).writeAsBytes(response.bodyBytes);
-      print('Thumbnail download complete');
+      print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 파일에 넣어주기 완료  @@@@@@@@@@@@@@@@@@@@@@@@@");
+
       print('Thumbnail file saved at: $filePath');
     } else {
       print('Failed to download thumbnail');
     }
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 메서드() 호출 @@@@@@@@@@@@@@@@@@@@@@@@@");
+
     return filePath;
+  }
+
+  Future<void> _downloadAudio({int retryCount = 0}) async {
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  #1 오디오 다운로드() 메서드 호출  @@@@@@@@@@@@@@@@@@@@@@@@@");
+
+    try {
+      var videoId = videoUrl.split('v=')[1].split('&')[0];
+      var manifest = await yt.videos.streamsClient.getManifest(videoId);
+      // var audioInfo = manifest.audioOnly.withHighestBitrate();
+      var audioInfo = manifest.audio.withHighestBitrate();
+
+
+      if (audioInfo != null) {
+        var audioStream = yt.videos.streamsClient.get(audioInfo);
+
+        //파일 열고,
+        var directory = await getApplicationDocumentsDirectory();
+        var video = await yt.videos.get(videoId);
+        var title = video.title;
+        title = title.replaceAll(RegExp(r'[\/:*?"<>|\-]'), '_');
+        if (title.length > maxTextLength) {
+          title = title.substring(0, maxTextLength) + '...';
+        }
+        var audioFile = File('${directory.path}/$title.mp3');
+        var duration = video.duration;
+
+        var audioFileStream = audioFile.openWrite();
+
+        await (await audioStream).pipe(audioFileStream);
+
+        await audioFileStream.flush();
+        await audioFileStream.close();
+
+        print('Download complete');
+        print('Audio file saved at: ${audioFile.path}');
+
+        // Reduce Audio Quality using FFmpeg
+        var compressedAudioFile = File('${directory.path}/$title.mp3');
+        await FFmpegKit.execute('-i ${audioFile.path} -b:a 64k ${compressedAudioFile.path}').then((session) async {
+          final returnCode = await session.getReturnCode();
+
+          if (ReturnCode.isSuccess(returnCode)) {
+            print("Audio compression successful using FFmpeg");
+          } else {
+            print("Audio compression error using FFmpeg");
+          }
+        });
+
+        // Download thumbnail
+        var thumbnailPath = await _downloadThumbnail(videoId);
+
+        // Save to Hive
+        var mediaFile = MediaFile(title, compressedAudioFile.path, thumbnailPath, 'audio', title, 'off', _formatDuration(duration!));
+        Box<MediaFile>? box;
+        if (Hive.isBoxOpen('mediaFiles')) {
+          box = Hive.box('mediaFiles');
+        } else {
+          box = await Hive.openBox('mediaFiles');
+        }
+        box.add(mediaFile);
+        print('Audio metadata saved to Hive');
+      }
+    } catch (e) {
+      print('An error occurred: $e');
+      if (retryCount < 2) {
+        Future.delayed(Duration(seconds: 1), () {
+          _downloadAudio(retryCount: retryCount + 1);
+        });
+      }
+    }
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  #1 오디오 다운로드() 메서드 종료  @@@@@@@@@@@@@@@@@@@@@@@@@");
+
   }
 
   Future<void> _downloadVideo({int retryCount = 0}) async {
@@ -138,72 +217,20 @@ class _YoutubeState extends State<GoDownload> {
     }
   }
 
-  Future<void> _downloadAudio({int retryCount = 0}) async {
-    try {
-      var videoId = videoUrl.split('v=')[1].split('&')[0];
-      var manifest = await yt.videos.streamsClient.getManifest(videoId);
-      var audioInfo = manifest.audioOnly.withHighestBitrate();
 
-      if (audioInfo != null) {
-        var audioStream = yt.videos.streamsClient.get(audioInfo);
+  Future<void> reduceAudioQualityWithFFmpeg(String inputPath, String outputPath) async {
+    await FFmpegKit.execute('-i $inputPath -b:a 64k $outputPath').then((session) async {
+      final returnCode = await session.getReturnCode();
 
-        var directory = await getApplicationDocumentsDirectory();
-
-        var video = await yt.videos.get(videoId);
-        var title = video.title;
-        title = title.replaceAll(RegExp(r'[\/:*?"<>|\-]'), '_');
-        if (title.length > maxTextLength) {
-          title = title.substring(0, maxTextLength) + '...';
-        }
-        var audioFile = File('${directory.path}/$title.mp3');
-        var duration = video.duration;
-
-        var audioFileStream = audioFile.openWrite();
-
-        await (await audioStream).pipe(audioFileStream);
-
-        await audioFileStream.flush();
-        await audioFileStream.close();
-
-        print('Download complete');
-        print('Audio file saved at: ${audioFile.path}');
-
-        // Reduce Audio Quality using FFmpeg
-        var compressedAudioFile = File('${directory.path}/$title.mp3');
-        await FFmpegKit.execute('-i ${audioFile.path} -b:a 64k ${compressedAudioFile.path}').then((session) async {
-          final returnCode = await session.getReturnCode();
-
-          if (ReturnCode.isSuccess(returnCode)) {
-            print("Audio compression successful using FFmpeg");
-          } else {
-            print("Audio compression error using FFmpeg");
-          }
-        });
-
-        // Download thumbnail
-        var thumbnailPath = await _downloadThumbnail(videoId);
-
-        // Save to Hive
-        var mediaFile = MediaFile(title, compressedAudioFile.path, thumbnailPath, 'audio', title, 'off', _formatDuration(duration!));
-        Box<MediaFile>? box;
-        if (Hive.isBoxOpen('mediaFiles')) {
-          box = Hive.box('mediaFiles');
-        } else {
-          box = await Hive.openBox('mediaFiles');
-        }
-        box.add(mediaFile);
-        print('Audio metadata saved to Hive');
+      if (ReturnCode.isSuccess(returnCode)) {
+        print("Audio compression successful using FFmpeg");
+      } else if (ReturnCode.isCancel(returnCode)) {
+        print("Audio compression cancelled");
+      } else {
+        print("Audio compression error using FFmpeg");
       }
-    } catch (e) {
-      print('An error occurred: $e');
-      if (retryCount < 2) {
-        Future.delayed(Duration(seconds: 1), () {
-          _downloadAudio(retryCount: retryCount + 1);
-        });
-      }
-    }
+    });
   }
-
   Future<void> _showDownloadDialog() async {
     _webViewController.reload(); // Reload the WebView before showing the dialog
     switch (await showDialog<String>(
@@ -301,7 +328,6 @@ class _YoutubeState extends State<GoDownload> {
                   _controller.text = url;
                   if (url.contains('youtube.com/watch?v=')) {
                     videoUrl = url;
-                    _getMetaData();
                   }
                 });
               },
@@ -311,13 +337,8 @@ class _YoutubeState extends State<GoDownload> {
       ),
     );
   }
-  String _formatDuration(Duration duration) {
-    if (duration.inHours > 0) {
-      return '${duration.inHours}:${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}';
-    } else {
-      return '${duration.inMinutes}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
-    }
-  }
+
+
 
   @override
   void dispose() {

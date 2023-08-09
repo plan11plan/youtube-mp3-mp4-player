@@ -348,12 +348,21 @@ class _MusicState extends State<Music> {
                                         ),
                                         child: InkWell(
                                           onTap: () {
+                                            print("@@@@@ Before Passing to AudioPlayerScreen : @@@@@");
+                                          mediaFiles.forEach((file) {
+                                            print("${file.title}, ${file.duration}, ..."); // 기타 필요한 메타 정보를 추가하세요
+                                          });
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) => AudioPlayerScreen(mediaFiles: mediaFiles, currentIndex: index),
                                               ),
                                             );
+                                            // 전달 후 mediaFiles의 정보 출력
+                                            print("@@@@@@@@@@ After @@@@@@@@@@@@@@@@@@@@@@@@@@@");
+                                            mediaFiles.forEach((file) {
+                                              print("${file.title}, ${file.duration}, ..."); // 기타 필요한 메타 정보를 추가하세요
+                                            });
 
                                           },
                                           child: Padding(

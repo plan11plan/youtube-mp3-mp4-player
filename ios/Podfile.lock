@@ -3,6 +3,13 @@ PODS:
     - Flutter
   - audio_session (0.0.1):
     - Flutter
+  - ffmpeg-kit-ios-https (5.1.LTS)
+  - ffmpeg_kit_flutter (5.1.0.LTS):
+    - ffmpeg_kit_flutter/https-lts (= 5.1.0.LTS)
+    - Flutter
+  - ffmpeg_kit_flutter/https-lts (5.1.0.LTS):
+    - ffmpeg-kit-ios-https (= 5.1.LTS)
+    - Flutter
   - Flutter (1.0.0)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
@@ -30,6 +37,7 @@ PODS:
 DEPENDENCIES:
   - audio_service (from `.symlinks/plugins/audio_service/ios`)
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
   - Flutter (from `Flutter`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/ios`)
@@ -42,6 +50,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - ffmpeg-kit-ios-https
     - FMDB
 
 EXTERNAL SOURCES:
@@ -49,6 +58,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/audio_service/ios"
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
+  ffmpeg_kit_flutter:
+    :path: ".symlinks/plugins/ffmpeg_kit_flutter/ios"
   Flutter:
     :path: Flutter
   image_picker_ios:
@@ -71,6 +82,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   audio_service: f509d65da41b9521a61f1c404dd58651f265a567
   audio_session: 4f3e461722055d21515cf3261b64c973c062f345
+  ffmpeg-kit-ios-https: 9e50ffa7eaa6272a0021829e054ef241f2ecffb2
+  ffmpeg_kit_flutter: fb5bee3a6038231463ee99e30f97a5763e0ae40f
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5

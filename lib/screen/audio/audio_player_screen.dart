@@ -39,15 +39,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       children: widget.mediaFiles
           .map(
             (mediaFile) => AudioSource.file(
-              File(mediaFile.filePath).path,
-              tag: MediaItem(
-                id: mediaFile.title,
-                title: mediaFile.title,
-                album: mediaFile.description,
-                artUri: Uri.parse(mediaFile.thumbnailPath),
-              ),
-            ),
-          )
+          File(mediaFile.filePath).path,
+          tag: MediaItem(
+            id: mediaFile.title,
+            title: mediaFile.title,
+            album: mediaFile.description,
+            artUri: Uri.parse(mediaFile.thumbnailPath),
+          ),
+        ),
+      )
           .toList(),
     ));
 
@@ -91,7 +91,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
         audioPlayer?.positionStream ?? Stream.empty(),
         audioPlayer?.bufferedPositionStream ?? Stream.empty(),
         audioPlayer?.durationStream ?? Stream.empty(),
-        (position, bufferedPosition, duration) =>
+            (position, bufferedPosition, duration) =>
             PositionData(position, bufferedPosition, duration ?? Duration.zero),
       );
 
@@ -150,10 +150,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
 class PositionData {
   const PositionData(
-    this.position,
-    this.bufferedPosition,
-    this.duration,
-  );
+      this.position,
+      this.bufferedPosition,
+      this.duration,
+      );
 
   final Duration position;
   final Duration bufferedPosition;
@@ -200,17 +200,17 @@ class _MusicPlayer extends StatelessWidget {
           Text(
             mediaFile.title,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 10),
           Text(
             mediaFile.description,
             maxLines: 2,
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                  color: Colors.white,
-                ),
+              color: Colors.white,
+            ),
           ),
           SizedBox(height: 30),
           StreamBuilder<PositionData>(
@@ -301,13 +301,13 @@ class _BackgroundFilter extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
             gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.black,
-            Colors.grey,
-          ],
-        )),
+              begin: Alignment.topCenter,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.black,
+                Colors.grey,
+              ],
+            )),
       ),
     );
   }
