@@ -142,7 +142,7 @@ class _YoutubeState extends State<GoDownload> {
         print('Audio metadata saved to Hive');
       }
     } catch (e) {
-      print('An error occurred: $e');
+      print(' ###### Failed Download ...######.');
       if (retryCount < 2) {
         Future.delayed(Duration(seconds: 1), () {
           _downloadAudio(retryCount: retryCount + 1);

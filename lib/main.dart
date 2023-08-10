@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,13 +6,18 @@ import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:player/screen/MyAudioServiceTask.dart';
 import 'package:player/screen/home/GoDownload.dart';
 import 'package:player/screen/home/Home_screen.dart';
 import 'package:player/screen/home/Music.dart';
 import 'package:player/screen/home/Video.dart';
-import 'package:player/screen/playlist_screen.dart';
 
 import 'models/file_model.dart';
+
+
+void _backgroundTaskEntrypoint() {
+  AudioServiceBackground.run(() => MyAudioServiceTask());
+}
 
 Future<void> main() async {
   await Hive.initFlutter();
@@ -30,7 +36,9 @@ Future<void> main() async {
       .then((_) {
     runApp(const MyApp());
   });
+
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);

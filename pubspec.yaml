@@ -41,7 +41,6 @@ dependencies:
   lecle_downloads_path_provider: ^0.0.2+8
   path_provider: ^2.0.5
   shared_preferences: ^2.0.8
-  youtube_explode_dart: ^1.10.4
   http: ^0.13.3
   hive: ^2.0.6
   hive_flutter: ^1.1.0
@@ -52,8 +51,9 @@ dependencies:
   flutter_slidable: ^2.0.0
   curved_navigation_bar: ^1.0.3
   ffmpeg_kit_flutter: 5.1.0-LTS
-  meta: ^1.7.0
-  json_annotation: ^4.1.0
+  youtube_explode_dart: ^1.10.4
+  audio_service: ^0.18.10
+
 
 
 dev_dependencies:
@@ -79,10 +79,6 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-  assets:
-    - assets/images/
-    - assets/music/
-    - assets/video/
 
   fonts:
     - family: font1
