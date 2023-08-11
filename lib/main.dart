@@ -5,8 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:player/screen/MyAudioServiceTask.dart';
 import 'package:player/screen/home/GoDownload.dart';
 import 'package:player/screen/home/Home_screen.dart';
 import 'package:player/screen/home/Music.dart';
@@ -15,9 +15,7 @@ import 'package:player/screen/home/Video.dart';
 import 'models/file_model.dart';
 
 
-void _backgroundTaskEntrypoint() {
-  AudioServiceBackground.run(() => MyAudioServiceTask());
-}
+
 
 Future<void> main() async {
   await Hive.initFlutter();
@@ -31,6 +29,12 @@ Future<void> main() async {
   await Hive.openBox<MediaFile>('mediaFiles');
   await Hive.openBox<int>('skyColorBox');
   await Hive.openBox('settings');  // 여기서 settings box를 열어줍니다.
+
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.example.myAudioPlayer',
+    androidNotificationChannelName: 'myAudioPlayer',
+    androidNotificationOngoing: true,
+  );
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
@@ -58,15 +62,6 @@ class _MyAppState extends State<MyApp> {
     GoDownload(),
     // HomeScreen(),
   ];
-  void _startAudioService() async {
-    await AudioService.start(
-      backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
-      androidNotificationChannelName: 'Audio Playback',
-      androidNotificationColor: 0xFF2196f3,
-      androidNotificationIcon: 'mipmap/ic_launcher',
-      androidEnableQueue: true,
-    );
-  }
 
 
   @override

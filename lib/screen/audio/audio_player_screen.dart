@@ -31,10 +31,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer(); // 추가된 코드
 
+    // AudioPlayer 인스턴스를 초기화합니다.
+    audioPlayer = AudioPlayer();
+
+    // 현재 재생할 미디어 파일의 인덱스를 설정합니다.
     currentSongIndex = widget.currentIndex;
 
+    // 여러 미디어 파일들을 ConcatenatingAudioSource에 추가하여 audioPlayer에 설정합니다.
     audioPlayer.setAudioSource(ConcatenatingAudioSource(
       children: widget.mediaFiles
           .map(
@@ -44,16 +48,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
             id: mediaFile.title,
             title: mediaFile.title,
             album: mediaFile.description,
-            artUri: Uri.parse(mediaFile.thumbnailPath),
+            artUri: Uri.file(mediaFile.thumbnailPath),
           ),
         ),
       )
           .toList(),
     ));
 
-    audioPlayer?.seek(Duration.zero, index: currentSongIndex);
-    audioPlayer?.play();
-    audioPlayer?.currentIndexStream.listen((index) {
+    // 선택한 미디어 파일을 시작 위치에서 재생합니다.
+    audioPlayer.seek(Duration.zero, index: currentSongIndex);
+    audioPlayer.play();
+
+    // 현재 재생 중인 미디어 파일의 인덱스를 업데이트합니다.
+    audioPlayer.currentIndexStream.listen((index) {
       if (index != null) {
         setState(() {
           currentSongIndex = index;
@@ -61,6 +68,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       }
     });
   }
+
 
 //
   void onPrevious() {
@@ -351,4 +359,3 @@ class _BackgroundFilter extends StatelessWidget {
     );
   }
 }
-

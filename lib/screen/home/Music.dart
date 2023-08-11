@@ -349,9 +349,9 @@ class _MusicState extends State<Music> {
                                         child: InkWell(
                                           onTap: () {
                                             print("@@@@@ Before Passing to AudioPlayerScreen : @@@@@");
-                                          mediaFiles.forEach((file) {
-                                            print("${file.title}, ${file.duration}, ..."); // 기타 필요한 메타 정보를 추가하세요
-                                          });
+                                            mediaFiles.forEach((file) {
+                                              print("${file.title}, ${file.duration}, ..."); // 기타 필요한 메타 정보를 추가하세요
+                                            });
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
