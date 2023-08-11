@@ -53,6 +53,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
 
   int currentindex = 0;
 

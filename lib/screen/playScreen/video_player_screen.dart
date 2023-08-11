@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/file_model.dart';
-import '../../widgets/seekbar.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final List<MediaFile> mediaFiles;
@@ -16,42 +15,37 @@ class VideoPlayerScreen extends StatefulWidget {
   @override
   _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
 }
+
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  VideoPlayerController? videoPlayer;
+  late VideoPlayerController videoPlayer;
   int currentSongIndex = 0;
 
   @override
   void initState() {
     super.initState();
-
     currentSongIndex = widget.currentIndex;
-
     _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
-
-    videoPlayer?.addListener(_videoPlayerListener);
   }
-  _initializeVideoPlayer(String path) {
-    if (videoPlayer?.value.isInitialized ?? false) {
-      videoPlayer?.removeListener(_videoPlayerListener);  // Remove listener first
-      videoPlayer?.dispose();
-    }
 
+  _initializeVideoPlayer(String path) {
     videoPlayer = VideoPlayerController.file(File(path))
       ..initialize().then((_) {
         setState(() {});
-        videoPlayer?.play();
+        videoPlayer.play();
       });
-
-    videoPlayer?.addListener(_videoPlayerListener);
+    // 1. videoPlayer에 리스너 추가
+    videoPlayer.addListener(_updateSlider);
   }
-
+  void _updateSlider() {
+    // 비디오의 현재 위치가 변경될 때마다 setState를 호출하여 UI를 업데이트합니다.
+    setState(() {});
+  }
   void onPrevious() {
     if (currentSongIndex > 0) {
-      videoPlayer?.removeListener(_videoPlayerListener);  // Remove listener before switching
       setState(() {
         currentSongIndex--;
-        videoPlayer?.pause();
-        videoPlayer?.seekTo(Duration.zero);
+        videoPlayer.pause();
+        videoPlayer.seekTo(Duration.zero);
         _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
       });
     }
@@ -59,23 +53,13 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   void onNext() {
     if (currentSongIndex < widget.mediaFiles.length - 1) {
-      videoPlayer?.removeListener(_videoPlayerListener);  // Remove listener before switching
       setState(() {
         currentSongIndex++;
-        videoPlayer?.pause();
-        videoPlayer?.seekTo(Duration.zero);
+        videoPlayer.pause();
+        videoPlayer.seekTo(Duration.zero);
         _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
       });
     }
-  }
-
-
-  _videoPlayerListener() {
-    // If the video has finished playing, play the next video
-    if (videoPlayer?.value.position == videoPlayer?.value.duration) {
-      onNext();
-    }
-    setState(() {});
   }
 
   @override
@@ -99,12 +83,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                videoPlayer?.value.isInitialized ?? false
+                videoPlayer.value.isInitialized
                     ? AspectRatio(
-                  aspectRatio: videoPlayer!.value.aspectRatio,
-                  child: VideoPlayer(videoPlayer!),
+                  aspectRatio: videoPlayer.value.aspectRatio,
+                  child: VideoPlayer(videoPlayer),
                 )
-                    : CircularProgressIndicator(),
+                    : Center(child: CircularProgressIndicator()),
                 SizedBox(height: 20),
                 Text(
                   widget.mediaFiles[currentSongIndex].title,
@@ -121,13 +105,33 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               ],
             ),
           ),
-          if (videoPlayer?.value.isInitialized ?? false)
-            SeekBar(
-              position: videoPlayer!.value.position,
-              duration: videoPlayer!.value.duration,
-              onChanged: (position) {
-                videoPlayer?.seekTo(position);
+          if (videoPlayer.value.isInitialized)
+            Slider(
+              value: videoPlayer.value.position.inSeconds.toDouble(),
+              onChanged: (value) {
+                final position = Duration(seconds: value.toInt());
+                videoPlayer.seekTo(position);
+                setState(() {});
               },
+              min: 0,
+              max: videoPlayer.value.duration.inSeconds.toDouble(),
+            ),
+          if (videoPlayer.value.isInitialized)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(
+                    _formatDuration(videoPlayer.value.position),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  Text(
+                    _formatDuration(videoPlayer.value.duration),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
             ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -138,18 +142,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 onPressed: onPrevious,
               ),
               IconButton(
-                icon: Icon(
-                    videoPlayer?.value.isPlaying ?? false
-                        ? Icons.pause
-                        : Icons.play_arrow,
-                    color: Colors.white),
+                icon: Icon(videoPlayer.value.isPlaying
+                    ? Icons.pause
+                    : Icons.play_arrow),
+                color: Colors.white,
                 iconSize: 60,
                 onPressed: () {
                   setState(() {
-                    if (videoPlayer?.value.isPlaying ?? false) {
-                      videoPlayer?.pause();
+                    if (videoPlayer.value.isPlaying) {
+                      videoPlayer.pause();
                     } else {
-                      videoPlayer?.play();
+                      videoPlayer.play();
                     }
                   });
                 },
@@ -167,10 +170,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$twoDigitMinutes:$twoDigitSeconds";
+  }
+
   @override
   void dispose() {
-    videoPlayer?.removeListener(_videoPlayerListener);
-    videoPlayer?.dispose();
     super.dispose();
+    videoPlayer.dispose();
   }
 }

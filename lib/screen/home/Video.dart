@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/file_model.dart';
@@ -23,6 +24,10 @@ class _VideoState extends State<Video> {
   @override
   void initState() {
     super.initState();
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     _openHiveBox();
     _searchController.addListener(_onSearchChanged);
   }
@@ -194,6 +199,10 @@ class _VideoState extends State<Video> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
     return ValueListenableBuilder(
       valueListenable: SkyColor.getColorBoxListenable(),
       builder: (context, Box colorBox, _) {
