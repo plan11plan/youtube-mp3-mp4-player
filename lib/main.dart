@@ -58,6 +58,16 @@ class _MyAppState extends State<MyApp> {
     GoDownload(),
     // HomeScreen(),
   ];
+  void _startAudioService() async {
+    await AudioService.start(
+      backgroundTaskEntrypoint: _backgroundTaskEntrypoint,
+      androidNotificationChannelName: 'Audio Playback',
+      androidNotificationColor: 0xFF2196f3,
+      androidNotificationIcon: 'mipmap/ic_launcher',
+      androidEnableQueue: true,
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,17 +111,13 @@ class _MyAppState extends State<MyApp> {
                       currentindex = index;
                     });
                   },
+
                 ),
               ),
             ),
           ],
         ),
       ),
-      getPages: [
-        // GetPage(name: '/', page: () => const HomeScreen()),
-        // GetPage(name: '/song', page: () => SongScreen()),
-        // GetPage(name: '/playlist', page: () => const PlaylistScreen()),
-      ],
     );
   }
 }
