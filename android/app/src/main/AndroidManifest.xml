@@ -39,6 +39,8 @@
             </intent-filter>
         </service>
 
+        <service android:name="com.ryanheise.justaudio.background.AudioProcessingService" />
+
 
         <service android:name=".MainActivity"
             android:foregroundServiceType="mediaPlayback"

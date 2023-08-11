@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:player/screen/audio/audio_player_screen.dart';
+import 'package:player/screen/playScreen/audio_player_screen.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
 import '../popup/oneDelete.dart';

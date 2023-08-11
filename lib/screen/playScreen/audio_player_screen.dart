@@ -31,10 +31,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer(); // 추가된 코드
 
+    // AudioPlayer 인스턴스를 초기화합니다.
+    audioPlayer = AudioPlayer();
+
+    // 현재 재생할 미디어 파일의 인덱스를 설정합니다.
     currentSongIndex = widget.currentIndex;
 
+    // 여러 미디어 파일들을 ConcatenatingAudioSource에 추가하여 audioPlayer에 설정합니다.
     audioPlayer.setAudioSource(ConcatenatingAudioSource(
       children: widget.mediaFiles
           .map(
@@ -44,16 +48,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
             id: mediaFile.title,
             title: mediaFile.title,
             album: mediaFile.description,
-            artUri: Uri.parse(mediaFile.thumbnailPath),
+            artUri: Uri.file(mediaFile.thumbnailPath),
           ),
         ),
       )
           .toList(),
     ));
 
-    audioPlayer?.seek(Duration.zero, index: currentSongIndex);
-    audioPlayer?.play();
-    audioPlayer?.currentIndexStream.listen((index) {
+    // 선택한 미디어 파일을 시작 위치에서 재생합니다.
+    audioPlayer.seek(Duration.zero, index: currentSongIndex);
+    audioPlayer.play();
+
+    // 현재 재생 중인 미디어 파일의 인덱스를 업데이트합니다.
+    audioPlayer.currentIndexStream.listen((index) {
       if (index != null) {
         setState(() {
           currentSongIndex = index;
@@ -61,6 +68,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       }
     });
   }
+
 
 //
   void onPrevious() {
@@ -160,7 +168,7 @@ class PositionData {
   final Duration duration;
 }
 
-class _MusicPlayer extends StatelessWidget {
+class _MusicPlayer extends StatefulWidget {
   const _MusicPlayer({
     Key? key,
     required this.mediaFile,
@@ -176,6 +184,14 @@ class _MusicPlayer extends StatelessWidget {
   final AudioPlayer audioPlayer;
   final VoidCallback onPrevious;
   final VoidCallback onNext;
+
+  @override
+  State<_MusicPlayer> createState() => _MusicPlayerState();
+}
+
+class _MusicPlayerState extends State<_MusicPlayer> {
+  double _volume = 1.0;
+  bool showVolumeSlider = false;
 
   Icon _getLoopIcon(LoopMode loopMode) {
     switch (loopMode) {
@@ -198,7 +214,7 @@ class _MusicPlayer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            mediaFile.title,
+            widget.mediaFile.title,
             style: Theme.of(context).textTheme.headlineSmall!.copyWith(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -206,7 +222,7 @@ class _MusicPlayer extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            mediaFile.description,
+            widget.mediaFile.description,
             maxLines: 2,
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
               color: Colors.white,
@@ -214,36 +230,64 @@ class _MusicPlayer extends StatelessWidget {
           ),
           SizedBox(height: 30),
           StreamBuilder<PositionData>(
-            stream: _positionDataStream,
+            stream: widget._positionDataStream,
             builder: (context, snapshot) {
               final positionData = snapshot.data;
               return SeekBar(
                 position: positionData?.position ?? Duration.zero,
                 duration: positionData?.duration ?? Duration.zero,
                 onChanged: (duration) {
-                  audioPlayer.seek(duration);
+                  widget.audioPlayer.seek(duration);
                 },
                 onChangeEnd: (duration) {
-                  audioPlayer.seek(duration);
+                  widget.audioPlayer.seek(duration);
                 },
               );
             },
           ),
           PlayerButtons(
-              audioPlayer: audioPlayer, onPrevious: onPrevious, onNext: onNext),
+              audioPlayer: widget.audioPlayer, onPrevious: widget.onPrevious, onNext: widget.onNext),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
-                  iconSize: 35,
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.volume_down,
-                    color: Colors.white,
-                  )),
+                iconSize: 35,
+                onPressed: () {
+                  setState(() {
+                    showVolumeSlider = !showVolumeSlider; // 이 줄을 추가하여 슬라이드 바 표시 여부를 토글
+
+                    widget.audioPlayer.setVolume(_volume);
+                  });
+                },
+                icon: Icon(
+                  _volume == 0 ? Icons.volume_off : Icons.volume_down,
+                  color: Colors.white,
+                ),
+              ),
+
+              if (showVolumeSlider)  // 슬라이더 표시 여부에 따라 슬라이더를 표시하거나 숨김
+                Expanded(
+                  child: SliderTheme(
+                    data: SliderTheme.of(context).copyWith(
+                      activeTrackColor: Colors.white.withOpacity(0.7),
+                      inactiveTrackColor: Colors.white.withOpacity(0.3),
+                      thumbColor: Colors.white.withOpacity(0.7),
+                    ),
+                    child: Slider(
+                      value: _volume,
+                      onChanged: (value) {
+                        setState(() {
+                          _volume = value;
+                          widget.audioPlayer.setVolume(_volume);
+                        });
+                      },
+                    ),
+                  ),
+                ),
+
               StreamBuilder<LoopMode>(
-                stream: audioPlayer.loopModeStream,
+                stream: widget.audioPlayer.loopModeStream,
                 builder: (context, snapshot) {
                   final loopMode = snapshot.data ?? LoopMode.off;
                   return IconButton(
@@ -251,14 +295,14 @@ class _MusicPlayer extends StatelessWidget {
                     onPressed: () {
                       switch (loopMode) {
                         case LoopMode.off:
-                          audioPlayer.setLoopMode(LoopMode.one);
+                          widget.audioPlayer.setLoopMode(LoopMode.one);
                           break;
                         case LoopMode.one:
-                          audioPlayer.setLoopMode(LoopMode.all);
+                          widget.audioPlayer.setLoopMode(LoopMode.all);
                           break;
                         case LoopMode.all:
                         default:
-                          audioPlayer.setLoopMode(LoopMode.off);
+                          widget.audioPlayer.setLoopMode(LoopMode.off);
                           break;
                       }
                     },
@@ -268,6 +312,9 @@ class _MusicPlayer extends StatelessWidget {
               ),
             ],
           )
+
+
+
         ],
       ),
     );
@@ -312,4 +359,3 @@ class _BackgroundFilter extends StatelessWidget {
     );
   }
 }
-

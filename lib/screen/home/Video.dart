@@ -4,8 +4,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
+import '../playScreen/video_player_screen.dart';
 import '../popup/oneDelete.dart';
-import '../video/video_player_screen.dart';
 
 class Video extends StatefulWidget {
   const Video({Key? key}) : super(key: key);
@@ -351,7 +351,7 @@ class _VideoState extends State<Video> {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => VideoPlayerScreen(mediaFile: mediaFiles[index]),
+                                                builder: (context) => VideoPlayerScreen(mediaFiles: mediaFiles, currentIndex: index),
                                               ),
                                             );
 

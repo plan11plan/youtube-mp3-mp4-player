@@ -5,24 +5,64 @@ import 'package:video_player/video_player.dart';
 import '../../models/file_model.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
-  final MediaFile mediaFile;
+  final List<MediaFile> mediaFiles;
+  final int currentIndex;
 
-  VideoPlayerScreen({required this.mediaFile});
+  const VideoPlayerScreen(
+      {Key? key, required this.mediaFiles, required this.currentIndex})
+      : super(key: key);
 
   @override
   _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late VideoPlayerController _controller;
+  late VideoPlayerController videoPlayer;
+  int currentSongIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.file(File(widget.mediaFile.filePath))
+
+    // 현재 재생할 미디어 파일의 인덱스를 설정합니다.
+    currentSongIndex = widget.currentIndex;
+
+    // 선택된 미디어 파일로 비디오 플레이어를 초기화합니다.
+    _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
+  }
+
+  _initializeVideoPlayer(String path) {
+    videoPlayer = VideoPlayerController.file(File(path))
       ..initialize().then((_) {
-        setState(() {}); // Ensure widget is rebuilt when video is ready to be played
+        setState(() {});
+        videoPlayer.play();
       });
+
+    // 현재 재생 중인 미디어 파일의 인덱스를 업데이트합니다.
+    // Note: videoPlayer에는 currentIndexStream이 없습니다.
+    // 이 기능은 audioPlayer에서만 제공됩니다. 따라서 이 코드는 제거해야 합니다.
+  }
+
+  void onPrevious() {
+    if (currentSongIndex > 0) {
+      setState(() {
+        currentSongIndex--;
+        videoPlayer.pause();
+        videoPlayer.seekTo(Duration.zero);
+        _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
+      });
+    }
+  }
+
+  void onNext() {
+    if (currentSongIndex < widget.mediaFiles.length - 1) {
+      setState(() {
+        currentSongIndex++;
+        videoPlayer.pause();
+        videoPlayer.seekTo(Duration.zero);
+        _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
+      });
+    }
   }
 
   @override
@@ -42,12 +82,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             title: Text('Now Playing', style: TextStyle(color: Colors.white)),
             centerTitle: true,
           ),
-          _controller.value.isInitialized
+          videoPlayer.value.isInitialized
               ? Expanded(
             child: Center(
               child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
+                aspectRatio: videoPlayer.value.aspectRatio,
+                child: VideoPlayer(videoPlayer),
               ),
             ),
           )
@@ -56,8 +96,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Image.file(File(widget.mediaFiles[currentSongIndex].thumbnailPath)),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  widget.mediaFile.title,
+                  widget.mediaFiles[currentSongIndex].title,
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -66,7 +110,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               ),
               SizedBox(height: 10),
               Text(
-                widget.mediaFile.description,
+                widget.mediaFiles[currentSongIndex].description,
                 style: TextStyle(color: Colors.grey[400], fontSize: 16),
               ),
               SizedBox(height: 30),
@@ -76,20 +120,20 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   IconButton(
                     icon: Icon(Icons.skip_previous, color: Colors.white),
                     iconSize: 40,
-                    onPressed: () {},
+                    onPressed: onPrevious, // 이전 영상 재생 함수
                   ),
                   IconButton(
-                    icon: Icon(_controller.value.isPlaying
+                    icon: Icon(videoPlayer.value.isPlaying
                         ? Icons.pause
                         : Icons.play_arrow),
                     color: Colors.white,
                     iconSize: 60,
                     onPressed: () {
                       setState(() {
-                        if (_controller.value.isPlaying) {
-                          _controller.pause();
+                        if (videoPlayer.value.isPlaying) {
+                          videoPlayer.pause();
                         } else {
-                          _controller.play();
+                          videoPlayer.play();
                         }
                       });
                     },
@@ -97,7 +141,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   IconButton(
                     icon: Icon(Icons.skip_next, color: Colors.white),
                     iconSize: 40,
-                    onPressed: () {},
+                    onPressed: onNext, // 다음 영상 재생 함수
                   ),
                 ],
               ),
@@ -109,9 +153,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 
+
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    videoPlayer.dispose();
   }
 }
