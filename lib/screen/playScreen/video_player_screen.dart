@@ -16,46 +16,42 @@ class VideoPlayerScreen extends StatefulWidget {
   @override
   _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
 }
-
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late VideoPlayerController videoPlayer;
+  VideoPlayerController? videoPlayer;
   int currentSongIndex = 0;
 
   @override
   void initState() {
     super.initState();
 
-    // 현재 재생할 미디어 파일의 인덱스를 설정합니다.
     currentSongIndex = widget.currentIndex;
 
-    // 선택된 미디어 파일로 비디오 플레이어를 초기화합니다.
     _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
 
-    // Add a listener to the videoPlayer
-    videoPlayer.addListener(() {
-      // Rebuild the widget whenever the videoPlayer's state changes
-      setState(() {});
-    });
+    videoPlayer?.addListener(_videoPlayerListener);
   }
-
   _initializeVideoPlayer(String path) {
+    if (videoPlayer?.value.isInitialized ?? false) {
+      videoPlayer?.removeListener(_videoPlayerListener);  // Remove listener first
+      videoPlayer?.dispose();
+    }
+
     videoPlayer = VideoPlayerController.file(File(path))
       ..initialize().then((_) {
         setState(() {});
-        videoPlayer.play();
+        videoPlayer?.play();
       });
 
-    // 현재 재생 중인 미디어 파일의 인덱스를 업데이트합니다.
-    // Note: videoPlayer에는 currentIndexStream이 없습니다.
-    // 이 기능은 audioPlayer에서만 제공됩니다. 따라서 이 코드는 제거해야 합니다.
+    videoPlayer?.addListener(_videoPlayerListener);
   }
 
   void onPrevious() {
     if (currentSongIndex > 0) {
+      videoPlayer?.removeListener(_videoPlayerListener);  // Remove listener before switching
       setState(() {
         currentSongIndex--;
-        videoPlayer.pause();
-        videoPlayer.seekTo(Duration.zero);
+        videoPlayer?.pause();
+        videoPlayer?.seekTo(Duration.zero);
         _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
       });
     }
@@ -63,13 +59,23 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   void onNext() {
     if (currentSongIndex < widget.mediaFiles.length - 1) {
+      videoPlayer?.removeListener(_videoPlayerListener);  // Remove listener before switching
       setState(() {
         currentSongIndex++;
-        videoPlayer.pause();
-        videoPlayer.seekTo(Duration.zero);
+        videoPlayer?.pause();
+        videoPlayer?.seekTo(Duration.zero);
         _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
       });
     }
+  }
+
+
+  _videoPlayerListener() {
+    // If the video has finished playing, play the next video
+    if (videoPlayer?.value.position == videoPlayer?.value.duration) {
+      onNext();
+    }
+    setState(() {});
   }
 
   @override
@@ -93,11 +99,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Check if the video player is initialized
-                videoPlayer.value.isInitialized
+                videoPlayer?.value.isInitialized ?? false
                     ? AspectRatio(
-                  aspectRatio: videoPlayer.value.aspectRatio,
-                  child: VideoPlayer(videoPlayer),
+                  aspectRatio: videoPlayer!.value.aspectRatio,
+                  child: VideoPlayer(videoPlayer!),
                 )
                     : CircularProgressIndicator(),
                 SizedBox(height: 20),
@@ -116,18 +121,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               ],
             ),
           ),
-          if (videoPlayer.value.isInitialized)
+          if (videoPlayer?.value.isInitialized ?? false)
             SeekBar(
-              position: videoPlayer.value.position,
-              duration: videoPlayer.value.duration,
+              position: videoPlayer!.value.position,
+              duration: videoPlayer!.value.duration,
               onChanged: (position) {
-                videoPlayer.seekTo(position);
-              },
-              onChangeEnd: (position) {
-                // If you want to perform any additional actions after the user finishes seeking
+                videoPlayer?.seekTo(position);
               },
             ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -137,17 +138,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 onPressed: onPrevious,
               ),
               IconButton(
-                icon: Icon(videoPlayer.value.isPlaying
-                    ? Icons.pause
-                    : Icons.play_arrow),
-                color: Colors.white,
+                icon: Icon(
+                    videoPlayer?.value.isPlaying ?? false
+                        ? Icons.pause
+                        : Icons.play_arrow,
+                    color: Colors.white),
                 iconSize: 60,
                 onPressed: () {
                   setState(() {
-                    if (videoPlayer.value.isPlaying) {
-                      videoPlayer.pause();
+                    if (videoPlayer?.value.isPlaying ?? false) {
+                      videoPlayer?.pause();
                     } else {
-                      videoPlayer.play();
+                      videoPlayer?.play();
                     }
                   });
                 },
@@ -165,12 +167,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 
-
-
-
   @override
   void dispose() {
+    videoPlayer?.removeListener(_videoPlayerListener);
+    videoPlayer?.dispose();
     super.dispose();
-    videoPlayer.dispose();
   }
 }
