@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/file_model.dart';
+import '../../widgets/seekbar.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
   final List<MediaFile> mediaFiles;
@@ -29,6 +30,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
     // 선택된 미디어 파일로 비디오 플레이어를 초기화합니다.
     _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
+
+    // Add a listener to the videoPlayer
+    videoPlayer.addListener(() {
+      // Rebuild the widget whenever the videoPlayer's state changes
+      setState(() {});
+    });
   }
 
   _initializeVideoPlayer(String path) {
@@ -86,12 +93,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 50.0),
-                  child: Image.file(File(widget.mediaFiles[currentSongIndex].thumbnailPath),
-                      width: MediaQuery.of(context).size.width * 0.7,
-                      height: MediaQuery.of(context).size.width * 0.7),
-                ),
+                // Check if the video player is initialized
+                videoPlayer.value.isInitialized
+                    ? AspectRatio(
+                  aspectRatio: videoPlayer.value.aspectRatio,
+                  child: VideoPlayer(videoPlayer),
+                )
+                    : CircularProgressIndicator(),
+                SizedBox(height: 20),
                 Text(
                   widget.mediaFiles[currentSongIndex].title,
                   style: TextStyle(
@@ -101,23 +110,24 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  widget.mediaFiles[currentSongIndex].description, // Assuming this is the artist name
+                  widget.mediaFiles[currentSongIndex].description,
                   style: TextStyle(color: Colors.grey[400], fontSize: 18),
                 ),
               ],
             ),
           ),
-          if (!videoPlayer.value.isInitialized)
-            CircularProgressIndicator(),
           if (videoPlayer.value.isInitialized)
-            Slider(
-              value: videoPlayer.value.position.inSeconds.toDouble(),
-              onChanged: (value) {
-                // TODO: Implement video seeking functionality
+            SeekBar(
+              position: videoPlayer.value.position,
+              duration: videoPlayer.value.duration,
+              onChanged: (position) {
+                videoPlayer.seekTo(position);
               },
-              min: 0,
-              max: videoPlayer.value.duration.inSeconds.toDouble(),
+              onChangeEnd: (position) {
+                // If you want to perform any additional actions after the user finishes seeking
+              },
             ),
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -154,6 +164,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       ),
     );
   }
+
+
 
 
   @override

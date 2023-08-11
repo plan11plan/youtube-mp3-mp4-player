@@ -82,76 +82,80 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             title: Text('Now Playing', style: TextStyle(color: Colors.white)),
             centerTitle: true,
           ),
-          videoPlayer.value.isInitialized
-              ? Expanded(
-            child: Center(
-              child: AspectRatio(
-                aspectRatio: videoPlayer.value.aspectRatio,
-                child: VideoPlayer(videoPlayer),
-              ),
-            ),
-          )
-              : CircularProgressIndicator(),
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Image.file(File(widget.mediaFiles[currentSongIndex].thumbnailPath)),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Text(
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Check if the video player is initialized
+                videoPlayer.value.isInitialized
+                    ? AspectRatio(
+                  aspectRatio: videoPlayer.value.aspectRatio,
+                  child: VideoPlayer(videoPlayer),
+                )
+                    : CircularProgressIndicator(),
+                SizedBox(height: 20),
+                Text(
                   widget.mediaFiles[currentSongIndex].title,
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold),
                 ),
+                SizedBox(height: 10),
+                Text(
+                  widget.mediaFiles[currentSongIndex].description,
+                  style: TextStyle(color: Colors.grey[400], fontSize: 18),
+                ),
+              ],
+            ),
+          ),
+          if (videoPlayer.value.isInitialized)
+            Slider(
+              value: videoPlayer.value.position.inSeconds.toDouble(),
+              onChanged: (value) {
+                final newPosition = Duration(seconds: value.toInt());
+                videoPlayer.seekTo(newPosition);
+              },
+              min: 0,
+              max: videoPlayer.value.duration.inSeconds.toDouble(),
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(Icons.skip_previous, color: Colors.white),
+                iconSize: 40,
+                onPressed: onPrevious,
               ),
-              SizedBox(height: 10),
-              Text(
-                widget.mediaFiles[currentSongIndex].description,
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+              IconButton(
+                icon: Icon(videoPlayer.value.isPlaying
+                    ? Icons.pause
+                    : Icons.play_arrow),
+                color: Colors.white,
+                iconSize: 60,
+                onPressed: () {
+                  setState(() {
+                    if (videoPlayer.value.isPlaying) {
+                      videoPlayer.pause();
+                    } else {
+                      videoPlayer.play();
+                    }
+                  });
+                },
               ),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.skip_previous, color: Colors.white),
-                    iconSize: 40,
-                    onPressed: onPrevious, // 이전 영상 재생 함수
-                  ),
-                  IconButton(
-                    icon: Icon(videoPlayer.value.isPlaying
-                        ? Icons.pause
-                        : Icons.play_arrow),
-                    color: Colors.white,
-                    iconSize: 60,
-                    onPressed: () {
-                      setState(() {
-                        if (videoPlayer.value.isPlaying) {
-                          videoPlayer.pause();
-                        } else {
-                          videoPlayer.play();
-                        }
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.skip_next, color: Colors.white),
-                    iconSize: 40,
-                    onPressed: onNext, // 다음 영상 재생 함수
-                  ),
-                ],
+              IconButton(
+                icon: Icon(Icons.skip_next, color: Colors.white),
+                iconSize: 40,
+                onPressed: onNext,
               ),
-              SizedBox(height: 20),
             ],
           ),
+          SizedBox(height: 20),
         ],
       ),
     );
   }
+
 
 
   @override
