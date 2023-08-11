@@ -1,6 +1,6 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import '../../models/file_model.dart';
 
@@ -17,7 +17,7 @@ class VideoPlayerScreen extends StatefulWidget {
 }
 
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
-  late VideoPlayerController videoPlayer;
+  VideoPlayerController? videoPlayer;
   int currentSongIndex = 0;
 
   @override
@@ -25,48 +25,65 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     super.initState();
     currentSongIndex = widget.currentIndex;
     _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
-  _initializeVideoPlayer(String path) {
+  _initializeVideoPlayer(String path) async {
+    videoPlayer?.dispose();
+
     videoPlayer = VideoPlayerController.file(File(path))
       ..initialize().then((_) {
         setState(() {});
-        videoPlayer.play();
+        videoPlayer?.play();
       });
-    // 1. videoPlayer에 리스너 추가
-    videoPlayer.addListener(_updateSlider);
+
+    videoPlayer?.addListener(_updateSlider);
   }
+
   void _updateSlider() {
-    // 비디오의 현재 위치가 변경될 때마다 setState를 호출하여 UI를 업데이트합니다.
     setState(() {});
   }
+
   void onPrevious() {
     if (currentSongIndex > 0) {
-      setState(() {
-        currentSongIndex--;
-        videoPlayer.pause();
-        videoPlayer.seekTo(Duration.zero);
-        _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
-      });
+      currentSongIndex--;
+      _changeVideo();
     }
   }
 
   void onNext() {
     if (currentSongIndex < widget.mediaFiles.length - 1) {
-      setState(() {
-        currentSongIndex++;
-        videoPlayer.pause();
-        videoPlayer.seekTo(Duration.zero);
-        _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
-      });
+      currentSongIndex++;
+      _changeVideo();
     }
+  }
+
+  _changeVideo() {
+    videoPlayer?.pause();
+    _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
   }
 
   @override
   Widget build(BuildContext context) {
+    // 현재 화면의 방향을 확인
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
+      body: isLandscape
+          ? Center(
+        child: AspectRatio(
+          aspectRatio: videoPlayer!.value.aspectRatio,
+          child: VideoPlayer(videoPlayer!),
+        ),
+      )
+          : Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           AppBar(
@@ -74,65 +91,88 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             elevation: 0,
             leading: IconButton(
               icon: Icon(Icons.arrow_back_ios, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                SystemChrome.setPreferredOrientations([
+                  DeviceOrientation.portraitUp,
+                  DeviceOrientation.portraitDown,
+                ]);
+                Navigator.pop(context);
+              },
             ),
-            title: Text('Now Playing', style: TextStyle(color: Colors.white)),
+            title: Text('Now Playing',
+                style: TextStyle(color: Colors.white)),
             centerTitle: true,
           ),
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                videoPlayer.value.isInitialized
-                    ? AspectRatio(
-                  aspectRatio: videoPlayer.value.aspectRatio,
-                  child: VideoPlayer(videoPlayer),
-                )
-                    : Center(child: CircularProgressIndicator()),
-                SizedBox(height: 20),
-                Text(
-                  widget.mediaFiles[currentSongIndex].title,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  widget.mediaFiles[currentSongIndex].description,
-                  style: TextStyle(color: Colors.grey[400], fontSize: 18),
-                ),
-              ],
-            ),
-          ),
-          if (videoPlayer.value.isInitialized)
-            Slider(
-              value: videoPlayer.value.position.inSeconds.toDouble(),
-              onChanged: (value) {
-                final position = Duration(seconds: value.toInt());
-                videoPlayer.seekTo(position);
-                setState(() {});
-              },
-              min: 0,
-              max: videoPlayer.value.duration.inSeconds.toDouble(),
-            ),
-          if (videoPlayer.value.isInitialized)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!isLandscape && (videoPlayer?.value.isInitialized ?? false))
+                    AspectRatio(
+                      aspectRatio: videoPlayer!.value.aspectRatio,
+                      child: VideoPlayer(videoPlayer!),
+                    ),
+                  SizedBox(height: 20),
                   Text(
-                    _formatDuration(videoPlayer.value.position),
-                    style: TextStyle(color: Colors.white),
+                    widget.mediaFiles[currentSongIndex].title,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold),
                   ),
+                  SizedBox(height: 10),
                   Text(
-                    _formatDuration(videoPlayer.value.duration),
-                    style: TextStyle(color: Colors.white),
+                    widget.mediaFiles[currentSongIndex].description,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 18),
                   ),
+                  if (videoPlayer?.value.isInitialized ?? false)
+                    Column(
+                      children: <Widget>[
+                        SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 2.0,
+                            thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 5.0),
+                            activeTrackColor: Colors.green,
+                            inactiveTrackColor: Colors.grey[300],
+                          ),
+                          child: Slider(
+                            value: videoPlayer!
+                                .value.position.inSeconds.toDouble(),
+                            onChanged: (value) {
+                              final position =
+                              Duration(seconds: value.toInt());
+                              videoPlayer?.seekTo(position);
+                              setState(() {});
+                            },
+                            min: 0,
+                            max: videoPlayer!
+                                .value.duration.inSeconds.toDouble(),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Text(
+                                _formatDuration(videoPlayer!.value.position),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                _formatDuration(videoPlayer!.value.duration),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
@@ -142,17 +182,17 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 onPressed: onPrevious,
               ),
               IconButton(
-                icon: Icon(videoPlayer.value.isPlaying
+                icon: Icon(videoPlayer?.value.isPlaying ?? false
                     ? Icons.pause
                     : Icons.play_arrow),
                 color: Colors.white,
                 iconSize: 60,
                 onPressed: () {
                   setState(() {
-                    if (videoPlayer.value.isPlaying) {
-                      videoPlayer.pause();
+                    if (videoPlayer!.value.isPlaying) {
+                      videoPlayer!.pause();
                     } else {
-                      videoPlayer.play();
+                      videoPlayer!.play();
                     }
                   });
                 },
@@ -180,6 +220,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void dispose() {
     super.dispose();
-    videoPlayer.dispose();
+    videoPlayer?.removeListener(_updateSlider);
+    videoPlayer?.dispose();
+
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 }

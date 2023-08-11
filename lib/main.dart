@@ -88,12 +88,12 @@ class _MyAppState extends State<MyApp> {
                 child: CurvedNavigationBar(
                   key: _bottomNavigationKey,
                   items: const [
-                    Icon(Icons.queue_music_sharp, size: 25,color: Colors.grey,),
-                    Icon(Icons.play_circle_outline, size: 25,color: Colors.grey),
-                    Icon(Icons.youtube_searched_for, size: 25,color: Colors.grey),
-                    Icon(Icons.home, size: 25,color: Colors.grey),
+                    Icon(Icons.queue_music_sharp, size: 25,color: Colors.white,),
+                    Icon(Icons.play_circle_outline, size: 25,color: Colors.white),
+                    Icon(Icons.youtube_searched_for, size: 25,color: Colors.white),
+                    Icon(Icons.home, size: 25,color: Colors.white),
                   ],
-                  color: Colors.grey.withOpacity(0.4),
+                  color: Colors.white.withOpacity(0.4),
                   // color: Colors.black.withOpacity(0.3),
                   // buttonBackgroundColor: Colors.blueAccent.withOpacity(0.1),
                   // buttonBackgroundColor: Colors.black.withOpacity(0.3),
