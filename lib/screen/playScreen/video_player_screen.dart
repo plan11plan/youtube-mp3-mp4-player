@@ -75,6 +75,18 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
 
     return Scaffold(
+      appBar: isLandscape && showControls
+          ? AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text('${widget.mediaFiles[currentSongIndex].title}', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+      )
+          : null,
       backgroundColor: Colors.black,
       body: isLandscape
           ? GestureDetector(
@@ -102,9 +114,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       data: SliderTheme.of(context).copyWith(
                         trackHeight: 2.0,
                         thumbShape:
-                        RoundSliderThumbShape(enabledThumbRadius: 5.0),
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.grey[300],
+                        RoundSliderThumbShape(enabledThumbRadius: 5.0,),
+                        thumbColor: Colors.white,
+                        activeTrackColor: Colors.white,
+                        inactiveTrackColor: Colors.grey[800],
                       ),
                       child: Slider(
                         value: videoPlayer!.value.position.inSeconds.toDouble(),
@@ -185,7 +198,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               icon: Icon(Icons.arrow_back_ios, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text('Now Playing', style: TextStyle(color: Colors.white)),
+            title: Text('${widget.mediaFiles[currentSongIndex].title}', style: TextStyle(color: Colors.white)),
             centerTitle: true,
           ),
           Expanded(
@@ -198,33 +211,53 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                   child: VideoPlayer(videoPlayer!),
                 )
                     : Center(child: CircularProgressIndicator()),
-                SizedBox(height: 20),
-                Text(
-                  widget.mediaFiles[currentSongIndex].title,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  widget.mediaFiles[currentSongIndex].description,
-                  style: TextStyle(color: Colors.grey[400], fontSize: 18),
-                ),
               ],
             ),
           ),
           if (videoPlayer!.value.isInitialized)
-            Slider(
-              value: videoPlayer!.value.position.inSeconds.toDouble(),
-              onChanged: (value) {
-                final position = Duration(seconds: value.toInt());
-                videoPlayer?.seekTo(position);
-                setState(() {});
-              },
-              min: 0,
-              max: videoPlayer!.value.duration.inSeconds.toDouble(),
+            Column(
+              children: [
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 2.0,
+                    thumbShape:
+                    RoundSliderThumbShape(enabledThumbRadius: 5.0),
+                    activeTrackColor: Colors.white,
+                    thumbColor: Colors.white,
+
+                    inactiveTrackColor: Colors.grey[800],
+                  ),
+                  child: Slider(
+                    value: videoPlayer!.value.position.inSeconds.toDouble(),
+                    onChanged: (value) {
+                      final position = Duration(seconds: value.toInt());
+                      videoPlayer?.seekTo(position);
+                      setState(() {});
+                    },
+                    min: 0,
+                    max: videoPlayer!.value.duration.inSeconds.toDouble(),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text(
+                        _formatDuration(videoPlayer!.value.position),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      Text(
+                        _formatDuration(videoPlayer!.value.duration),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
+
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
