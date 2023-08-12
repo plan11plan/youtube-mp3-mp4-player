@@ -12,21 +12,41 @@ class SkyColor {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Color.fromRGBO(57, 2, 63, 1),
-        Color.fromRGBO(96, 18, 82, 1),
-        Color.fromRGBO(125, 46, 86, 1),
-        Color.fromRGBO(187, 135, 84, 1)
+        Colors.indigo[700]!,
+        Colors.indigo[200]!,
       ],
     ),
     LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
+        Colors.purple.shade900,
+        Colors.purple.shade700,
+        Colors.purple.shade500,
+        Colors.pink.shade400,
+        Colors.pink.shade200
+      ],
+    ),
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.purple.shade800,
+        Colors.purple.shade500,
+        Colors.pink.shade300,
+        Colors.pink.shade100
+      ],
+    ),
+    //------
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
         Colors.indigo.shade900,
-        Colors.indigo.shade700,
-            Colors.indigo.shade400,
-            Colors.pink.shade200,
-            Colors.yellow.shade200,
+        Colors.indigo.shade900,
+        Colors.indigo.shade800,
+        Colors.pink.shade300,
+        Colors.yellow.shade200,
       ],
     ),
     LinearGradient(
@@ -39,43 +59,36 @@ class SkyColor {
         Colors.yellow.shade200,
       ],
     ),
+
+
+
     LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.deepPurple.shade800.withOpacity(0.8),
-        Colors.deepPurple.shade700.withOpacity(0.99),
-        Colors.indigo.shade800.withOpacity(0.76),
-        Colors.indigo.shade700.withOpacity(0.76),
-        Colors.deepPurple.shade300.withOpacity(0.9),
-        Colors.deepPurple.shade200.withOpacity(0.8),
+        Colors.indigo.shade900,
+        Colors.purple.shade800,
+        Colors.purple.shade600,
+        Colors.pink.shade500,
+        Colors.pink.shade300
       ],
     ),
     LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.blue[700]!,
-        Colors.blue[200]!,
+        Colors.indigo.shade900,
+        Colors.indigo.shade700,
+        Colors.purple.shade600,
+        Colors.pink.shade400,
+        Colors.pink.shade200
       ],
-    ),
-    LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.indigo[700]!,
-        Colors.indigo[200]!,
-      ],
-    ),
-    LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.purple[700]!,
-        Colors.purple[200]!,
-      ],
-    ),
+    )
+
+
+
   ];
+
 
   static ValueListenable<Box> getColorBoxListenable() {
     return Hive.box('settings').listenable(keys: ['colorIndex']);

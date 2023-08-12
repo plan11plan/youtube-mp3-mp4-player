@@ -88,17 +88,13 @@ class _MyAppState extends State<MyApp> {
                 child: CurvedNavigationBar(
                   key: _bottomNavigationKey,
                   items: const [
-                    Icon(Icons.queue_music_sharp, size: 25,color: Colors.white,),
-                    Icon(Icons.play_circle_outline, size: 25,color: Colors.white),
-                    Icon(Icons.youtube_searched_for, size: 25,color: Colors.white),
-                    Icon(Icons.home, size: 25,color: Colors.white),
+                    Icon(Icons.queue_music_sharp, size: 25, color: Colors.white),
+                    Icon(Icons.play_circle_outline, size: 25, color: Colors.white),
+                    Icon(Icons.youtube_searched_for, size: 25, color: Colors.white),
+                    Icon(Icons.home, size: 25, color: Colors.white),
                   ],
-                  color: Colors.white.withOpacity(0.4),
-                  // color: Colors.black.withOpacity(0.3),
-                  // buttonBackgroundColor: Colors.blueAccent.withOpacity(0.1),
-                  // buttonBackgroundColor: Colors.black.withOpacity(0.3),
+                  color: currentindex == 2 ? Colors.black : Colors.white.withOpacity(0.4),  // 바텀 네비게이션의 배경색을 조절합니다.
                   buttonBackgroundColor: Colors.transparent,
-
                   backgroundColor: Colors.transparent,
                   animationCurve: Curves.easeInOut,
                   animationDuration: Duration(milliseconds: 500),
@@ -107,7 +103,6 @@ class _MyAppState extends State<MyApp> {
                       currentindex = index;
                     });
                   },
-
                 ),
               ),
             ),
@@ -116,4 +111,9 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+
+
+
+
+
 }
