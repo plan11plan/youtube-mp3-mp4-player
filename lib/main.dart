@@ -29,6 +29,8 @@ Future<void> main() async {
   await Hive.openBox<MediaFile>('mediaFiles');
   await Hive.openBox<int>('skyColorBox');
   await Hive.openBox('settings');  // 여기서 settings box를 열어줍니다.
+  await Hive.openBox<Playlist>('playlists');
+
 
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.example.myAudioPlayer',

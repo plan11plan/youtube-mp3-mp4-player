@@ -57,6 +57,15 @@ class MediaFile {
     return audioFiles.map((mediaFile) => mediaFile.title).toList();
   }
 
+}
 
+@HiveType(typeId: 1)  // 기존 MediaFile의 typeId가 0이므로, 1로 설정합니다.
+class Playlist {
+  @HiveField(0)
+  String name;
 
+  @HiveField(1)
+  List<String> mediaFileTitles;  // 여기에는 MediaFile의 title들을 저장합니다.
+
+  Playlist({required this.name, required this.mediaFileTitles});
 }
