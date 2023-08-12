@@ -23,7 +23,7 @@ class MediaFile {
   @HiveField(5)
   String like;
 
-  @HiveField(5)
+  @HiveField(6)
   String duration;
 
 

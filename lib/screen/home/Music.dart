@@ -191,6 +191,64 @@ class _MusicState extends State<Music> {
     }
   }
 
+  Future<void> showPlaylistSelectionDialog(BuildContext context, String mediaFileTitle) async {
+    var playlistBox = await Hive.openBox<Playlist>('playlists');
+    var playlistNames = playlistBox.values.map((playlist) => playlist.name).toList();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black, // Spotify의 어두운 배경색
+          title: Text(
+            'Add to Playlist',
+            style: TextStyle(color: Colors.white), // 밝은 글씨색
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: playlistNames.map((playlistName) => ListTile(
+                contentPadding: EdgeInsets.symmetric(vertical: 10.0), // 아이템 간격을 조금 더 넓게
+                title: Text(
+                  playlistName,
+                  style: TextStyle(color: Colors.white), // 밝은 글씨색
+                ),
+                onTap: () {
+                  addToPlaylist(playlistName, mediaFileTitle);
+                  Navigator.of(context).pop();
+                },
+              )).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.green), // Spotify의 주요 색상
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+  }
+  // 3. 사용자가 플레이리스트를 선택하면 선택된 플레이리스트에 현재 음악 파일의 제목을 추가합니다.
+  void addToPlaylist(String playlistName, String mediaFileTitle) {
+    var playlistBox = Hive.box<Playlist>('playlists');
+    var selectedPlaylist = playlistBox.values.firstWhere((playlist) => playlist.name == playlistName);
+
+    if (selectedPlaylist != null) {
+      if (!selectedPlaylist.mediaFileTitles.contains(mediaFileTitle)) {
+        selectedPlaylist.mediaFileTitles.add(mediaFileTitle);
+        var key = playlistBox.keyAt(playlistBox.values.toList().indexOf(selectedPlaylist));
+        playlistBox.put(key, selectedPlaylist);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -311,6 +369,12 @@ class _MusicState extends State<Music> {
                                             ? Colors.white
                                             : Colors.grey,
                                         icon: Icons.favorite,
+                                      ),
+                                      SlidableAction(
+                                        onPressed: (context) => showPlaylistSelectionDialog(context, mediaFiles[index].title),
+                                        backgroundColor: Colors.transparent,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.add, // 추가 아이콘
                                       ),
                                       SlidableAction(
                                         onPressed: (context) =>
