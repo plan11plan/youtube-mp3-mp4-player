@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:player/screen/playScreen/audio_player_screen.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
+import '../playScreen/playlist_screen.dart';
 import '../popup/oneDelete.dart';
 
 class  Music extends StatefulWidget {
@@ -16,6 +17,8 @@ class  Music extends StatefulWidget {
 
 class _MusicState extends State<Music> {
   TextEditingController _searchController = TextEditingController();
+  TextEditingController _playlistController = TextEditingController(); // 플레이리스트 제목을 위한 컨트롤러
+
   bool _isSearching = false;
   List<MediaFile> _filteredMediaFiles = [];
   bool _isLiked = false;  // 좋아요 버튼의 상태를 관리합니다.
@@ -32,6 +35,49 @@ class _MusicState extends State<Music> {
       await Hive.openBox<MediaFile>('mediaFiles');
     }
   }
+
+  // 플레이리스트 생성 다이얼로그를 표시하는 함수
+  Future<void> _showCreatePlaylistDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('플레이리스트 생성',style: TextStyle(color: Colors.black)),
+          content: TextField(
+            controller: _playlistController,
+            decoration: InputDecoration(
+              hintText: "플레이리스트 이름",
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소',style: TextStyle(color: Colors.black),),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('생성',style: TextStyle(color: Colors.black)),
+              onPressed: _createPlaylist,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // 플레이리스트를 생성하는 함수
+  void _createPlaylist() {
+    if (_playlistController.text.isNotEmpty) {
+      var playlistBox = Hive.box<Playlist>('playlists');
+      var newPlaylist = Playlist(name: _playlistController.text, mediaFileTitles: []);
+      playlistBox.add(newPlaylist);
+      _playlistController.clear();
+      Navigator.pop(context); // 다이얼로그 닫기
+    }
+  }
+
   void _toggleLike() {
     setState(() {
       _isLiked = !_isLiked;
@@ -55,7 +101,59 @@ class _MusicState extends State<Music> {
         file.title.toLowerCase().contains(searchText.toLowerCase()))
         .toList();
   }
+  Future<void> _showDeletePlaylistDialog() async {
+    var playlistBox = await Hive.openBox<Playlist>('playlists');
+    var playlistNames = playlistBox.values.map((playlist) => playlist.name).toList();
 
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black,
+          title: Text(
+            'Delete Playlist',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: playlistNames.map((playlistName) => ListTile(
+                contentPadding: EdgeInsets.symmetric(vertical: 10.0),
+                title: Text(
+                  playlistName,
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  _deletePlaylist(playlistName);
+                  Navigator.of(context).pop();
+                },
+              )).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.green),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deletePlaylist(String playlistName) {
+    var playlistBox = Hive.box<Playlist>('playlists');
+    var playlistToDelete = playlistBox.values.firstWhere((playlist) => playlist.name == playlistName,);
+    if (playlistToDelete != null) {
+      var key = playlistBox.keyAt(playlistBox.values.toList().indexOf(playlistToDelete));
+      playlistBox.delete(key);
+    }
+  }
 
   void _cancelSearch() {
     _searchController.clear();
@@ -324,6 +422,14 @@ class _MusicState extends State<Music> {
                                 ),
                               ),
                             ),
+                            IconButton(
+                              icon: Icon(
+                                Icons.favorite,
+                                color: _isLiked ? Colors.red : Colors.white,
+                                size: 24.0,
+                              ),
+                              onPressed: _toggleLike,
+                            ),
                             Expanded(
                               flex: 1,
                               child: Padding(
@@ -338,6 +444,8 @@ class _MusicState extends State<Music> {
                           ],
                         ),
                       ),
+                      ////
+
                       Expanded(
                         child: ValueListenableBuilder(
                           valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
@@ -534,20 +642,52 @@ class _MusicState extends State<Music> {
                         ),
                       ),
 
-                      SizedBox(
-                        height: 180,
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.favorite,
-                              color: _isLiked ? Colors.red : Colors.white,
-                              size: 40.0,
+
+                      //여기부분
+                      ValueListenableBuilder(
+                        valueListenable: Hive.box<Playlist>('playlists').listenable(),
+                        builder: (context, Box<Playlist> box, _) {
+                          return SizedBox(
+                            height: 50,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                Row(
+                                  children: box.values.map((playlist) => GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => PlaylistScreen(playlist: playlist),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 10),
+                                      child: Center(
+                                        child: Text(
+                                          playlist.name,
+                                          style: TextStyle(color: Colors.black),
+                                        ),
+                                      ),
+                                    ),
+                                  )).toList(),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.add, color: Colors.black),
+                                  onPressed: _showCreatePlaylistDialog,
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.black),
+                                  onPressed: _showDeletePlaylistDialog,
+                                ),
+                              ],
                             ),
-                            onPressed: _toggleLike,
-                          ),
-                        ),
+                          );
+                        },
                       ),
+
+                      SizedBox(height: 120,)
 
                     ],
                   ),

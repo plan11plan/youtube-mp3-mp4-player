@@ -7,7 +7,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
-
 import '../../models/file_model.dart';
 
 class GoDownload extends StatefulWidget {
@@ -18,28 +17,19 @@ class GoDownload extends StatefulWidget {
 }
 
 class _YoutubeState extends State<GoDownload> {
-  final int maxTextLength =12; // Title 허용 최대 길이.
+  final int maxTextLength = 12;
   final YoutubeExplode yt = YoutubeExplode();
-  String videoUrl = 'https://m.youtube.com/'; // 나중에 다운로드 버튼 누르면, 해당 영상으로 초기화
+  String videoUrl = 'https://m.youtube.com/';
   final TextEditingController _controller = TextEditingController();
-  late WebViewController _webViewController; // 새로고침하려고 가져옴.
+  late WebViewController _webViewController;
 
   @override
   void initState() {
     super.initState();
     _controller.text = videoUrl;
   }
-  // Future<void> _getMetaData() async {
-  //   if (videoUrl.contains('youtube.com/watch?v=')) {
-  //     var video = await yt.videos.get(videoUrl);
-  //     print('Title: ${video.title}');
-  //     print('Author: ${video.author}');
-  //     print('Duration: ${video.duration}');
-  //   }
-  // }
-  String _formatDuration(Duration duration) {
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@ duration 조작 시작 및 종료 @@@@@@@@@@@@@@@@@@@@@@@@@");
 
+  String _formatDuration(Duration duration) {
     if (duration.inHours > 0) {
       return '${duration.inHours}:${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}';
     } else {
@@ -48,53 +38,30 @@ class _YoutubeState extends State<GoDownload> {
   }
 
   Future<String> _downloadThumbnail(String videoId) async {
-    // 썸네일 다운로드
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 메서드() 호출 @@@@@@@@@@@@@@@@@@@@@@@@@");
     var video = await yt.videos.get(videoId);
-
-    //제목 필터링
     var title = video.title;
-    title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
+    title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_');
     if (title.length > maxTextLength) {
-      title = title.substring(0, maxTextLength ) + '...';
+      title = title.substring(0, maxTextLength) + '...';
     }
-    //저장할 파일 경로.
     var directory = await getApplicationDocumentsDirectory();
     var filePath = '${directory.path}/$title.jpg';
-
-    //
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 시작  @@@@@@@@@@@@@@@@@@@@@@@@@");
     var response = await http.get(Uri.parse(video.thumbnails.highResUrl));
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 완료  @@@@@@@@@@@@@@@@@@@@@@@@@");
-
     if (response.statusCode == 200) {
-      print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 파일에 넣어주기 시작  @@@@@@@@@@@@@@@@@@@@@@@@@");
       await File(filePath).writeAsBytes(response.bodyBytes);
-      print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 파일에 넣어주기 완료  @@@@@@@@@@@@@@@@@@@@@@@@@");
-
-      print('Thumbnail file saved at: $filePath');
     } else {
       print('Failed to download thumbnail');
     }
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@ 썸네일 다운로드 메서드() 호출 @@@@@@@@@@@@@@@@@@@@@@@@@");
-
     return filePath;
   }
 
   Future<void> _downloadAudio({int retryCount = 0}) async {
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  #1 오디오 다운로드() 메서드 호출  @@@@@@@@@@@@@@@@@@@@@@@@@");
-
     try {
       var videoId = videoUrl.split('v=')[1].split('&')[0];
       var manifest = await yt.videos.streamsClient.getManifest(videoId);
-      // var audioInfo = manifest.audioOnly.withHighestBitrate();
       var audioInfo = manifest.audio.withHighestBitrate();
-
-
       if (audioInfo != null) {
         var audioStream = yt.videos.streamsClient.get(audioInfo);
-
-        //파일 열고,
         var directory = await getApplicationDocumentsDirectory();
         var video = await yt.videos.get(videoId);
         var title = video.title;
@@ -104,33 +71,21 @@ class _YoutubeState extends State<GoDownload> {
         }
         var audioFile = File('${directory.path}/$title.mp3');
         var duration = video.duration;
-
         var audioFileStream = audioFile.openWrite();
-
         await (await audioStream).pipe(audioFileStream);
-
         await audioFileStream.flush();
         await audioFileStream.close();
-
         print('Download complete');
-        print('Audio file saved at: ${audioFile.path}');
-
-        // Reduce Audio Quality using FFmpeg
         var compressedAudioFile = File('${directory.path}/$title.mp3');
         await FFmpegKit.execute('-i ${audioFile.path} -b:a 64k ${compressedAudioFile.path}').then((session) async {
           final returnCode = await session.getReturnCode();
-
           if (ReturnCode.isSuccess(returnCode)) {
             print("Audio compression successful using FFmpeg");
           } else {
             print("Audio compression error using FFmpeg");
           }
         });
-
-        // Download thumbnail
         var thumbnailPath = await _downloadThumbnail(videoId);
-
-        // Save to Hive
         var mediaFile = MediaFile(title, compressedAudioFile.path, thumbnailPath, 'audio', title, 'off', _formatDuration(duration!));
         Box<MediaFile>? box;
         if (Hive.isBoxOpen('mediaFiles')) {
@@ -140,99 +95,157 @@ class _YoutubeState extends State<GoDownload> {
         }
         box.add(mediaFile);
         print('Audio metadata saved to Hive');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("다운로드 완료!",style: TextStyle(color: Colors.black),),
+            actions: <Widget>[
+              TextButton(
+                child: Text('확인',style: TextStyle(color: Colors.black)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
-      print(' ###### Failed Download ...######.');
+      print('다운로드 실패');
       if (retryCount < 2) {
-        Future.delayed(Duration(seconds: 1), () {
+        String? action = await showDownloadProgressDialog(context, initialMessage: '다운로드 실패. 재시도하시겠습니까?',);
+        if (action == 'retry') {
           _downloadAudio(retryCount: retryCount + 1);
-        });
+        }
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("3번의 시도 끝에 다운로드 실패",style: TextStyle(color: Colors.black)),
+            actions: <Widget>[
+              TextButton(
+                child: Text('확인',style: TextStyle(color: Colors.black)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
       }
     }
-    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  #1 오디오 다운로드() 메서드 종료  @@@@@@@@@@@@@@@@@@@@@@@@@");
-
   }
 
   Future<void> _downloadVideo({int retryCount = 0}) async {
     try {
-      var videoId = videoUrl.split('v=')[1].split('&')[0]; // Extract video ID before any '&' character
+      var videoId = videoUrl.split('v=')[1].split('&')[0];
       var manifest = await yt.videos.streamsClient.getManifest(videoId);
       var muxedStreamInfos = manifest.muxed.toList()
         ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
       var muxedStreamInfo = muxedStreamInfos.first;
-
       if (muxedStreamInfo != null) {
         var stream = yt.videos.streamsClient.get(muxedStreamInfo);
-
         var directory = await getApplicationDocumentsDirectory();
-
         var video = await yt.videos.get(videoId);
         var title = video.title;
-
-        title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_'); // Replace invalid characters
-        if (title.length > maxTextLength ) {
-          title = title.substring(0, maxTextLength ) + '...';
+        title = title.replaceAll(RegExp(r'[\/:*?"<>|]'), '_');
+        if (title.length > maxTextLength) {
+          title = title.substring(0, maxTextLength) + '...';
         }
         var file = File('${directory.path}/$title.mp4');
         var duration = video.duration;
-
-
         var fileStream = file.openWrite();
-
         await (await stream).pipe(fileStream);
-
         await fileStream.flush();
         await fileStream.close();
-
-        print('다운로드 완료');
-        print('영상 저장 파일 경로 : ${file.path}');
-        // Download thumbnail
-        _downloadThumbnail(videoId);
         var thumbnailPath = await _downloadThumbnail(videoId);
-        print('이미지 저장 완료');
-
-        // 변수 선언
-        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video',title, 'off',_formatDuration(duration!));
+        var mediaFile = MediaFile(title, file.path, thumbnailPath, 'video', title, 'off', _formatDuration(duration!));
         Box<MediaFile>? box;
-
-        //박스 열기
-        if(Hive.isBoxOpen('mediaFiles')) {
+        if (Hive.isBoxOpen('mediaFiles')) {
           box = Hive.box('mediaFiles');
         } else {
           box = await Hive.openBox('mediaFiles');
         }
-        // 박스 값 넣기
         box.add(mediaFile);
         print('Video metadata saved to Hive');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("다운로드 완료!",style: TextStyle(color: Colors.black)),
+            actions: <Widget>[
+              TextButton(
+                child: Text('확인',style: TextStyle(color: Colors.black)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
       }
     } catch (e) {
-      print('An error occurred: $e');
-      if (retryCount < 2) { // retry only if retry count is less than 3
-        Future.delayed(Duration(seconds: 1), () {
+      print('다운로드 실패');
+      if (retryCount < 2) {
+        String? action = await showDownloadProgressDialog(context, initialMessage: '다운로드 실패. 재시도하시겠습니까?');
+        if (action == 'retry') {
           _downloadVideo(retryCount: retryCount + 1);
-        });
+        }
       } else {
-        print('Download failed after 3 attempts');
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("3번의 시도 끝에 다운로드 실패",style: TextStyle(color: Colors.black)),
+            actions: <Widget>[
+              TextButton(
+                child: Text('확인',style: TextStyle(color: Colors.black)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
       }
     }
   }
 
-
-  Future<void> reduceAudioQualityWithFFmpeg(String inputPath, String outputPath) async {
-    await FFmpegKit.execute('-i $inputPath -b:a 64k $outputPath').then((session) async {
-      final returnCode = await session.getReturnCode();
-
-      if (ReturnCode.isSuccess(returnCode)) {
-        print("Audio compression successful using FFmpeg");
-      } else if (ReturnCode.isCancel(returnCode)) {
-        print("Audio compression cancelled");
-      } else {
-        print("Audio compression error using FFmpeg");
-      }
-    });
+  Future<String?> showDownloadProgressDialog(BuildContext context, {required String initialMessage}) async {
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return SimpleDialog(
+              title: Text(initialMessage),
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      child: Text('재시도',style: TextStyle(color: Colors.black)),
+                      onPressed: () {
+                        Navigator.of(context).pop('retry');
+                      },
+                    ),
+                    TextButton(
+                      child: Text('취소',style: TextStyle(color: Colors.black)),
+                      onPressed: () {
+                        Navigator.of(context).pop('cancel');
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
+
   Future<void> _showDownloadDialog() async {
-    _webViewController.reload(); // Reload the WebView before showing the dialog
+    _webViewController.reload();
     switch (await showDialog<String>(
       context: context,
       builder: (BuildContext context) {
@@ -277,9 +290,11 @@ class _YoutubeState extends State<GoDownload> {
       },
     )) {
       case 'Video':
+        showDownloadProgressDialog(context, initialMessage: '다운로딩 중...',);
         _downloadVideo();
         break;
       case 'Audio':
+        showDownloadProgressDialog(context, initialMessage: '다운로딩 중...');
         _downloadAudio();
         break;
     }
@@ -337,8 +352,6 @@ class _YoutubeState extends State<GoDownload> {
       ),
     );
   }
-
-
 
   @override
   void dispose() {

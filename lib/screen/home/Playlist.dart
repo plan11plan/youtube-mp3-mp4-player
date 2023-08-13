@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../models/file_model.dart';
 import '../playScreen/audio_player_screen.dart';
+import '../playScreen/playlist_screen.dart';
 
 class PlaylistCreationScreen extends StatefulWidget {
   @override
@@ -18,7 +19,7 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
       var newPlaylist = Playlist(name: _playlistController.text, mediaFileTitles: []);
       playlistBox.add(newPlaylist);
       _playlistController.clear();
-      Navigator.pop(context);
+      // Navigator.pop(context);
     }
   }
 
@@ -26,9 +27,41 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.black,  // AppBar 색상을 검정색으로 변경
         title: Text("플레이리스트 생성"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.black,
+                builder: (BuildContext context) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      ListTile(
+                        leading: Icon(Icons.add, color: Colors.white),
+                        title: Text('플레이리스트 생성', style: TextStyle(color: Colors.white)),
+                        onTap: _createPlaylist,
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.delete, color: Colors.white),
+                        title: Text('플레이리스트 삭제', style: TextStyle(color: Colors.white)),
+                        onTap: () {
+                          // 플레이리스트 삭제 기능을 여기에 구현
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          )
+        ],
       ),
-      body: Padding(
+      body: Container(
+        color: Colors.black,
         padding: EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -37,13 +70,21 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
               controller: _playlistController,
               decoration: InputDecoration(
                 hintText: "새 플레이리스트 이름",
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.white),
+                ),
               ),
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(color: Colors.white),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _createPlaylist,
               child: Text("플레이리스트 생성"),
+              style: ElevatedButton.styleFrom(primary: Colors.green),
             ),
             Expanded(
               child: ValueListenableBuilder(
@@ -54,9 +95,10 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                     itemBuilder: (context, index) {
                       var playlist = box.getAt(index);
                       return ListTile(
+                        tileColor: Colors.black,
                         title: Text(
                           playlist!.name,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: Colors.white),
                         ),
                         onTap: () async {
                           var mediaFilesBox = Hive.box<MediaFile>('mediaFiles');
@@ -89,56 +131,3 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
     );
   }
 }
-
-class PlaylistMediaFilesScreen extends StatefulWidget {
-  final List<MediaFile> mediaFiles;
-  final Playlist playlist;
-
-  PlaylistMediaFilesScreen({required this.mediaFiles, required this.playlist});
-
-  @override
-  _PlaylistMediaFilesScreenState createState() => _PlaylistMediaFilesScreenState();
-}
-
-class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("플레이리스트 음악"),
-      ),
-      body: ListView.builder(
-        itemCount: widget.mediaFiles.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(
-              widget.mediaFiles[index].title,
-              style: TextStyle(color: Colors.black),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AudioPlayerScreen(mediaFiles: widget.mediaFiles, currentIndex: index),
-                ),
-              );
-            },
-            trailing: IconButton(
-              icon: Icon(Icons.remove_circle_outline, color: Colors.red),
-              onPressed: () {
-                setState(() {
-                  var playlistBox = Hive.box<Playlist>('playlists');
-                  widget.playlist.mediaFileTitles.remove(widget.mediaFiles[index].title);
-                  playlistBox.put(widget.playlist.name, widget.playlist);
-                  widget.mediaFiles.removeAt(index);
-                });
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// AudioPlayerScreen 코드는 이전에 제공한 코드를 그대로 사용하면 됩니다.

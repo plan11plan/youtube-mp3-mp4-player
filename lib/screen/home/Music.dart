@@ -1,11 +1,11 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:player/screen/playScreen/audio_player_screen.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
-import '../playScreen/playlist_screen.dart';
 import '../popup/oneDelete.dart';
 
 class  Music extends StatefulWidget {
@@ -17,8 +17,6 @@ class  Music extends StatefulWidget {
 
 class _MusicState extends State<Music> {
   TextEditingController _searchController = TextEditingController();
-  TextEditingController _playlistController = TextEditingController(); // 플레이리스트 제목을 위한 컨트롤러
-
   bool _isSearching = false;
   List<MediaFile> _filteredMediaFiles = [];
   bool _isLiked = false;  // 좋아요 버튼의 상태를 관리합니다.
@@ -30,36 +28,34 @@ class _MusicState extends State<Music> {
     _searchController.addListener(_onSearchChanged);
   }
 
-  Future<void> _openHiveBox() async {
-    if (!Hive.isBoxOpen('mediaFiles')) {
-      await Hive.openBox<MediaFile>('mediaFiles');
-    }
-  }
+  // 2. 추가 버튼을 클릭하면 플레이리스트 선택 다이얼로그가 표시됩니다.
+  Future<void> showPlaylistSelectionDialog(BuildContext context, String mediaFileTitle) async {
+    var playlistBox = await Hive.openBox<Playlist>('playlists');
+    var playlistNames = playlistBox.values.map((playlist) => playlist.name).toList();
 
-  // 플레이리스트 생성 다이얼로그를 표시하는 함수
-  Future<void> _showCreatePlaylistDialog() async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('플레이리스트 생성'),
-          content: TextField(
-            controller: _playlistController,
-            decoration: InputDecoration(
-              hintText: "플레이리스트 이름",
+          title: Text('Add to Playlist',style: TextStyle(color: Colors.black)),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: playlistNames.map((playlistName) => ListTile(
+                title: Text(playlistName,style: TextStyle(color: Colors.black),),
+                onTap: () {
+                  addToPlaylist(playlistName, mediaFileTitle);
+                  Navigator.of(context).pop();
+                },
+              )).toList(),
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('취소'),
+              child: Text('Cancel',style: TextStyle(color: Colors.black),),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-            ),
-            TextButton(
-              child: Text('생성'),
-              onPressed: _createPlaylist,
             ),
           ],
         );
@@ -67,17 +63,24 @@ class _MusicState extends State<Music> {
     );
   }
 
-  // 플레이리스트를 생성하는 함수
-  void _createPlaylist() {
-    if (_playlistController.text.isNotEmpty) {
-      var playlistBox = Hive.box<Playlist>('playlists');
-      var newPlaylist = Playlist(name: _playlistController.text, mediaFileTitles: []);
-      playlistBox.add(newPlaylist);
-      _playlistController.clear();
-      Navigator.pop(context); // 다이얼로그 닫기
+// 3. 사용자가 플레이리스트를 선택하면 선택된 플레이리스트에 현재 음악 파일의 제목을 추가합니다.
+  void addToPlaylist(String playlistName, String mediaFileTitle) {
+    var playlistBox = Hive.box<Playlist>('playlists');
+    var selectedPlaylist = playlistBox.values.firstWhere((playlist) => playlist.name == playlistName);
+
+    if (selectedPlaylist != null) {
+      if (!selectedPlaylist.mediaFileTitles.contains(mediaFileTitle)) {
+        selectedPlaylist.mediaFileTitles.add(mediaFileTitle);
+        var key = playlistBox.keyAt(playlistBox.values.toList().indexOf(selectedPlaylist));
+        playlistBox.put(key, selectedPlaylist);
+      }
     }
   }
-
+  Future<void> _openHiveBox() async {
+    if (!Hive.isBoxOpen('mediaFiles')) {
+      await Hive.openBox<MediaFile>('mediaFiles');
+    }
+  }
   void _toggleLike() {
     setState(() {
       _isLiked = !_isLiked;
@@ -237,64 +240,6 @@ class _MusicState extends State<Music> {
     }
   }
 
-  Future<void> showPlaylistSelectionDialog(BuildContext context, String mediaFileTitle) async {
-    var playlistBox = await Hive.openBox<Playlist>('playlists');
-    var playlistNames = playlistBox.values.map((playlist) => playlist.name).toList();
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.black, // Spotify의 어두운 배경색
-          title: Text(
-            'Add to Playlist',
-            style: TextStyle(color: Colors.white), // 밝은 글씨색
-          ),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: playlistNames.map((playlistName) => ListTile(
-                contentPadding: EdgeInsets.symmetric(vertical: 10.0), // 아이템 간격을 조금 더 넓게
-                title: Text(
-                  playlistName,
-                  style: TextStyle(color: Colors.white), // 밝은 글씨색
-                ),
-                onTap: () {
-                  addToPlaylist(playlistName, mediaFileTitle);
-                  Navigator.of(context).pop();
-                },
-              )).toList(),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.green), // Spotify의 주요 색상
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-
-  }
-  // 3. 사용자가 플레이리스트를 선택하면 선택된 플레이리스트에 현재 음악 파일의 제목을 추가합니다.
-  void addToPlaylist(String playlistName, String mediaFileTitle) {
-    var playlistBox = Hive.box<Playlist>('playlists');
-    var selectedPlaylist = playlistBox.values.firstWhere((playlist) => playlist.name == playlistName);
-
-    if (selectedPlaylist != null) {
-      if (!selectedPlaylist.mediaFileTitles.contains(mediaFileTitle)) {
-        selectedPlaylist.mediaFileTitles.add(mediaFileTitle);
-        var key = playlistBox.keyAt(playlistBox.values.toList().indexOf(selectedPlaylist));
-        playlistBox.put(key, selectedPlaylist);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -370,14 +315,6 @@ class _MusicState extends State<Music> {
                                 ),
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(
-                                Icons.favorite,
-                                color: _isLiked ? Colors.red : Colors.white,
-                                size: 40.0,
-                              ),
-                              onPressed: _toggleLike,
-                            ),
                             Expanded(
                               flex: 1,
                               child: Padding(
@@ -392,8 +329,6 @@ class _MusicState extends State<Music> {
                           ],
                         ),
                       ),
-                      ////
-
                       Expanded(
                         child: ValueListenableBuilder(
                           valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
@@ -590,43 +525,20 @@ class _MusicState extends State<Music> {
                         ),
                       ),
 
-
-                      //여기부분
-                      ValueListenableBuilder(
-                        valueListenable: Hive.box<Playlist>('playlists').listenable(),
-                        builder: (context, Box<Playlist> box, _) {
-                          return SizedBox(
-                            height: 50, // 높이를 조절하실 수 있습니다.
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: box.values.length,
-                              itemBuilder: (context, index) {
-                                var playlist = box.getAt(index);
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PlaylistScreen(playlist: playlist!),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 10),
-                                    child: Center(
-                                      child: Text(
-                                        playlist!.name,
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
+                      SizedBox(
+                        height: 180,
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.favorite,
+                              color: _isLiked ? Colors.red : Colors.white,
+                              size: 40.0,
                             ),
-                          );
-                        },
+                            onPressed: _toggleLike,
+                          ),
+                        ),
                       ),
-                      SizedBox(height: 120,)
 
                     ],
                   ),
