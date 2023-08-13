@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:like_button/like_button.dart';
 import 'package:player/screen/playScreen/audio_player_screen.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
@@ -38,11 +39,21 @@ class _MusicState extends State<Music> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add to Playlist',style: TextStyle(color: Colors.black)),
+          title: Text(
+            'Add to Playlist',
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 45,
+                fontFamily: 'font1'),
+          ),
+          contentPadding: EdgeInsets.all(15.0),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0)),
+          backgroundColor: Colors.grey[800],
           content: SingleChildScrollView(
             child: ListBody(
               children: playlistNames.map((playlistName) => ListTile(
-                title: Text(playlistName,style: TextStyle(color: Colors.black),),
+                title: Text(playlistName, style: TextStyle(color: Colors.white, fontSize: 14),),
                 onTap: () {
                   addToPlaylist(playlistName, mediaFileTitle);
                   Navigator.of(context).pop();
@@ -52,7 +63,7 @@ class _MusicState extends State<Music> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel',style: TextStyle(color: Colors.black),),
+              child: Text('Cancel', style: TextStyle(color: Colors.white, fontSize: 16)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -62,6 +73,7 @@ class _MusicState extends State<Music> {
       },
     );
   }
+
 
 // 3. 사용자가 플레이리스트를 선택하면 선택된 플레이리스트에 현재 음악 파일의 제목을 추가합니다.
   void addToPlaylist(String playlistName, String mediaFileTitle) {
@@ -348,19 +360,12 @@ class _MusicState extends State<Music> {
                                   endActionPane: ActionPane(
                                     motion: const ScrollMotion(),
                                     children: [
-                                      SlidableAction(
-                                        onPressed: (context) =>
-                                            updateLikeStatus(mediaFiles[index].title, mediaFiles[index].fileType),
-                                        backgroundColor:
-                                        mediaFiles[index].like == 'on'
-                                            ? Colors.red.shade300
-                                            : Colors.transparent,
-                                        foregroundColor:
-                                        mediaFiles[index].like == 'on'
-                                            ? Colors.white
-                                            : Colors.grey,
-                                        icon: Icons.favorite,
+
+                                      CustomSlidableAction(
+                                        mediaFile: mediaFiles[index],
+                                        updateLikeStatus: updateLikeStatus,
                                       ),
+
                                       SlidableAction(
                                         onPressed: (context) => showPlaylistSelectionDialog(context, mediaFiles[index].title),
                                         backgroundColor: Colors.transparent,
@@ -526,19 +531,32 @@ class _MusicState extends State<Music> {
                       ),
 
                       SizedBox(
-                        height: 180,
+                        height: 300,
                         child: Align(
                           alignment: Alignment.topCenter,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.favorite,
-                              color: _isLiked ? Colors.red : Colors.white,
-                              size: 40.0,
+                          child: LikeButton(
+                            isLiked: _isLiked,
+                            size: 40.0,
+                            circleColor: CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
+                            bubblesColor: BubblesColor(
+                              dotPrimaryColor: Color(0xff33b5e5),
+                              dotSecondaryColor: Color(0xff0099cc),
                             ),
-                            onPressed: _toggleLike,
+                            likeBuilder: (bool isLiked) {
+                              return Icon(
+                                Icons.favorite,
+                                color: isLiked ? Colors.red : Colors.white,
+                                size: 40.0,
+                              );
+                            },
+                            onTap: (isLiked) async {
+                              _toggleLike();
+                              return !isLiked;
+                            },
                           ),
                         ),
-                      ),
+                      )
+
 
                     ],
                   ),
@@ -548,6 +566,43 @@ class _MusicState extends State<Music> {
           },
         );
       },
+    );
+  }
+}
+class CustomSlidableAction extends StatelessWidget {
+  final MediaFile mediaFile;
+  final Function updateLikeStatus;
+
+  CustomSlidableAction({required this.mediaFile, required this.updateLikeStatus});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => updateLikeStatus(mediaFile.title, mediaFile.fileType),
+      child: Container(
+        color: mediaFile.like == 'on' ? Colors.transparent : Colors.transparent,
+        padding: const EdgeInsets.all(10),
+        child: LikeButton(
+          isLiked: mediaFile.like == 'on',
+          size: 25.0,
+          circleColor: CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
+          bubblesColor: BubblesColor(
+            dotPrimaryColor: Color(0xff33b5e5),
+            dotSecondaryColor: Color(0xff0099cc),
+          ),
+          likeBuilder: (bool isLiked) {
+            return Icon(
+              Icons.favorite,
+              color: isLiked ? Colors.red : Colors.grey,
+              size: 25.0,
+            );
+          },
+          onTap: (isLiked) async {
+            await updateLikeStatus(mediaFile.title, mediaFile.fileType);
+            return !isLiked;
+          },
+        ),
+      ),
     );
   }
 }

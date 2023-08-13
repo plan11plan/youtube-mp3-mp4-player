@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:like_button/like_button.dart';
 import '../../models/file_model.dart';
 import '../icon/skyColor.dart';
 import '../playScreen/video_player_screen.dart';
@@ -308,19 +309,11 @@ class _VideoState extends State<Video> {
                                   endActionPane: ActionPane(
                                     motion: const ScrollMotion(),
                                     children: [
-                                      SlidableAction(
-                                        onPressed: (context) =>
-                                            updateLikeStatus(mediaFiles[index].title, mediaFiles[index].fileType),
-                                        backgroundColor:
-                                        mediaFiles[index].like == 'on'
-                                            ? Colors.red.shade300
-                                            : Colors.transparent,
-                                        foregroundColor:
-                                        mediaFiles[index].like == 'on'
-                                            ? Colors.white
-                                            : Colors.grey,
-                                        icon: Icons.favorite,
+                                      CustomSlidableAction(
+                                        mediaFile: mediaFiles[index],
+                                        updateLikeStatus: updateLikeStatus,
                                       ),
+
                                       SlidableAction(
                                         onPressed: (context) =>
                                             showEditDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
@@ -471,19 +464,31 @@ class _VideoState extends State<Video> {
                       ),
 
                       SizedBox(
-                        height: 180,
+                        height: 300,
                         child: Align(
                           alignment: Alignment.topCenter,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.favorite,
-                              color: _isLiked ? Colors.red : Colors.white,
-                              size: 40.0,
+                          child: LikeButton(
+                            isLiked: _isLiked,
+                            size: 40.0,
+                            circleColor: CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
+                            bubblesColor: BubblesColor(
+                              dotPrimaryColor: Color(0xff33b5e5),
+                              dotSecondaryColor: Color(0xff0099cc),
                             ),
-                            onPressed: _toggleLike,
+                            likeBuilder: (bool isLiked) {
+                              return Icon(
+                                Icons.favorite,
+                                color: isLiked ? Colors.red : Colors.white,
+                                size: 40.0,
+                              );
+                            },
+                            onTap: (isLiked) async {
+                              _toggleLike();
+                              return !isLiked;
+                            },
                           ),
                         ),
-                      ),
+                      )
 
                     ],
                   ),
@@ -493,6 +498,43 @@ class _VideoState extends State<Video> {
           },
         );
       },
+    );
+  }
+}
+class CustomSlidableAction extends StatelessWidget {
+  final MediaFile mediaFile;
+  final Function updateLikeStatus;
+
+  CustomSlidableAction({required this.mediaFile, required this.updateLikeStatus});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => updateLikeStatus(mediaFile.title, mediaFile.fileType),
+      child: Container(
+        color: mediaFile.like == 'on' ? Colors.transparent : Colors.transparent,
+        padding: const EdgeInsets.all(10),
+        child: LikeButton(
+          isLiked: mediaFile.like == 'on',
+          size: 25.0,
+          circleColor: CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
+          bubblesColor: BubblesColor(
+            dotPrimaryColor: Color(0xff33b5e5),
+            dotSecondaryColor: Color(0xff0099cc),
+          ),
+          likeBuilder: (bool isLiked) {
+            return Icon(
+              Icons.favorite,
+              color: isLiked ? Colors.red : Colors.grey,
+              size: 25.0,
+            );
+          },
+          onTap: (isLiked) async {
+            await updateLikeStatus(mediaFile.title, mediaFile.fileType);
+            return !isLiked;
+          },
+        ),
+      ),
     );
   }
 }
