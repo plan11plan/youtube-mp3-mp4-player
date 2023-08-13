@@ -33,31 +33,172 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
           IconButton(
             icon: Icon(Icons.settings),
             onPressed: () {
-              showModalBottomSheet(
+              showDialog(
                 context: context,
-                backgroundColor: Colors.black,
                 builder: (BuildContext context) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      ListTile(
-                        leading: Icon(Icons.add, color: Colors.white),
-                        title: Text('플레이리스트 생성', style: TextStyle(color: Colors.white)),
-                        onTap: _createPlaylist,
-                      ),
-                      ListTile(
-                        leading: Icon(Icons.delete, color: Colors.white),
-                        title: Text('플레이리스트 삭제', style: TextStyle(color: Colors.white)),
-                        onTap: () {
-                          // 플레이리스트 삭제 기능을 여기에 구현
-                        },
-                      ),
-                    ],
+                  return AlertDialog(
+                    backgroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    title: Text(
+                      'Settings',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        ListTile(
+                          leading: Icon(Icons.add, color: Colors.white),
+                          title: Text('Create Playlist', style: TextStyle(color: Colors.white)),
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  title: Text(
+                                    'Create Playlist',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      TextField(
+                                        controller: _playlistController,
+                                        decoration: InputDecoration(
+                                          hintText: "New Playlist Name",
+                                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                                          enabledBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                                          ),
+                                          focusedBorder: UnderlineInputBorder(
+                                            borderSide: BorderSide(color: Colors.white),
+                                          ),
+                                        ),
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      SizedBox(height: 20),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          _createPlaylist();
+                                          Navigator.of(context).pop();  // This will close the current dialog
+                                          Navigator.of(context).pop();  // This will close the settings dialog
+                                        },
+                                        child: Text("Create Playlist"),
+                                        style: ElevatedButton.styleFrom(primary: Colors.green),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+
+                        ListTile(
+                          leading: Icon(Icons.delete, color: Colors.white),
+                          title: Text('Delete Playlist', style: TextStyle(color: Colors.white)),
+                          onTap: () {
+                            Navigator.of(context).pop(); // 현재 모달 팝업을 닫습니다.
+
+                            // 플레이리스트 선택 화면을 표시합니다.
+                            showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  title: const Text(
+                                    'Select Playlist to Delete',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: Container(
+                                    width: double.maxFinite,
+                                    child: ListView.builder(
+                                      itemCount: Hive.box<Playlist>('playlists').length,
+                                      itemBuilder: (context, index) {
+                                        var playlist = Hive.box<Playlist>('playlists').getAt(index);
+                                        return ListTile(
+                                          title: Text(playlist!.name, style: TextStyle(color: Colors.white)),
+                                          onTap: () {
+                                            Navigator.of(context).pop(); // 선택 화면을 닫습니다.
+
+                                            // 'Delete?' 팝업창을 표시합니다.
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) {
+                                                return AlertDialog(
+                                                  backgroundColor: Colors.black,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(15),
+                                                  ),
+                                                  title: const Text(
+                                                    'Delete?',
+                                                    style: TextStyle(color: Colors.white),
+                                                  ),
+                                                  content: SingleChildScrollView(
+                                                    child: ListBody(
+                                                      children: const <Widget>[
+                                                        Text(
+                                                          'Do you want to delete this playlist?',
+                                                          style: TextStyle(color: Colors.white),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                                      onPressed: () {
+                                                        Hive.box<Playlist>('playlists').deleteAt(index);
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                    ),
+                                                    TextButton(
+                                                      child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                                                      onPressed: () {
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
+
+
+
+                      ],
+                    ),
                   );
                 },
               );
             },
           )
+
         ],
       ),
       body: Container(
@@ -113,12 +254,7 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                             ),
                           );
                         },
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            box.deleteAt(index);
-                          },
-                        ),
+
                       );
                     },
                   );
