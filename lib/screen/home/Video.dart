@@ -463,32 +463,49 @@ class _VideoState extends State<Video> {
                         ),
                       ),
 
-                      SizedBox(
-                        height: 300,
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: LikeButton(
-                            isLiked: _isLiked,
-                            size: 40.0,
-                            circleColor: CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
-                            bubblesColor: BubblesColor(
-                              dotPrimaryColor: Color(0xff33b5e5),
-                              dotSecondaryColor: Color(0xff0099cc),
+                      Stack(
+                        children: [
+                          // 기존의 SizedBox
+                          SizedBox(
+                            height: 160,
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: Container(
+                                // 여기에 필요한 위젯이나 디자인을 추가하세요.
+                              ),
                             ),
-                            likeBuilder: (bool isLiked) {
-                              return Icon(
-                                Icons.favorite,
-                                color: isLiked ? Colors.red : Colors.white,
-                                size: 40.0,
-                              );
-                            },
-                            onTap: (isLiked) async {
-                              _toggleLike();
-                              return !isLiked;
-                            },
                           ),
-                        ),
-                      )
+                          // LikeButton 위치 변경
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              height: 50.0,  // 아이콘 크기와 동일하게 설정
+                              width: 50.0,   // 아이콘 크기와 동일하게 설정
+                              child: LikeButton(
+                                isLiked: _isLiked,
+                                size: 44.0,
+                                circleColor: CircleColor(start: Color(0xff00ddff), end: Color(0xff0099cc)),
+                                bubblesColor: BubblesColor(
+                                  dotPrimaryColor: Color(0xff33b5e5),
+                                  dotSecondaryColor: Color(0xff0099cc),
+                                ),
+                                likeBuilder: (bool isLiked) {
+                                  return Icon(
+                                    Icons.favorite,
+                                    color: isLiked ? Colors.red : Colors.white,
+                                    size: 44.0,
+                                  );
+                                },
+                                onTap: (isLiked) async {
+                                  _toggleLike();
+                                  return !isLiked;
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
 
                     ],
                   ),

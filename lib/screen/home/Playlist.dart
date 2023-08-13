@@ -217,11 +217,9 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                                                                     Colors.red,
                                                                 fontSize: 16)),
                                                         onPressed: () {
-                                                          Hive.box<Playlist>(
-                                                                  'playlists')
-                                                              .deleteAt(index);
-                                                          Navigator.of(context)
-                                                              .pop();
+                                                          var playlistBox = Hive.box<Playlist>('playlists');
+                                                          playlistBox.deleteAt(index);
+                                                          Navigator.of(context).pop();
                                                         },
                                                       ),
                                                       TextButton(
@@ -278,52 +276,75 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
               }),
         ],
       ),
-      body: Container(
-        decoration: SkyColor.skyDecoration, // 이 부분에서 배경색을 설정합니다.
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: Hive.box<Playlist>('playlists').listenable(),
-                builder: (context, Box<Playlist> box, _) {
-                  return ListView.builder(
-                    itemCount: box.values.length,
-                    itemBuilder: (context, index) {
-                      var playlist = box.getAt(index);
-                      return ListTile(
-                        tileColor: Colors.black,
-                        title: Text(
-                          playlist!.name,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        onTap: () async {
-                          var mediaFilesBox = Hive.box<MediaFile>('mediaFiles');
-                          List<MediaFile> playlistMediaFiles = playlist
-                              .mediaFileTitles
-                              .map((title) => mediaFilesBox.values
-                                  .firstWhere((file) => file.title == title))
-                              .toList();
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PlaylistMediaFilesScreen(
-                                  mediaFiles: playlistMediaFiles,
-                                  playlist: playlist),
+        body: Container(
+          decoration: SkyColor.skyDecoration,
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: ValueListenableBuilder(
+                  valueListenable: Hive.box<Playlist>('playlists').listenable(),
+                  builder: (context, Box<Playlist> box, _) {
+                    return ListView.builder(
+                      itemCount: box.values.length,
+                      itemBuilder: (context, index) {
+                        var playlist = box.getAt(index);
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 15.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+                            child: ListTile(
+                              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              title: Text(
+                                playlist!.name,
+                                style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),  // 크기를 24로 변경
+                              ),
+                              subtitle: Text(
+                                '${playlist.mediaFileTitles.length} songs',
+                                style: TextStyle(color: Colors.white54, fontSize: 18),  // 크기를 18으로 변경
+                              ),
+                              trailing: Icon(Icons.chevron_right, color: Colors.white54, size: 30),
+                              onTap: () async {
+                                var mediaFilesBox = Hive.box<MediaFile>('mediaFiles');
+                                List<MediaFile> playlistMediaFiles = playlist
+                                    .mediaFileTitles
+                                    .map((title) => mediaFilesBox.values
+                                    .firstWhere((file) => file.title == title))
+                                    .toList();
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PlaylistMediaFilesScreen(
+                                        mediaFiles: playlistMediaFiles,
+                                        playlist: playlist),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    );
+
+
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        )
+
+
+
+
+
+      //
     );
   }
 }
