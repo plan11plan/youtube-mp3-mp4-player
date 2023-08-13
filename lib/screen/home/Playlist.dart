@@ -16,7 +16,8 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
   void _createPlaylist() {
     if (_playlistController.text.isNotEmpty) {
       var playlistBox = Hive.box<Playlist>('playlists');
-      var newPlaylist = Playlist(name: _playlistController.text, mediaFileTitles: []);
+      var newPlaylist =
+          Playlist(name: _playlistController.text, mediaFileTitles: []);
       playlistBox.add(newPlaylist);
       _playlistController.clear();
       // Navigator.pop(context);
@@ -27,7 +28,7 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,  // AppBar 색상을 검정색으로 변경
+        backgroundColor: Colors.black, // AppBar 색상을 검정색으로 변경
         title: Text("플레이리스트 생성"),
         actions: [
           IconButton(
@@ -37,7 +38,7 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Color(0xFF282828),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -50,7 +51,8 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                       children: <Widget>[
                         ListTile(
                           leading: Icon(Icons.add, color: Colors.white),
-                          title: Text('Create Playlist', style: TextStyle(color: Colors.white)),
+                          title: Text('Create Playlist',
+                              style: TextStyle(color: Colors.white)),
                           onTap: () {
                             showDialog(
                               context: context,
@@ -71,12 +73,17 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                                         controller: _playlistController,
                                         decoration: InputDecoration(
                                           hintText: "New Playlist Name",
-                                          hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
+                                          hintStyle: TextStyle(
+                                              color: Colors.white
+                                                  .withOpacity(0.6)),
                                           enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                                            borderSide: BorderSide(
+                                                color: Colors.white
+                                                    .withOpacity(0.3)),
                                           ),
                                           focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.white),
+                                            borderSide:
+                                                BorderSide(color: Colors.white),
                                           ),
                                         ),
                                         style: TextStyle(color: Colors.white),
@@ -85,11 +92,14 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                                       ElevatedButton(
                                         onPressed: () {
                                           _createPlaylist();
-                                          Navigator.of(context).pop();  // This will close the current dialog
-                                          Navigator.of(context).pop();  // This will close the settings dialog
+                                          Navigator.of(context)
+                                              .pop(); // This will close the current dialog
+                                          Navigator.of(context)
+                                              .pop(); // This will close the settings dialog
                                         },
                                         child: Text("Create Playlist"),
-                                        style: ElevatedButton.styleFrom(primary: Colors.green),
+                                        style: ElevatedButton.styleFrom(
+                                            primary: Colors.green),
                                       ),
                                     ],
                                   ),
@@ -98,10 +108,11 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                             );
                           },
                         ),
-
                         ListTile(
                           leading: Icon(Icons.delete, color: Colors.white),
-                          title: Text('Delete Playlist', style: TextStyle(color: Colors.white)),
+                          title: Text('Delete Playlist',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16)),
                           onTap: () {
                             Navigator.of(context).pop(); // 현재 모달 팝업을 닫습니다.
 
@@ -110,60 +121,92 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
-                                  backgroundColor: Colors.black,
+                                  backgroundColor: Color(0xFF282828),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
+                                    borderRadius: BorderRadius.circular(10),
                                   ),
-                                  title: const Text(
+                                  title: Text(
                                     'Select Playlist to Delete',
-                                    style: TextStyle(color: Colors.white),
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   content: Container(
                                     width: double.maxFinite,
                                     child: ListView.builder(
-                                      itemCount: Hive.box<Playlist>('playlists').length,
+                                      itemCount: Hive.box<Playlist>('playlists')
+                                          .length,
                                       itemBuilder: (context, index) {
-                                        var playlist = Hive.box<Playlist>('playlists').getAt(index);
+                                        var playlist =
+                                            Hive.box<Playlist>('playlists')
+                                                .getAt(index);
                                         return ListTile(
-                                          title: Text(playlist!.name, style: TextStyle(color: Colors.white)),
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 24, vertical: 8),
+                                          title: Text(playlist!.name,
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14)),
                                           onTap: () {
-                                            Navigator.of(context).pop(); // 선택 화면을 닫습니다.
+                                            Navigator.of(context)
+                                                .pop(); // 선택 화면을 닫습니다.
 
                                             // 'Delete?' 팝업창을 표시합니다.
                                             showDialog(
                                               context: context,
                                               builder: (context) {
                                                 return AlertDialog(
-                                                  backgroundColor: Colors.black,
+                                                  backgroundColor:
+                                                      Color(0xFF282828),
                                                   shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(15),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
                                                   ),
-                                                  title: const Text(
+                                                  title: Text(
                                                     'Delete?',
-                                                    style: TextStyle(color: Colors.white),
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold),
                                                   ),
-                                                  content: SingleChildScrollView(
+                                                  content:
+                                                      SingleChildScrollView(
                                                     child: ListBody(
-                                                      children: const <Widget>[
+                                                      children: <Widget>[
                                                         Text(
                                                           'Do you want to delete this playlist?',
-                                                          style: TextStyle(color: Colors.white),
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[400],
+                                                              fontSize: 14),
                                                         ),
                                                       ],
                                                     ),
                                                   ),
                                                   actions: <Widget>[
                                                     TextButton(
-                                                      child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                                      child: Text('Delete',
+                                                          style: TextStyle(
+                                                              color: Colors.red,
+                                                              fontSize: 16)),
                                                       onPressed: () {
-                                                        Hive.box<Playlist>('playlists').deleteAt(index);
-                                                        Navigator.of(context).pop();
+                                                        Hive.box<Playlist>(
+                                                                'playlists')
+                                                            .deleteAt(index);
+                                                        Navigator.of(context)
+                                                            .pop();
                                                       },
                                                     ),
                                                     TextButton(
-                                                      child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                                                      child: Text('Cancel',
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[400],
+                                                              fontSize: 16)),
                                                       onPressed: () {
-                                                        Navigator.of(context).pop();
+                                                        Navigator.of(context)
+                                                            .pop();
                                                       },
                                                     ),
                                                   ],
@@ -177,7 +220,10 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                                   ),
                                   actions: <Widget>[
                                     TextButton(
-                                      child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+                                      child: Text('Cancel',
+                                          style: TextStyle(
+                                              color: Colors.grey[400],
+                                              fontSize: 16)),
                                       onPressed: () {
                                         Navigator.of(context).pop();
                                       },
@@ -190,15 +236,21 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                         ),
 
 
-
                       ],
                     ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: Text('Cancel', style: TextStyle(color: Colors.grey[400], fontSize: 16)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
                   );
                 },
               );
             },
           )
-
         ],
       ),
       body: Container(
@@ -207,26 +259,6 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _playlistController,
-              decoration: InputDecoration(
-                hintText: "새 플레이리스트 이름",
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.6)),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-              ),
-              style: TextStyle(color: Colors.white),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _createPlaylist,
-              child: Text("플레이리스트 생성"),
-              style: ElevatedButton.styleFrom(primary: Colors.green),
-            ),
             Expanded(
               child: ValueListenableBuilder(
                 valueListenable: Hive.box<Playlist>('playlists').listenable(),
@@ -243,18 +275,21 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                         ),
                         onTap: () async {
                           var mediaFilesBox = Hive.box<MediaFile>('mediaFiles');
-                          List<MediaFile> playlistMediaFiles = playlist.mediaFileTitles
-                              .map((title) => mediaFilesBox.values.firstWhere((file) => file.title == title))
+                          List<MediaFile> playlistMediaFiles = playlist
+                              .mediaFileTitles
+                              .map((title) => mediaFilesBox.values
+                                  .firstWhere((file) => file.title == title))
                               .toList();
 
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PlaylistMediaFilesScreen(mediaFiles: playlistMediaFiles, playlist: playlist),
+                              builder: (context) => PlaylistMediaFilesScreen(
+                                  mediaFiles: playlistMediaFiles,
+                                  playlist: playlist),
                             ),
                           );
                         },
-
                       );
                     },
                   );
