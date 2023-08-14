@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../models/file_model.dart';
 import 'audio_player_screen.dart';
 
@@ -18,11 +19,17 @@ class PlaylistMediaFilesScreen extends StatefulWidget {
 
 class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
   late List<MediaFile> _displayedMediaFiles;
+  final _picker = ImagePicker(); // 추가된 코드
+  String? imagePath; // 추가된 코드
+
+
 
   @override
   void initState() {
     super.initState();
     _displayedMediaFiles = widget.mediaFiles;
+    imagePath = 'assets/image/paka.png'; // 초기 이미지 경로 설정
+
   }
 
   void _onShuffle(List<MediaFile> shuffledList) {
@@ -30,6 +37,15 @@ class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
       _displayedMediaFiles = shuffledList;
     });
   }
+  Future<void> _changeThumbnail() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        imagePath = pickedFile.path;
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -49,13 +65,43 @@ class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           title: Text("Playlist"),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.more_vert_outlined, color: Colors.white),
+              onPressed: () async {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text("썸네일 이미지를 바꾸시겠습니까?",style: TextStyle(color: Colors.black),),
+                      actions: [
+                        TextButton(
+                          child: Text("Change"),
+                          onPressed: () async {
+                            await _changeThumbnail();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: Text("Cancel"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ],
         ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(27.0),
             child: Column(
               children: [
-                _PlaylistInformation(playlist: widget.playlist),
+                _PlaylistInformation(playlist: widget.playlist, imagePath: imagePath), // imagePath를 전달
                 const SizedBox(height: 14),
                 _PlayOrShuffleSwitch(
                   mediaFiles: widget.mediaFiles,
@@ -71,12 +117,16 @@ class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
       ),
     );
   }
+
 }
 
 class _PlaylistInformation extends StatelessWidget {
   final Playlist playlist;
+  final String? imagePath; // 추가된 코드
 
-  _PlaylistInformation({required this.playlist});
+
+
+  _PlaylistInformation({required this.playlist, this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -96,10 +146,17 @@ class _PlaylistInformation extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15),
-            child: Image.asset(
-              'assets/image/paka.png',
+            child: (imagePath == null || imagePath!.startsWith('assets/'))
+                ? Image.asset(
+              imagePath ?? 'assets/image/paka.png', // <- 여기에서 기본값을 설정
               height: MediaQuery.of(context).size.height * 0.3,
-              width: MediaQuery.of(context).size.height * 0.3,
+              width: MediaQuery.of(context).size.width * 0.3,
+              fit: BoxFit.cover,
+            )
+                : Image.file(
+              File(imagePath!),
+              height: MediaQuery.of(context).size.height * 0.3,
+              width: MediaQuery.of(context).size.width * 0.3,
               fit: BoxFit.cover,
             ),
           ),
