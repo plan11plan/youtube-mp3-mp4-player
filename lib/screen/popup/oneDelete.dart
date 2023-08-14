@@ -26,7 +26,7 @@ class OneDeleteDialog extends StatelessWidget {
           children: <Widget>[
             Text(
               'Do you want to delete this file?',
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              style: TextStyle(color: Colors.white, fontSize: 14),
             ),
           ],
         ),

@@ -54,9 +54,9 @@ class MediaFileAdapter extends TypeAdapter<MediaFile> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MediaFileAdapter &&
-          runtimeType == other.runtimeType &&
-          typeId == other.typeId;
+          other is MediaFileAdapter &&
+              runtimeType == other.runtimeType &&
+              typeId == other.typeId;
 }
 class PlaylistAdapter extends TypeAdapter<Playlist> {
   @override
@@ -71,6 +71,8 @@ class PlaylistAdapter extends TypeAdapter<Playlist> {
     return Playlist(
       name: fields[0] as String? ?? "",
       mediaFileTitles: (fields[1] as List? ?? []).cast<String>(),
+      imagePath: fields[2] as String? ?? 'assets/image/paka.png', // Add this line
+
     );
   }
 
@@ -81,7 +83,9 @@ class PlaylistAdapter extends TypeAdapter<Playlist> {
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
-      ..write(obj.mediaFileTitles);
+      ..write(obj.mediaFileTitles)
+      ..writeByte(2)
+      ..write(obj.imagePath); // Add this line
   }
 
   @override

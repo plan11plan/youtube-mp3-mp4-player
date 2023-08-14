@@ -19,7 +19,8 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
     if (_playlistController.text.isNotEmpty) {
       var playlistBox = Hive.box<Playlist>('playlists');
       var newPlaylist =
-      Playlist(name: _playlistController.text, mediaFileTitles: []);
+      Playlist(name: _playlistController.text, mediaFileTitles: [], imagePath: 'assets/image/default_playlist.png'
+      );
       playlistBox.add(newPlaylist);
       _playlistController.clear();
     }

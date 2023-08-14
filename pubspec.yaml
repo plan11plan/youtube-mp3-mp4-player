@@ -81,7 +81,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/image/paka.png
+    - assets/image/default_playlist.png
 
   fonts:
     - family: font1
