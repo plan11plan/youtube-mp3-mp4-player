@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,23 +13,36 @@ class PlaylistMediaFilesScreen extends StatefulWidget {
   PlaylistMediaFilesScreen({required this.mediaFiles, required this.playlist});
 
   @override
-  _PlaylistMediaFilesScreenState createState() =>
-      _PlaylistMediaFilesScreenState();
+  _PlaylistMediaFilesScreenState createState() => _PlaylistMediaFilesScreenState();
 }
 
 class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
+  late List<MediaFile> _displayedMediaFiles;
+
+  @override
+  void initState() {
+    super.initState();
+    _displayedMediaFiles = widget.mediaFiles;
+  }
+
+  void _onShuffle(List<MediaFile> shuffledList) {
+    setState(() {
+      _displayedMediaFiles = shuffledList;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
           gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.deepPurple.shade800.withOpacity(0.8),
-          Colors.deepPurple.shade200.withOpacity(0.8),
-        ],
-      )),
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.deepPurple.shade800.withOpacity(0.8),
+              Colors.deepPurple.shade200.withOpacity(0.8),
+            ],
+          )),
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
@@ -42,12 +56,13 @@ class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
             child: Column(
               children: [
                 _PlaylistInformation(playlist: widget.playlist),
+                _PlayOrShuffleSwitch(
+                  mediaFiles: widget.mediaFiles,
+                  onShuffle: _onShuffle,
+                ),
                 const SizedBox(height: 10),
-                _PlayOrShuffleSwitch(), // 추가된 부분
-                const SizedBox(height: 10),
-
                 _MediaFilesList(
-                    mediaFiles: widget.mediaFiles, playlist: widget.playlist),
+                    mediaFiles: _displayedMediaFiles, playlist: widget.playlist),
               ],
             ),
           ),
@@ -303,9 +318,14 @@ class __MediaFilesListState extends State<_MediaFilesList> {
   }
 }
 class _PlayOrShuffleSwitch extends StatefulWidget {
+  final List<MediaFile> mediaFiles;
+  final Function(List<MediaFile>) onShuffle;
+
   const _PlayOrShuffleSwitch({
-    super.key,
-  });
+    Key? key,
+    required this.mediaFiles,
+    required this.onShuffle,
+  }) : super(key: key);
 
   @override
   State<_PlayOrShuffleSwitch> createState() => _PlayOrShuffleSwitchState();
@@ -313,11 +333,18 @@ class _PlayOrShuffleSwitch extends StatefulWidget {
 
 class _PlayOrShuffleSwitchState extends State<_PlayOrShuffleSwitch> {
   bool isPlay = true;
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
+        if (!isPlay) {
+          // Shuffle the playlist
+          List<MediaFile> shuffledMediaFiles = List.from(widget.mediaFiles);
+          shuffledMediaFiles.shuffle();
+          widget.onShuffle(shuffledMediaFiles);
+        }
         setState(() {
           isPlay = !isPlay;
         });
@@ -338,7 +365,8 @@ class _PlayOrShuffleSwitchState extends State<_PlayOrShuffleSwitch> {
                 width: width * 0.45,
                 decoration: BoxDecoration(
                     color: Colors.deepPurple.shade400, borderRadius: BorderRadius.circular(15)
-                ),),
+                ),
+              ),
             ),
             Row(
               children: [
@@ -390,4 +418,5 @@ class _PlayOrShuffleSwitchState extends State<_PlayOrShuffleSwitch> {
       ),
     );
   }
+
 }
