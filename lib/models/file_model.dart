@@ -65,7 +65,14 @@ class Playlist {
   String name;
 
   @HiveField(1)
-  List<String> mediaFileTitles;  // 여기에는 MediaFile의 title들을 저장합니다.
+  List<String> mediaFileTitles; // 여기에는 MediaFile의 title들을 저장합니다.
 
   Playlist({required this.name, required this.mediaFileTitles});
+
+  Playlist copyWith({String? name, List<String>? mediaFileTitles}) {
+    return Playlist(
+      name: name ?? this.name,
+      mediaFileTitles: mediaFileTitles ?? this.mediaFileTitles,
+    );
+  }
 }

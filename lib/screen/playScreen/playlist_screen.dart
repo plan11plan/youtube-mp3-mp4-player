@@ -56,6 +56,7 @@ class _PlaylistMediaFilesScreenState extends State<PlaylistMediaFilesScreen> {
             child: Column(
               children: [
                 _PlaylistInformation(playlist: widget.playlist),
+                const SizedBox(height: 14),
                 _PlayOrShuffleSwitch(
                   mediaFiles: widget.mediaFiles,
                   onShuffle: _onShuffle,
@@ -81,13 +82,26 @@ class _PlaylistInformation extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: Image.asset(
-            'assets/image/paka.png',
-            height: MediaQuery.of(context).size.height * 0.3,
-            width: MediaQuery.of(context).size.height * 0.3,
-            fit: BoxFit.cover,
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.4),
+                spreadRadius: 2,
+                blurRadius: 20,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.asset(
+              'assets/image/paka.png',
+              height: MediaQuery.of(context).size.height * 0.3,
+              width: MediaQuery.of(context).size.height * 0.3,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(
@@ -353,7 +367,15 @@ class _PlayOrShuffleSwitchState extends State<_PlayOrShuffleSwitch> {
         height: 50,
         width: width,
         decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(15)
+            color: Colors.white, borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 30,
+              offset: Offset(0, 5),
+            ),
+          ],
         ),
         child: Stack(
           children: [

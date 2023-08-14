@@ -377,7 +377,7 @@ class _MusicState extends State<Music> {
                                             showEditDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: Colors.white,
-                                        icon: Icons.settings,
+                                        icon: Icons.edit,
                                       ),
                                       SlidableAction(
                                         onPressed: (context) =>
