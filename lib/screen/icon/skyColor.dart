@@ -12,32 +12,10 @@ class SkyColor {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.indigo[700]!,
-        Colors.indigo[200]!,
-      ],
-    ),
-    LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.purple.shade900,
-        Colors.purple.shade700,
-        Colors.purple.shade500,
-        Colors.pink.shade400,
+        Colors.indigo.shade900,
         Colors.pink.shade200
       ],
     ),
-    LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.purple.shade800,
-        Colors.purple.shade500,
-        Colors.pink.shade300,
-        Colors.pink.shade100
-      ],
-    ),
-    //------
     LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -61,29 +39,44 @@ class SkyColor {
     ),
 
 
-
     LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.indigo.shade900,
-        Colors.purple.shade800,
-        Colors.purple.shade600,
-        Colors.pink.shade500,
-        Colors.pink.shade300
+        Color.fromRGBO(57, 0, 63, 1),  // +20 to each RGB value
+        Color.fromRGBO(106, 28, 92, 1),  // +20 to each RGB value
+        Color.fromRGBO(135, 56, 96, 1),  // +20 to each RGB value
+        Color.fromRGBO(207, 155, 104, 1)  // +20 to each RGB value
       ],
     ),
     LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.indigo.shade900,
-        Colors.indigo.shade700,
-        Colors.purple.shade600,
-        Colors.pink.shade400,
+        Colors.purple.shade900,
+        Colors.purple.shade700,
+
         Colors.pink.shade200
       ],
-    )
+    ),
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.purple.shade800,
+        Colors.purple.shade500,
+        Colors.pink.shade300,
+        Colors.pink.shade100
+      ],
+    ),
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.indigo[900]!,
+        Colors.indigo[200]!,
+      ],
+    ),
 
 
 

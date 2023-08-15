@@ -272,7 +272,7 @@ class _MusicPlayerState extends State<_MusicPlayer> {
                     data: SliderTheme.of(context).copyWith(
                       activeTrackColor: Colors.white.withOpacity(0.7),
                       inactiveTrackColor: Colors.white.withOpacity(0.3),
-                      thumbColor: Colors.white.withOpacity(0.7),
+                      thumbColor: Colors.white.withOpacity(1.0),
                     ),
                     child: Slider(
                       value: _volume,

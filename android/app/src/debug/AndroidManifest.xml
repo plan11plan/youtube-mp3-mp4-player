@@ -4,4 +4,14 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application>
+        <!-- 기존의 다른 액티비티, 서비스, 리시버 등의 설정이 있을 수 있습니다. -->
+
+        <service
+            android:name="com.ryanheise.audioservice.AudioService"
+            android:exported="true">
+            <!-- 다른 속성 및 intent filter는 여기에 -->
+        </service>
+    </application>
 </manifest>

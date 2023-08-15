@@ -20,6 +20,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   VideoPlayerController? videoPlayer;
   int currentSongIndex = 0;
   bool showControls = false;
+  bool isFullscreen = false;
 
   @override
   void initState() {
@@ -27,13 +28,27 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     currentSongIndex = widget.currentIndex;
     _initializeVideoPlayer(widget.mediaFiles[currentSongIndex].filePath);
 
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+
   }
+  void _toggleFullscreen() {
+    if (isFullscreen) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeLeft,
+        DeviceOrientation.landscapeRight,
+      ]);
+    }
+    setState(() {
+      isFullscreen = !isFullscreen;
+    });
+  }
+
 
   _initializeVideoPlayer(String path) async {
     videoPlayer?.dispose();
@@ -85,7 +100,16 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         ),
         title: Text('${widget.mediaFiles[currentSongIndex].title}', style: TextStyle(color: Colors.white)),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen, color: Colors.white),
+            onPressed: _toggleFullscreen,
+          ),
+        ],
       )
+
+
+
           : null,
       backgroundColor: Colors.black,
       body: isLandscape
@@ -200,7 +224,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             ),
             title: Text('${widget.mediaFiles[currentSongIndex].title}', style: TextStyle(color: Colors.white)),
             centerTitle: true,
+            actions: [
+              IconButton(
+                icon: Icon(isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen, color: Colors.white),
+                onPressed: _toggleFullscreen,
+              ),
+            ],
           ),
+
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

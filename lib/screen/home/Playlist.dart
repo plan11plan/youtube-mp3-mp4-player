@@ -107,18 +107,18 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                                                   Navigator.of(context).pop();
                                                   Navigator.of(context).pop();
                                                 },
-                                                child: Text("Create Playlist"),
+                                                child: Text("Create Playlist",style: TextStyle(color: Colors.green),),
                                                 style: ElevatedButton.styleFrom(
-                                                    primary: Colors.green),
+                                                    primary: Colors.transparent),
                                               ),
                                               SizedBox(width: 10), // 두 버튼 사이의 간격
                                               ElevatedButton(
                                                 onPressed: () {
                                                   Navigator.of(context).pop();
                                                 },
-                                                child: Text("Cancel"),
+                                                child: Text("Cancel",style: TextStyle(color: Colors.red),),
                                                 style: ElevatedButton.styleFrom(
-                                                    primary: Colors.red), // 원하시는 색상으로 변경 가능
+                                                    primary: Colors.transparent), // 원하시는 색상으로 변경 가능
                                               ),
                                             ],
                                           ),
@@ -398,13 +398,6 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                                         ),
                                         actions: <Widget>[
                                           TextButton(
-                                            child: Text('Cancel',
-                                                style: TextStyle(color: Colors.grey[400], fontSize: 16)),
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                          TextButton(
                                             child: Text('Save',
                                                 style: TextStyle(color: Colors.green, fontSize: 16)),
                                             onPressed: () {
@@ -413,6 +406,14 @@ class _PlaylistCreationScreenState extends State<PlaylistCreationScreen> {
                                               Navigator.of(context).pop();
                                             },
                                           ),
+                                          TextButton(
+                                            child: Text('Cancel',
+                                                style: TextStyle(color: Colors.grey[400], fontSize: 16)),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+
                                         ],
                                       );
                                     },
