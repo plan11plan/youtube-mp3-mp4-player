@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:player/screen/home/GoDownload.dart';
+import 'package:player/screen/home/donwloadYoutube/GoDownload.dart';
 import 'package:player/screen/home/Music.dart';
 import 'package:player/screen/home/Playlist.dart';
 import 'package:player/screen/home/Video.dart';
@@ -37,6 +37,7 @@ Future<void> main() async {
     androidNotificationOngoing: true,
   );
 
+   // MobileAds.instance.initialize();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(const MyApp());
