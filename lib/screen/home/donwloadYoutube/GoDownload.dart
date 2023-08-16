@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -17,6 +18,31 @@ class _YoutubeState extends State<GoDownload> {
   final TextEditingController _controller = TextEditingController();
   late WebViewController _webViewController;
 
+  final String _iOSInterstitialAdUnitId = 'ca-app-pub-3940256099942544/4411468910';
+  final String _androidInterstitialAdUnitId = 'ca-app-pub-3940256099942544/1033173712';
+  InterstitialAd? _interstitialAd;
+  String _selectedDownloadType = '';
+
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: Platform.isIOS ? _iOSInterstitialAdUnitId : _androidInterstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          _interstitialAd = ad;
+          _interstitialAd!.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              _download(_selectedDownloadType);
+            },
+          );
+          _interstitialAd!.show();
+        },
+        onAdFailedToLoad: (err) {
+          _download(_selectedDownloadType);
+        },
+      ),
+    );
+  }
   void _showDialog(String title, String content, List<Widget> actions) {
     showDialog(
       context: context,
@@ -91,6 +117,7 @@ class _YoutubeState extends State<GoDownload> {
   void initState() {
     super.initState();
     _controller.text = videoUrl;
+
   }
 
   Future<void> _getMetaData() async {
@@ -210,7 +237,11 @@ class _YoutubeState extends State<GoDownload> {
                   children: <Widget>[
                     Expanded(
                       child: SimpleDialogOption(
-                        onPressed: () => Navigator.pop(context, 'Video'),
+                        onPressed: () {
+                          _selectedDownloadType = 'Video';
+                          _loadInterstitialAd();
+                          Navigator.pop(context);
+                        },
                         child: Text(
                           'Video',
                           style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
@@ -218,7 +249,11 @@ class _YoutubeState extends State<GoDownload> {
                       ),
                     ),
                     SimpleDialogOption(
-                      onPressed: () => Navigator.pop(context, 'Audio'),
+                      onPressed: () {
+                        _selectedDownloadType = 'Audio';
+                        _loadInterstitialAd();
+                        Navigator.pop(context);
+                      },
                       child: Text(
                         'Audio',
                         style: TextStyle(color: Colors.black54, fontWeight: FontWeight.bold),
@@ -230,15 +265,9 @@ class _YoutubeState extends State<GoDownload> {
           ],
         );
       },
-    )) {
-      case 'Video':
-        _download('Video');
-        break;
-      case 'Audio':
-        _download('Audio');
-        break;
-    }
+    )) {}
   }
+
 
   @override
   Widget build(BuildContext context) {

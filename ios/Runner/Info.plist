@@ -79,6 +79,9 @@
     </dict>
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>message</string>
+    <key>GADApplicationIdentifier</key>
+    <string>ca-app-pub-9776592593447090~7096711296</string>
+
 
 
 
