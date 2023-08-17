@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:player/screen/home/donwloadYoutube/GoDownload.dart';
@@ -36,8 +37,8 @@ Future<void> main() async {
     androidNotificationChannelName: 'myAudioPlayer',
     androidNotificationOngoing: true,
   );
-
-   // MobileAds.instance.initialize();
+   //광고
+   MobileAds.instance.initialize();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(const MyApp());
