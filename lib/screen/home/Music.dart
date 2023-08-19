@@ -345,7 +345,6 @@ class _MusicState extends State<Music> {
                         child: ValueListenableBuilder(
                           valueListenable: Hive.box<MediaFile>('mediaFiles').listenable(),
                           builder: (context, Box<MediaFile> box, _) {
-                            // 기존에는 _isSearching 조건으로만 필터링하였지만, _isLiked 상태에 따라 좋아요가 눌린 항목만 가져오도록 수정하였습니다.
                             var mediaFiles = _isSearching
                                 ? _filteredMediaFiles
                                 : (_isLiked
@@ -360,169 +359,165 @@ class _MusicState extends State<Music> {
                                   endActionPane: ActionPane(
                                     motion: const ScrollMotion(),
                                     children: [
-
                                       CustomSlidableAction(
                                         mediaFile: mediaFiles[index],
                                         updateLikeStatus: updateLikeStatus,
                                       ),
-
                                       SlidableAction(
                                         onPressed: (context) => showPlaylistSelectionDialog(context, mediaFiles[index].title),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: Colors.white,
-                                        icon: Icons.add, // 추가 아이콘
+                                        icon: Icons.add,
                                       ),
                                       SlidableAction(
-                                        onPressed: (context) =>
-                                            showEditDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
+                                        onPressed: (context) => showEditDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: Colors.white,
                                         icon: Icons.edit,
                                       ),
                                       SlidableAction(
-                                        onPressed: (context) =>
-                                            showDeleteConfirmationDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
+                                        onPressed: (context) => showDeleteConfirmationDialog(context, mediaFiles[index].title, mediaFiles[index].fileType),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: Colors.white,
                                         icon: Icons.delete,
                                       ),
-
                                     ],
                                   ),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: MediaQuery.of(context).size.width * 1.0,
-                                        margin: EdgeInsets.symmetric(vertical: 9.0, horizontal: 35.0),
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius: BorderRadius.circular(15.0),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(0.4),
-                                              spreadRadius: 0.2,
-                                              blurRadius: 3,
-                                              offset: Offset(5, 3),
-                                            ),
-                                          ],
-                                        ),
-                                        child: InkWell(
-                                          onTap: () {
-                                            mediaFiles.forEach((file) {
-                                              print("${file.title}, ${file.duration}, ..."); // 기타 필요한 메타 정보를 추가하세요
-                                            });
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => AudioPlayerScreen(mediaFiles: mediaFiles, currentIndex: index),
-                                              ),
-                                            );
-                                            mediaFiles.forEach((file) {
-                                              print("${file.title}, ${file.duration}, ..."); // 기타 필요한 메타 정보를 추가하세요
-                                            });
-
-                                          },
-                                          child: Padding(
-                                            padding: EdgeInsets.all(5.0),
-                                            child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.grey[300],
-                                                        borderRadius: BorderRadius.circular(5.0),
-                                                        boxShadow: [
-                                                          BoxShadow(
-                                                            color: Colors.black54.withOpacity(0.4),
-                                                            spreadRadius: 4,
-                                                            blurRadius: 8,
-                                                            offset: Offset(0, 5),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      child: ClipRRect(
-                                                        borderRadius: BorderRadius.circular(5.0),
-                                                        child: Image.file(
-                                                            File(mediaFiles[index].thumbnailPath),
-                                                            height: 60,
-                                                            width: 60,
-                                                            fit: BoxFit.cover),
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 13),
-                                                    Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      children: [
-                                                        SizedBox(height: 2),
-                                                        Text(mediaFiles[index].title,
-                                                            style:  TextStyle(
-                                                                color: Colors.white,
-                                                                fontSize: 15,
-                                                                fontFamily: 'font4',
-                                                                fontWeight: FontWeight.w700
-                                                            )),
-                                                        SizedBox(height: 10),
-                                                        Text(
-                                                            mediaFiles[index].description,
-                                                            style: TextStyle(
-                                                                color: Colors.white,
-                                                                fontSize: 12,
-                                                                fontFamily: 'font5',
-                                                                fontWeight: FontWeight.w700
-                                                            )),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                Spacer(),
-                                                Padding(
-                                                  padding: EdgeInsets.only(top: 18.0, right: 0),
-                                                  child: Text(
-                                                      mediaFiles[index].duration,
-                                                      style:TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 15,
-                                                          fontFamily: 'font5',
-                                                          fontWeight: FontWeight.w700
-                                                      )),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(top: 5.0, right: 0),
-                                                  child: IconButton(
-                                                    icon: Icon(Icons.chevron_left, color: Colors.white),
-                                                    onPressed: null,
-                                                  ),
+                                  child: Builder(
+                                    builder: (BuildContext context) {
+                                      return Column(
+                                        children: [
+                                          Container(
+                                            width: MediaQuery.of(context).size.width * 1.0,
+                                            margin: EdgeInsets.symmetric(vertical: 9.0, horizontal: 35.0),
+                                            decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              borderRadius: BorderRadius.circular(15.0),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.4),
+                                                  spreadRadius: 0.2,
+                                                  blurRadius: 3,
+                                                  offset: Offset(5, 3),
                                                 ),
                                               ],
                                             ),
-                                          ),
-
-
-
-
-                                        ),
-                                      ),
-                                      Transform.translate(
-                                        offset: Offset(0, -5),
-                                        child: Container(
-                                          width: MediaQuery.of(context).size.width * 0.7,
-                                          margin: EdgeInsets.symmetric(horizontal: 35.0),
-                                          height: 5,
-                                          decoration: BoxDecoration(
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withOpacity(0.3),
-                                                spreadRadius: 1.2,
-                                                blurRadius: 8,
-                                                offset: Offset(10,2),
+                                            child: InkWell(
+                                              onTap: () {
+                                                mediaFiles.forEach((file) {
+                                                  print("${file.title}, ${file.duration}, ...");
+                                                });
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => AudioPlayerScreen(mediaFiles: mediaFiles, currentIndex: index),
+                                                  ),
+                                                );
+                                                mediaFiles.forEach((file) {
+                                                  print("${file.title}, ${file.duration}, ...");
+                                                });
+                                              },
+                                              child: Padding(
+                                                padding: EdgeInsets.all(5.0),
+                                                child: Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.grey[300],
+                                                            borderRadius: BorderRadius.circular(5.0),
+                                                            boxShadow: [
+                                                              BoxShadow(
+                                                                color: Colors.black54.withOpacity(0.4),
+                                                                spreadRadius: 4,
+                                                                blurRadius: 8,
+                                                                offset: Offset(0, 5),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          child: ClipRRect(
+                                                            borderRadius: BorderRadius.circular(5.0),
+                                                            child: Image.file(
+                                                                File(mediaFiles[index].thumbnailPath),
+                                                                height: 60,
+                                                                width: 60,
+                                                                fit: BoxFit.cover),
+                                                          ),
+                                                        ),
+                                                        SizedBox(width: 13),
+                                                        Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            SizedBox(height: 2),
+                                                            Text(mediaFiles[index].title,
+                                                                style: TextStyle(
+                                                                    color: Colors.white,
+                                                                    fontSize: 15,
+                                                                    fontFamily: 'font4',
+                                                                    fontWeight: FontWeight.w700
+                                                                )),
+                                                            SizedBox(height: 10),
+                                                            Text(
+                                                                mediaFiles[index].description,
+                                                                style: TextStyle(
+                                                                    color: Colors.white,
+                                                                    fontSize: 12,
+                                                                    fontFamily: 'font5',
+                                                                    fontWeight: FontWeight.w700
+                                                                )),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Spacer(),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(top: 18.0, right: 0),
+                                                      child: Text(
+                                                          mediaFiles[index].duration,
+                                                          style:TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 15,
+                                                              fontFamily: 'font5',
+                                                              fontWeight: FontWeight.w700
+                                                          )),
+                                                    ),
+                                                    Padding(
+                                                      padding: EdgeInsets.only(top: 5.0, right: 0),
+                                                      child: IconButton(
+                                                        icon: Icon(Icons.chevron_left, color: Colors.white),
+                                                        onPressed: () {
+                                                          Slidable.of(context)?.openEndActionPane();
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    ],
+                                          Transform.translate(
+                                            offset: Offset(0, -5),
+                                            child: Container(
+                                              width: MediaQuery.of(context).size.width * 0.7,
+                                              margin: EdgeInsets.symmetric(horizontal: 35.0),
+                                              height: 5,
+                                              decoration: BoxDecoration(
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.black.withOpacity(0.3),
+                                                    spreadRadius: 1.2,
+                                                    blurRadius: 8,
+                                                    offset: Offset(10,2),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 );
                               },
@@ -530,6 +525,7 @@ class _MusicState extends State<Music> {
                           },
                         ),
                       ),
+
 
                       Stack(
                         children: [

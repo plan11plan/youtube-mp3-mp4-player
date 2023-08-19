@@ -49,14 +49,14 @@
         </service>
 
         <service android:name="com.ryanheise.justaudio.background.AudioProcessingService" />
-        <service android:name=".MainActivity"
-            android:foregroundServiceType="mediaPlayback"
-            android:exported="true">
+<!--        <service android:name=".MainActivity"-->
+<!--            android:foregroundServiceType="mediaPlayback"-->
+<!--            android:exported="true">-->
 
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService"/>
-            </intent-filter>
-        </service>
+<!--            <intent-filter>-->
+<!--                <action android:name="android.media.browse.MediaBrowserService"/>-->
+<!--            </intent-filter>-->
+<!--        </service>-->
 
         <service android:name="com.github.florent37.assets_audio_player.notification.AndroidService"
             tools:ignore="MissingClass" />

@@ -46,7 +46,7 @@ dependencies:
   just_audio_background: ^0.0.1-beta.7
   material_design_icons_flutter: ^5.0.5955
   avatar_glow: ^2.0.1
-  flutter_slidable: ^2.0.0
+  flutter_slidable: ^3.0.0
   curved_navigation_bar: ^1.0.3
   youtube_explode_dart: ^2.0.1
   audio_service: ^0.18.10

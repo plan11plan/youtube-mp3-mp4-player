@@ -3,13 +3,6 @@ PODS:
     - Flutter
   - audio_session (0.0.1):
     - Flutter
-  - ffmpeg-kit-ios-https (5.1.LTS)
-  - ffmpeg_kit_flutter (5.1.0.LTS):
-    - ffmpeg_kit_flutter/https-lts (= 5.1.0.LTS)
-    - Flutter
-  - ffmpeg_kit_flutter/https-lts (5.1.0.LTS):
-    - ffmpeg-kit-ios-https (= 5.1.LTS)
-    - Flutter
   - Flutter (1.0.0)
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
@@ -87,7 +80,6 @@ PODS:
 DEPENDENCIES:
   - audio_service (from `.symlinks/plugins/audio_service/ios`)
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
-  - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
   - Flutter (from `Flutter`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
@@ -101,7 +93,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - ffmpeg-kit-ios-https
     - FMDB
     - Google-Mobile-Ads-SDK
     - GoogleAppMeasurement
@@ -115,8 +106,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/audio_service/ios"
   audio_session:
     :path: ".symlinks/plugins/audio_session/ios"
-  ffmpeg_kit_flutter:
-    :path: ".symlinks/plugins/ffmpeg_kit_flutter/ios"
   Flutter:
     :path: Flutter
   google_mobile_ads:
@@ -141,8 +130,6 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   audio_service: f509d65da41b9521a61f1c404dd58651f265a567
   audio_session: 4f3e461722055d21515cf3261b64c973c062f345
-  ffmpeg-kit-ios-https: 9e50ffa7eaa6272a0021829e054ef241f2ecffb2
-  ffmpeg_kit_flutter: fb5bee3a6038231463ee99e30f97a5763e0ae40f
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   Google-Mobile-Ads-SDK: 4fe6304b771f8467d29978cb790ec1e56e646946
