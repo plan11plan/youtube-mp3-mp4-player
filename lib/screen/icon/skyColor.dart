@@ -12,18 +12,9 @@ class SkyColor {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.indigo.shade900,
-        Colors.pink.shade200
-      ],
-    ),
-    LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.indigo.shade900,
-        Colors.indigo.shade900,
         Colors.indigo.shade800,
-        Colors.pink.shade300,
+        Colors.indigo.shade700,
+        Colors.pink.shade200,
         Colors.yellow.shade200,
       ],
     ),
@@ -31,8 +22,22 @@ class SkyColor {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
+        Colors.blueGrey.shade900,
+        // Colors.indigo.shade900,
+        // Colors.indigo.shade800,
+        // Colors.pink.shade300,
+        Colors.yellow.shade100,
+      ],
+    ),
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.black87,
+        Colors.black87,
         Colors.indigo.shade800,
-        Colors.indigo.shade700,
+        // Colors.indigo.shade700,
+        // Colors.indigo.shade600,
         Colors.pink.shade200,
         Colors.yellow.shade200,
       ],
@@ -43,6 +48,7 @@ class SkyColor {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
+        Colors.black87,
         Color.fromRGBO(57, 0, 63, 1),  // +20 to each RGB value
         Color.fromRGBO(106, 28, 92, 1),  // +20 to each RGB value
         Color.fromRGBO(135, 56, 96, 1),  // +20 to each RGB value
@@ -53,19 +59,9 @@ class SkyColor {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.purple.shade900,
+        Colors.black87,
         Colors.purple.shade700,
 
-        Colors.pink.shade200
-      ],
-    ),
-    LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        Colors.purple.shade800,
-        Colors.purple.shade500,
-        Colors.pink.shade300,
         Colors.pink.shade100
       ],
     ),
@@ -73,8 +69,23 @@ class SkyColor {
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
       colors: [
-        Colors.indigo[900]!,
-        Colors.indigo[200]!,
+        Colors.blueGrey.shade800,
+
+        Colors.blueGrey.shade500,
+        // Colors.purple.shade300,
+        Colors.orange.shade200
+        // Colors.pink.shade100
+      ],
+    ),
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Colors.black87,
+        Colors.blueGrey.shade800,
+        Colors.blueGrey.shade500,
+        // Colors.indigo[800]!,
+        Colors.green.shade100!,
       ],
     ),
 
