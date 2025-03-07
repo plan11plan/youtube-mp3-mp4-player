@@ -1,16 +1,3 @@
-# player
+# 심심해서 연습용으로 만든 유투브 mp3,mp4 다운로드 앱
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img width="379" alt="image" src="https://github.com/user-attachments/assets/aeb6a3cc-a1fb-4cab-b730-fd808dd9b5df" />
